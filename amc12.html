@@ -5,41 +5,160 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AMC 12 Problems & Solutions - AoPS Links</title>
   <style>
-    body { font-family: sans-serif; margin: 2rem; background: #f9f9f9; }
-    h1 { color: #003366; text-align: center; }
-    h2 { color: #00509e; margin-top: 2rem; }
-    ul { list-style-type: none; padding-left: 0; }
-    li { margin: 0.3rem 0; }
-    a { color: #0074d9; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    #search-form { text-align: center; margin-bottom: 2rem; }
-    #search-input { width: 60%; padding: 0.5rem; font-size: 1rem; }
-    #search-button { padding: 0.5rem 1rem; font-size: 1rem; margin-left: 0.5rem; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: linear-gradient(to bottom right, #e0f0ff, #ffffff);
+      color: #003366;
+    }
+    header {
+      background: #003366;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    nav {
+      background: #00509e;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 0.8rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      color: #00509e;
+      margin-top: 2rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.3rem;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      margin: 0.3rem 0;
+    }
+    a {
+      color: #0074d9;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    #search-form {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    #search-input {
+      width: 60%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    #search-button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      background: #00509e;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #search-button:hover {
+      background: #003f7f;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .tabs button {
+      padding: 0.5rem 1rem;
+      background: #ccc;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .tabs button.active {
+      background: #00509e;
+      color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body>
-  <h1>AMC 12 Problems & Solutions (AoPS Wiki)</h1>
-  <div id="search-form">
-    <form id="form">
-      <input type="text" id="search-input" placeholder="Type e.g. '2023 AMC 12A problem 2'" />
-      <button type="submit" id="search-button">Go</button>
-    </form>
-    <p style="color:#555;font-size:0.9rem;">Supports format: YEAR AMC 12A/B PROBLEM N</p>
-  </div>
-  <p>Or browse below:</p>
-  <div id="content"></div>
+  <header>
+    <h1>OlympiadPrep - AMC 12 Problems & Solutions</h1>
+    <p style="font-size:1.1rem; margin-top:0.5rem;">Interactive archive linked to AoPS Wiki</p>
+  </header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="#">Math</a>
+    <a href="#">Science</a>
+    <a href="#">About</a>
+  </nav>
+  <main>
+    <div id="search-form">
+      <form id="form">
+        <input type="text" id="search-input" placeholder="Type e.g. '2023 AMC 12A problem 2'" />
+        <button type="submit" id="search-button">Go</button>
+      </form>
+      <p style="color:#555;font-size:0.9rem;">Supports format: YEAR AMC 12A/B PROBLEM N</p>
+    </div>
+
+    <div class="tabs" id="year-tabs"></div>
+    <div id="content"></div>
+  </main>
   <script>
-    const startYear = 1985;
+    const startYear = 2000;
     const endYear = 2023;
-    const content = document.getElementById('content');
+    const tabsContainer = document.getElementById('year-tabs');
+    const contentContainer = document.getElementById('content');
+
     for (let year = startYear; year <= endYear; year++) {
+      const btn = document.createElement('button');
+      btn.textContent = year;
+      btn.dataset.year = year;
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`year-${year}`).classList.add('active');
+      });
+      tabsContainer.appendChild(btn);
+
+      const tabContent = document.createElement('div');
+      tabContent.id = `year-${year}`;
+      tabContent.className = 'tab-content';
+
       ['A', 'B'].forEach(letter => {
         const section = document.createElement('div');
         const heading = document.createElement('h2');
         heading.textContent = `${year} AMC 12${letter}`;
         section.appendChild(heading);
+
         const list = document.createElement('ul');
-        // Link to problems & solutions page
         const problemsLi = document.createElement('li');
         const problemsLink = document.createElement('a');
         problemsLink.href = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems`;
@@ -47,7 +166,7 @@
         problemsLink.textContent = `${year} AMC 12${letter} Problems & Solutions`;
         problemsLi.appendChild(problemsLink);
         list.appendChild(problemsLi);
-        // Individual problem pages
+
         for (let i = 1; i <= 25; i++) {
           const li = document.createElement('li');
           const solLink = document.createElement('a');
@@ -57,11 +176,18 @@
           li.appendChild(solLink);
           list.appendChild(li);
         }
+
         section.appendChild(list);
-        content.appendChild(section);
+        tabContent.appendChild(section);
       });
+
+      contentContainer.appendChild(tabContent);
     }
-    // Search handler
+
+    // Activate latest year by default
+    document.querySelector(`button[data-year='${endYear}']`).click();
+
+    // Search
     document.getElementById('form').addEventListener('submit', function(e) {
       e.preventDefault();
       const input = document.getElementById('search-input').value.trim().toUpperCase();
