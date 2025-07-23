@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Olympiad Prep Hub</title>
   <style>
     body {
@@ -23,11 +23,45 @@
       justify-content: center;
       gap: 2rem;
       padding: 0.8rem 0;
+      position: relative;
     }
     nav a {
       color: white;
       text-decoration: none;
       font-weight: bold;
+      padding: 0.5rem 1rem;
+      display: inline-block;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropbtn {
+      cursor: pointer;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #004080;
+      min-width: 160px;
+      z-index: 1;
+      flex-direction: column;
+      margin-top: 0.3rem;
+    }
+    .dropdown-content a {
+      color: white;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #003366;
+    }
+    .dropdown:hover .dropdown-content {
+      display: flex;
     }
     .hero {
       padding: 3rem;
@@ -57,14 +91,18 @@
   </header>
 
   <nav>
-    <a href="#">Math</a>
-    <a href="#">Physics</a>
-    <a href="#">Chemistry</a>
-    <a href="#">Biology</a>
-    <a href="#">Search</a>
     <a href="index.html">Home</a>
-    <a href="amc12.html">AMC 12</a>
-    <!-- other links -->
+    <div class="dropdown">
+      <a href="math.html" class="dropbtn">Math ▼</a>
+      <div class="dropdown-content">
+        <a href="amc12.html">AMC 12 (All Years)</a>
+        <a href="aime.html">AIME</a>
+        <a href="putnam.html">Putnam</a>
+      </div>
+    </div>
+    <a href="physics.html">Physics</a>
+    <a href="chemistry.html">Chemistry</a>
+    <a href="biology.html">Biology</a>
   </nav>
 
   <section class="hero">
