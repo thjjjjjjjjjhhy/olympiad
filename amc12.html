@@ -12,7 +12,6 @@
     li { margin: 0.3rem 0; }
     a { color: #0074d9; text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .year-section { margin-bottom: 2rem; }
     #search-form { text-align: center; margin-bottom: 2rem; }
     #search-input { width: 60%; padding: 0.5rem; font-size: 1rem; }
     #search-button { padding: 0.5rem 1rem; font-size: 1rem; margin-left: 0.5rem; }
@@ -25,38 +24,36 @@
       <input type="text" id="search-input" placeholder="Type e.g. '2023 AMC 12A problem 2'" />
       <button type="submit" id="search-button">Go</button>
     </form>
-    <p style="color:#555;font-size:0.9rem;">Supports flexible order: year, 'AMC', '12A'/'12B', 'problem', etc.</p>
+    <p style="color:#555;font-size:0.9rem;">Supports format: YEAR AMC 12A/B PROBLEM N</p>
   </div>
   <p>Or browse below:</p>
   <div id="content"></div>
   <script>
-    // Generate list as before
     const startYear = 1985;
-    const endYear = 2022;
+    const endYear = 2023;
     const content = document.getElementById('content');
     for (let year = startYear; year <= endYear; year++) {
       ['A', 'B'].forEach(letter => {
         const section = document.createElement('div');
-        section.className = 'year-section';
         const heading = document.createElement('h2');
         heading.textContent = `${year} AMC 12${letter}`;
         section.appendChild(heading);
         const list = document.createElement('ul');
-        // Problems page link
+        // Link to problems & solutions page
         const problemsLi = document.createElement('li');
         const problemsLink = document.createElement('a');
         problemsLink.href = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems`;
         problemsLink.target = '_blank';
-        problemsLink.textContent = `${year} AMC 12${letter} Problems`;
+        problemsLink.textContent = `${year} AMC 12${letter} Problems & Solutions`;
         problemsLi.appendChild(problemsLink);
         list.appendChild(problemsLi);
-        // Individual problem solutions
+        // Individual problem pages
         for (let i = 1; i <= 25; i++) {
           const li = document.createElement('li');
           const solLink = document.createElement('a');
-          solLink.href = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problem_${i}_Solution`;
+          solLink.href = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${i}`;
           solLink.target = '_blank';
-          solLink.textContent = `Problem ${i} Solution`;
+          solLink.textContent = `Problem ${i}`;
           li.appendChild(solLink);
           list.appendChild(li);
         }
@@ -67,19 +64,15 @@
     // Search handler
     document.getElementById('form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const input = document.getElementById('search-input').value.trim();
-      const text = input.toUpperCase().replace(/[‘’]/g, "'");
-      // Extract year
-      const yearMatch = text.match(/\b(19|20)\d{2}\b/);
-      // Extract test letter A or B
-      const letterMatch = text.match(/12\s*([AB])\b/);
-      // Extract problem number
-      const probMatch = text.match(/PROBLEM\s*(\d{1,2})\b/);
+      const input = document.getElementById('search-input').value.trim().toUpperCase();
+      const yearMatch = input.match(/\b(19|20)\d{2}\b/);
+      const letterMatch = input.match(/12\s*([AB])\b/);
+      const probMatch = input.match(/PROBLEM\s*(\d{1,2})\b/);
       if (yearMatch && letterMatch && probMatch) {
         const year = yearMatch[0];
         const letter = letterMatch[1];
         const problem = probMatch[1];
-        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problem_${problem}_Solution`;
+        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
         window.open(url, '_blank');
       } else {
         alert('Please enter in format: YEAR AMC 12A/B PROBLEM N');
