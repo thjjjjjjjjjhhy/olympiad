@@ -2,118 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Olympiad Prep Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OlympiadPrep - Home</title>
   <style>
+    :root {
+      --bg: #f9fbfe;
+      --text: #1c1c1c;
+      --card: #ffffff;
+      --accent: #0059ff;
+      --accent-dark: #003bcc;
+      --shadow: rgba(0, 0, 0, 0.05);
+    }
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f4f7fa;
+      background: var(--bg);
+      color: var(--text);
     }
     header {
-      background: #003366;
-      color: white;
-      padding: 1rem 2rem;
+      padding: 4rem 1rem 2rem;
       text-align: center;
     }
-    nav {
-      background: #00509e;
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      padding: 0.8rem 0;
-      position: relative;
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
     }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
-      display: inline-block;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropbtn {
-      cursor: pointer;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #004080;
-      min-width: 160px;
-      z-index: 1;
-      flex-direction: column;
-      margin-top: 0.3rem;
-    }
-    .dropdown-content a {
-      color: white;
-      padding: 0.5rem 1rem;
-      text-decoration: none;
-      display: block;
-    }
-    .dropdown-content a:hover {
-      background-color: #003366;
-    }
-    .dropdown:hover .dropdown-content {
-      display: flex;
-    }
-    .hero {
-      padding: 3rem;
-      text-align: center;
-    }
-    .hero h1 {
-      font-size: 2.5rem;
-      color: #003366;
-    }
-    .hero p {
+    header p {
       font-size: 1.2rem;
-      color: #444;
+      color: #555;
+    }
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px var(--shadow);
+      padding: 2rem;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+    }
+    .card h2 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .card p {
+      font-size: 1rem;
+      color: #666;
     }
     footer {
       text-align: center;
-      padding: 1rem;
-      background: #eee;
-      margin-top: 4rem;
       font-size: 0.9rem;
+      color: #999;
+      padding: 3rem 1rem;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Olympiad Prep Hub</h1>
-    <p>One place for all AMC, AIME, USAMO, F=ma, IPhO, IChO, and more!</p>
+    <h1>OlympiadPrep</h1>
+    <p>Your Gateway to Elite Math & Science Competitions</p>
   </header>
-
-  <nav>
-    <a href="index.html">Home</a>
-    <div class="dropdown">
-      <a href="math.html" class="dropbtn">Math ▼</a>
-      <div class="dropdown-content">
-        <a href="amc12.html">AMC 12 (All Years)</a>
-        <a href="aime.html">AIME</a>
-        <a href="putnam.html">Putnam</a>
-      </div>
-    </div>
-    <a href="physics.html">Physics</a>
-    <a href="chemistry.html">Chemistry</a>
-    <a href="biology.html">Biology</a>
-  </nav>
-
-  <section class="hero">
-    <h1>Welcome to Olympiad Prep Hub!</h1>
-    <p>
-      Access past tests, solutions, study timelines, and resources for all major STEM Olympiads.
-    </p>
-  </section>
-
+  <main>
+    <a href="amc12.html" class="card">
+      <h2>AMC 12 Archive</h2>
+      <p>Explore problems from 2000 to 2023 with direct AoPS Wiki links and searchable tools.</p>
+    </a>
+    <a href="#" class="card">
+      <h2>AMC 10 (Coming Soon)</h2>
+      <p>Stay tuned for the full AMC 10 archive and search features.</p>
+    </a>
+    <a href="#" class="card">
+      <h2>AIME (Coming Soon)</h2>
+      <p>Dive into AIME-level problem solving. Coming later this year.</p>
+    </a>
+    <a href="#" class="card">
+      <h2>About</h2>
+      <p>Learn more about OlympiadPrep's mission to empower future problem solvers.</p>
+    </a>
+  </main>
   <footer>
-    Built with ❤️ by students, for students. Free forever.
+    © 2025 OlympiadPrep. All rights reserved.
   </footer>
 </body>
 </html>
