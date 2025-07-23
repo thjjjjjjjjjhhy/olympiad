@@ -188,22 +188,27 @@
     document.querySelector(`button[data-year='${endYear}']`).click();
 
     // Search
-    document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const input = document.getElementById('search-input').value.trim().toUpperCase();
-      const yearMatch = input.match(/\b(19|20)\d{2}\b/);
-      const letterMatch = input.match(/12\s*([AB])\b/);
-      const probMatch = input.match(/PROBLEM\s*(\d{1,2})\b/);
-      if (yearMatch && letterMatch && probMatch) {
-        const year = yearMatch[0];
-        const letter = letterMatch[1];
-        const problem = probMatch[1];
-        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
-        window.open(url, '_blank');
-      } else {
-        alert('Please enter in format: YEAR AMC 12A/B PROBLEM N');
-      }
-    });
-  </script>
+ <script>
+  document.getElementById('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('search-input').value.trim().toUpperCase();
+
+    const yearMatch = input.match(/\b(19|20)\d{2}\b/);
+    const letterMatch = input.match(/AMC\s*12\s*([AB])|12\s*([AB])/);
+    const probMatch = input.match(/PROBLEM\s*(\d{1,2})|\b(\d{1,2})\b\s*PROBLEM|\bPROB\s*(\d{1,2})/);
+
+    const year = yearMatch ? yearMatch[0] : null;
+    const letter = letterMatch ? (letterMatch[1] || letterMatch[2]) : null;
+    const problem = probMatch ? (probMatch[1] || probMatch[2] || probMatch[3]) : null;
+
+    if (year && letter && problem) {
+      const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
+      window.open(url, '_blank');
+    } else {
+      alert("Please enter something like '2023 AMC 12B Problem 4' — in any order!");
+    }
+  });
+</script>
+
 </body>
 </html>
