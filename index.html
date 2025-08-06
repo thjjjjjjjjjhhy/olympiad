@@ -171,12 +171,7 @@
       <div class="card lookup-card">
         <h2>🔍 Problem & Solution Finder</h2>
         <form class="lookup-form" onsubmit="handleSearch(event)">
-          <input type="text" id="lookup-query" placeholder="e.g. 2023 AMC 12B Problem 14" required>
-          <select id="lookup-subject">
-            <option value="amc12">AMC 12</option>
-            <option value="amc10">AMC 10</option>
-            <option value="aime">AIME</option>
-          </select>
+          <input type="text" id="lookup-query" placeholder="e.g. 2023 AMC 12B 14" required>
           <button type="submit">Go</button>
         </form>
       </div>
@@ -211,15 +206,44 @@
     function handleSearch(event) {
       event.preventDefault();
       const q = document.getElementById('lookup-query').value.toUpperCase();
-      const subject = document.getElementById('lookup-subject').value;
-      const year = (q.match(/\b(19|20)\d{2}\b/) || [])[0];
-      const letter = (q.match(/AMC\s*1[02]\s*([AB])|1[02]\s*([AB])/) || []).slice(1).find(Boolean);
-      const problem = (q.match(/PROBLEM\s*(\d{1,2})|\b(\d{1,2})\b\s*PROBLEM|\bPROB\s*(\d{1,2})/) || []).slice(1).find(Boolean);
-      if (year && letter && problem) {
-        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
+      const tokens = q.split(/\s+/).filter(Boolean);
+      let year, contestNum, letter, problem;
+      for (const t of tokens) {
+        if (!year && /^\d{4}$/.test(t)) {
+          year = t;
+          continue;
+        }
+        if (!contestNum && /^AMC1[02][AB]$/.test(t)) {
+          contestNum = t.slice(3, 5);
+          letter = t.slice(5);
+          continue;
+        }
+        if (!contestNum && /^1[02][AB]$/.test(t)) {
+          contestNum = t.slice(0, 2);
+          letter = t.slice(2);
+          continue;
+        }
+        if (!contestNum && /^AMC1[02]$/.test(t)) {
+          contestNum = t.slice(3);
+          continue;
+        }
+        if (contestNum && !letter && /^[AB]$/.test(t)) {
+          letter = t;
+          continue;
+        }
+        if (!contestNum && /^1[02]$/.test(t)) {
+          contestNum = t;
+          continue;
+        }
+        if (!problem && /^\d{1,2}$/.test(t)) {
+          problem = t;
+        }
+      }
+      if (year && contestNum && letter && problem) {
+        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${contestNum}${letter}_Problems/Problem_${problem}`;
         window.open(url);
       } else {
-        alert("Please enter 'YEAR AMC 12A/B Problem N'");
+        alert("Please enter a query like '2023 AMC 12B 14'");
       }
     }
   </script>
