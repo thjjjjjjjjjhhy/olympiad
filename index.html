@@ -98,8 +98,7 @@
       margin-top: 1rem;
       flex-wrap: wrap;
     }
-    .lookup-form input,
-    .lookup-form select {
+    .lookup-form input {
       flex: 1;
       min-width: 150px;
       padding: 0.8rem;
@@ -171,12 +170,7 @@
       <div class="card lookup-card">
         <h2>🔍 Problem & Solution Finder</h2>
         <form class="lookup-form" onsubmit="handleSearch(event)">
-          <input type="text" id="lookup-query" placeholder="e.g. 2023 AMC 12B Problem 14" required>
-          <select id="lookup-subject">
-            <option value="amc12">AMC 12</option>
-            <option value="amc10">AMC 10</option>
-            <option value="aime">AIME</option>
-          </select>
+          <input type="text" id="lookup-query" placeholder="e.g. AIME I 2024 Problem 3" required>
           <button type="submit">Go</button>
         </form>
       </div>
@@ -207,19 +201,16 @@
   <footer>
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
+  <script src="search.js"></script>
   <script>
     function handleSearch(event) {
       event.preventDefault();
-      const q = document.getElementById('lookup-query').value.toUpperCase();
-      const subject = document.getElementById('lookup-subject').value;
-      const year = (q.match(/\b(19|20)\d{2}\b/) || [])[0];
-      const letter = (q.match(/AMC\s*1[02]\s*([AB])|1[02]\s*([AB])/) || []).slice(1).find(Boolean);
-      const problem = (q.match(/PROBLEM\s*(\d{1,2})|\b(\d{1,2})\b\s*PROBLEM|\bPROB\s*(\d{1,2})/) || []).slice(1).find(Boolean);
-      if (year && letter && problem) {
-        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
-        window.open(url);
+      const q = document.getElementById('lookup-query').value;
+      const url = buildAoPSUrl(q);
+      if (url) {
+        window.open(url, '_blank');
       } else {
-        alert("Please enter 'YEAR AMC 12A/B Problem N'");
+        alert("Could not parse that contest query. Try '2024 AMC 12B Problem 3'.");
       }
     }
   </script>
