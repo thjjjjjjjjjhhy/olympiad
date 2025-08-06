@@ -1,0 +1,1596 @@
+{
+  "study_plan": [
+    {
+      "date": "2025-08-06",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #1-10",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-08-07",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "185-194",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-08-08",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Algebra",
+          "pages": "241-246",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "Algebra"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-08-09",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-08-10",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-08-11",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Counting & Prob",
+          "pages": "221-230",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-08-12",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Geometry",
+          "pages": "305-314",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-08-13",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #11-20",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-08-14",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "195-204",
+          "problems": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-08-15",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Counting & Prob",
+          "pages": "221-226",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "Combinatorics"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-08-16",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-08-17",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-08-18",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Counting & Prob",
+          "pages": "231-240",
+          "problems": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-08-19",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Geometry",
+          "pages": "315-324",
+          "problems": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-08-20",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #21-30",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-08-21",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "205-208",
+          "problems": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-08-22",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int Algebra",
+          "pages": "171-176",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "Sequences"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-08-23",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-08-24",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-08-25",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Counting & Prob",
+          "pages": "241-244",
+          "problems": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-08-26",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Geometry",
+          "pages": "325-330",
+          "problems": [],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-08-27",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #31-40",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-08-28",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-08-29",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "AoPS Vol 2 Inequalities",
+          "pages": "413-418",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "Inequalities"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-08-30",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-08-31",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-09-01",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "265-274",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-09-02",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "1-10",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-09-03",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #41-50",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-09-04",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-09-05",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int Algebra",
+          "pages": "171-176",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "FunctionalEq"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-09-06",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-09-07",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-09-08",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "275-284",
+          "problems": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-09-09",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "11-20",
+          "problems": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-09-10",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #51-60",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-09-11",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-09-12",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Geometry",
+          "pages": "305-310",
+          "problems": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "topic": "CoordinateGeo"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-09-13",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-09-14",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-09-15",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "285-290",
+          "problems": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-09-16",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "21-30",
+          "problems": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-09-17",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #61-70",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-09-18",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-09-19",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Algebra",
+          "pages": "247-252",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "Algebra"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-09-20",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-09-21",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-09-22",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "291-290",
+          "problems": [],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-09-23",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "31-40",
+          "problems": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-09-24",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #71-80",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-09-25",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-09-26",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Counting & Prob",
+          "pages": "227-232",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "Combinatorics"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-09-27",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-09-28",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-09-29",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "291-290",
+          "problems": [],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-09-30",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "41-50",
+          "problems": [],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-10-01",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #81-90",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-10-02",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-10-03",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int Algebra",
+          "pages": "177-182",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "Sequences"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-10-04",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-10-05",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-10-06",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "291-290",
+          "problems": [],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-10-07",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "51-60",
+          "problems": [],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-10-08",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #91-100",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-10-09",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-10-10",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "AoPS Vol 2 Inequalities",
+          "pages": "419-424",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "Inequalities"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-10-11",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-10-12",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-10-13",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "291-290",
+          "problems": [],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-10-14",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "61-70",
+          "problems": [],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-10-15",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #101-110",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-10-16",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-10-17",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int Algebra",
+          "pages": "177-182",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "FunctionalEq"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-10-18",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-10-19",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-10-20",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Int C&P",
+          "pages": "291-290",
+          "problems": [],
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-10-21",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "106 Geo A",
+          "pages": "71-80",
+          "problems": [],
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-10-22",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #111-120",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-10-23",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Number Theory",
+          "pages": "209-208",
+          "problems": [],
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-10-24",
+      "tasks": [
+        {
+          "type": "reading",
+          "resource": "Intro Geometry",
+          "pages": "311-316",
+          "problems": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "topic": "CoordinateGeo"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-10-25",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-10-26",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-10-27",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #121-130",
+          "timed": false,
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-10-28",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #131-140",
+          "timed": false,
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-10-29",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #141-150",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-10-30",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #151-160",
+          "timed": false,
+          "topic": "NumberTheory"
+        }
+      ],
+      "notes": "Deep dive into NumberTheory."
+    },
+    {
+      "date": "2025-10-31",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #161-170",
+          "timed": false,
+          "topic": "Algebra"
+        },
+        {
+          "type": "review",
+          "resource": "Review missed questions and flashcards",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Consolidate the week's learning."
+    },
+    {
+      "date": "2025-11-01",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Full-length timed practice."
+    },
+    {
+      "date": "2025-11-02",
+      "tasks": [
+        {
+          "type": "rest",
+          "resource": "Rest or light review",
+          "timed": false,
+          "topic": "Rest"
+        }
+      ],
+      "notes": "Recharge for next week."
+    },
+    {
+      "date": "2025-11-03",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #171-180",
+          "timed": false,
+          "topic": "Probability"
+        }
+      ],
+      "notes": "Focus on Probability."
+    },
+    {
+      "date": "2025-11-04",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #181-190",
+          "timed": false,
+          "topic": "Geometry"
+        }
+      ],
+      "notes": "Continue strengthening Geometry."
+    },
+    {
+      "date": "2025-11-05",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest #191-200",
+          "timed": false,
+          "topic": "Mixed (Probability, Geometry, NumberTheory)"
+        }
+      ],
+      "notes": "Mixed practice covering weak topics."
+    },
+    {
+      "date": "2025-11-06",
+      "tasks": [
+        {
+          "type": "review",
+          "resource": "Review mistakes from previous contest",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Analyze errors and redo tough problems."
+    },
+    {
+      "date": "2025-11-07",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Simulate exam conditions."
+    },
+    {
+      "date": "2025-11-08",
+      "tasks": [
+        {
+          "type": "review",
+          "resource": "Review mistakes from previous contest",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Analyze errors and redo tough problems."
+    },
+    {
+      "date": "2025-11-09",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Simulate exam conditions."
+    },
+    {
+      "date": "2025-11-10",
+      "tasks": [
+        {
+          "type": "review",
+          "resource": "Review mistakes from previous contest",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Analyze errors and redo tough problems."
+    },
+    {
+      "date": "2025-11-11",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Past Contest Full Test",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Simulate exam conditions."
+    },
+    {
+      "date": "2025-11-12",
+      "tasks": [
+        {
+          "type": "review",
+          "resource": "Review mistakes from previous contest",
+          "timed": false,
+          "topic": "Review"
+        }
+      ],
+      "notes": "Analyze errors and redo tough problems."
+    },
+    {
+      "date": "2025-11-13",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Half-length practice set",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Focus on rest and mindset; keep work light."
+    },
+    {
+      "date": "2025-11-14",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Half-length practice set",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Focus on rest and mindset; keep work light."
+    },
+    {
+      "date": "2025-11-15",
+      "tasks": [
+        {
+          "type": "contest_set",
+          "resource": "Half-length practice set",
+          "timed": true,
+          "topic": "Mixed"
+        }
+      ],
+      "notes": "Focus on rest and mindset; keep work light."
+    }
+  ]
+}

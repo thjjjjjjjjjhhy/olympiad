@@ -1,0 +1,27 @@
+{
+  "today": "2025-08-06",
+  "test_date": "2025-11-15",
+  "level": "intermediate",
+  "scores": {
+    "Algebra": 6,
+    "Geometry": 3,
+    "NumberTheory": 4,
+    "Combinatorics": 5,
+    "Probability": 2,
+    "Sequences": 7,
+    "Inequalities": 8,
+    "FunctionalEq": 5,
+    "CoordinateGeo": 4
+  },
+  "diagnostic": {
+    "Algebra": 6,
+    "Geometry": 3,
+    "NumberTheory": 4,
+    "Combinatorics": 5,
+    "Probability": 2,
+    "Sequences": 7,
+    "Inequalities": 8,
+    "FunctionalEq": 5,
+    "CoordinateGeo": 4
+  }
+}
