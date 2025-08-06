@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap');
+
 :root {
-  --bg: #f4f6f8;
-  --primary: #0059ff;
-  --accent: #00d084;
+  --bg: #f8fafc;
+  --primary: #0f4d92;
+  --accent: #1dacd6;
   --text: #1e1e1e;
   --muted: #6b6b6b;
   --card-bg: #ffffff;
@@ -10,7 +12,7 @@
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
@@ -24,7 +26,7 @@ body {
   padding: 0 1rem;
 }
 .site-header {
-  background: var(--card-bg);
+  background: var(--primary);
   box-shadow: 0 1px 6px var(--shadow);
 }
 .site-header .container {
@@ -32,30 +34,33 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 0;
+  color: #fff;
 }
 .logo {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--primary);
+  color: #fff;
 }
 .site-nav a {
   margin-left: 1rem;
   text-decoration: none;
-  color: var(--muted);
+  color: #fff;
+  opacity: 0.85;
   font-weight: 500;
 }
 .site-nav a:hover, .site-nav a.active {
-  color: var(--primary);
+  color: var(--accent);
+  opacity: 1;
 }
 .hero {
   text-align: center;
-  padding: 4rem 1rem;
-  background: var(--primary);
+  padding: 5rem 1rem;
+  background: linear-gradient(135deg, var(--primary), #142d6e);
   color: white;
 }
 .hero h2 {
   margin-top: 0;
-  font-weight: 400;
+  font-weight: 600;
 }
 .lookup-form {
   margin-top: 1.5rem;
@@ -64,24 +69,24 @@ body {
   flex-wrap: wrap;
   justify-content: center;
 }
-.lookup-form input,
-.lookup-form select {
-  padding: 0.8rem;
+.lookup-form input {
+  padding: 0.8rem 1rem;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 1rem;
+  width: 280px;
 }
 .lookup-form button {
   background: var(--accent);
   border: none;
   color: white;
   padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
 }
 .lookup-form button:hover {
-  background: #00b36a;
+  background: #1593b8;
 }
 .features {
   display: grid;
