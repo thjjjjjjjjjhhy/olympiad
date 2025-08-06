@@ -28,6 +28,9 @@ body {
 .site-header {
   background: var(--primary);
   box-shadow: 0 1px 6px var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 .site-header .container {
   display: flex;
@@ -113,6 +116,43 @@ body {
 }
 main.container {
   padding: 2rem 0;
+}
+.card.diagnostic-card {
+  max-width: 500px;
+  margin: 1rem auto;
+  text-align: left;
+}
+.diagnostic-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.diagnostic-form select,
+.diagnostic-form button {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.diagnostic-form button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+}
+.diagnostic-form button:hover {
+  background: #1593b8;
 }
 .book-list {
   list-style: disc;
