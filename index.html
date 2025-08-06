@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OlympiadPrep - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,14 +21,9 @@
   </header>
   <section class="hero">
     <div class="container">
-      <h2>Your journey to math contest excellence</h2>
+      <h2>Find any contest problem instantly</h2>
       <form class="lookup-form" onsubmit="handleSearch(event)">
-        <input type="text" id="lookup-query" placeholder="e.g. 2023 AMC 12B Problem 14" required>
-        <select id="lookup-subject">
-          <option value="amc12">AMC 12</option>
-          <option value="amc10">AMC 10</option>
-          <option value="aime">AIME</option>
-        </select>
+        <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14" required>
         <button type="submit">Search</button>
       </form>
     </div>
@@ -56,15 +52,98 @@
     function handleSearch(event) {
       event.preventDefault();
       const q = document.getElementById('lookup-query').value.toUpperCase();
-      const subject = document.getElementById('lookup-subject').value;
-      const year = (q.match(/\b(19|20)\d{2}\b/) || [])[0];
-      const letter = (q.match(/AMC\s*1[02]\s*([AB])|1[02]\s*([AB])/) || []).slice(1).find(Boolean);
-      const problem = (q.match(/PROBLEM\s*(\d{1,2})|\b(\d{1,2})\b\s*PROBLEM|\bPROB\s*(\d{1,2})/) || []).slice(1).find(Boolean);
-      if (year && letter && problem) {
-        const url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_12${letter}_Problems/Problem_${problem}`;
-        window.open(url);
+      const tokens = q.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean);
+
+      let year, problem, contest, level, variant;
+
+      tokens.forEach(t => {
+        if (!year && /^\d{4}$/.test(t)) {
+          year = t;
+          return;
+        }
+        if (t === 'USAMO') {
+          contest = 'USAMO';
+          return;
+        }
+        if (t.startsWith('AIME')) {
+          contest = 'AIME';
+          const m = t.match(/AIME(.*)/);
+          if (m && m[1]) variant = m[1];
+          return;
+        }
+        if (t === 'AIME') {
+          contest = 'AIME';
+          return;
+        }
+        if (t.startsWith('AMC')) {
+          contest = 'AMC';
+          const m = t.match(/AMC(\d*)([AB])?/);
+          if (m) {
+            if (m[1]) level = m[1];
+            if (m[2]) variant = m[2];
+          }
+          return;
+        }
+        if (contest === 'AMC' && !level) {
+          const m = t.match(/(8|10|12)([AB])?/);
+          if (m) {
+            level = m[1];
+            if (m[2]) variant = m[2];
+            return;
+          }
+        }
+        if (contest === 'AMC' && !variant && /^[AB]$/.test(t)) {
+          variant = t;
+          return;
+        }
+        if (contest === 'AIME' && !variant && /^(I|II|1|2)$/.test(t)) {
+          variant = t.replace('1', 'I').replace('2', 'II');
+          return;
+        }
+        if (!problem && /^\d{1,2}$/.test(t)) {
+          problem = t;
+        }
+      });
+
+      if (contest === 'AIME' && variant) {
+        variant = variant.replace('1', 'I').replace('2', 'II').toUpperCase();
+      }
+
+      let url = null;
+      if (!year || !problem || !contest) {
+        alert('Please include a year, contest, and problem number');
+        return;
+      }
+
+      if (contest === 'AMC') {
+        if (!level) {
+          alert('Please specify AMC level (8, 10, or 12)');
+          return;
+        }
+        if (parseInt(year) >= 2002) {
+          if (!variant) {
+            alert('Please specify A or B');
+            return;
+          }
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
+        } else {
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
+        }
+      } else if (contest === 'AIME') {
+        if (parseInt(year) >= 2000) {
+          variant = variant || 'I';
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${problem}`;
+        } else {
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems/Problem_${problem}`;
+        }
+      } else if (contest === 'USAMO') {
+        url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${problem}`;
+      }
+
+      if (url) {
+        window.open(url, '_blank');
       } else {
-        alert("Please enter 'YEAR AMC 12A/B Problem N'");
+        alert('Unable to construct a link for that query');
       }
     }
   </script>
