@@ -44,7 +44,7 @@ function generateICS(plan) {
 function setupExport() {
   const dl = document.getElementById('download-ics');
   const gcal = document.getElementById('google-calendar');
-  dl.addEventListener('click', () => {
+  function downloadICSFile() {
     const ics = generateICS(window.loadedPlan);
     const blob = new Blob([ics], { type: 'text/calendar' });
     const url = URL.createObjectURL(blob);
@@ -53,12 +53,11 @@ function setupExport() {
     a.download = 'study_plan.ics';
     a.click();
     URL.revokeObjectURL(url);
-  });
+  }
+  dl.addEventListener('click', downloadICSFile);
   gcal.addEventListener('click', () => {
-    const ics = generateICS(window.loadedPlan);
-    const encoded = encodeURIComponent(ics);
-    const url = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent('data:text/calendar;charset=utf8,' + encoded);
-    window.open(url, '_blank');
+    downloadICSFile();
+    window.open('https://calendar.google.com/calendar/u/0/r/settings/import', '_blank');
   });
 }
 
