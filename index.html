@@ -157,48 +157,9 @@
     }
   </script>
 
-  <!-- ✅✅ NEW: Script to load plan.json -->
+  <script src="plan.js"></script>
   <script>
-    fetch('plan.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('No plan found.');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const container = document.getElementById('study-plan');
-        if (!container) return;
-
-        const table = document.createElement('table');
-        table.border = "1";
-        table.style.borderCollapse = "collapse";
-        table.style.width = "100%";
-        table.style.marginTop = "1em";
-
-        // Header row
-        const header = table.insertRow();
-        header.innerHTML = "<th>Date</th><th>Tasks</th>";
-
-        for (const day of data.schedule) {
-          const row = table.insertRow();
-          const dateCell = row.insertCell();
-          dateCell.textContent = day.date;
-
-          const taskCell = row.insertCell();
-          taskCell.innerHTML = day.tasks.join("<br>");
-        }
-
-        container.innerHTML = ""; // Clear placeholder
-        container.appendChild(table);
-      })
-      .catch(error => {
-        const container = document.getElementById('study-plan');
-        if (container) {
-          container.textContent = "No study plan found. Please generate one.";
-        }
-        console.error(error);
-      });
+    loadStudyPlan('study-plan');
   </script>
 </body>
 </html>
