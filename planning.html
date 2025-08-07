@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build Timeline - OlympiadPrep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">OlympiadPrep</h1>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="tutor.html">Need a Tutor</a>
+        <a href="books.html">Books</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <h2>📅 Build Your Timeline</h2>
+    <div class="card diagnostic-card">
+      <p>Before we craft your personalized study schedule, you’ll need to take a quick diagnostic test.</p>
+      <form class="diagnostic-form" action="diagnostic.html" method="get">
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <select id="subject" name="subject">
+            <option value="math">Math</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="goal">Goal</label>
+          <select id="goal" name="goal" required>
+            <option value="" disabled selected>Select your goal</option>
+            <option value="amc10">AMC 10</option>
+            <option value="amc12">AMC 12</option>
+            <option value="aime">AIME</option>
+            <option value="usamo">USAMO</option>
+            <option value="usajmo">USAJMO</option>
+          </select>
+        </div>
+        <button type="submit">Start Diagnostic →</button>
+      </form>
+    </div>
+  </main>
+  <footer>
+    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
+  </footer>
+</body>
+</html>

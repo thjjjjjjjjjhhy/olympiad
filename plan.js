@@ -22,12 +22,10 @@ function loadStudyPlan(containerId) {
     .then(data => {
       const plan = data.study_plan || data.schedule;
       if (!plan) throw new Error('Invalid plan data.');
+      window.loadedPlan = plan;
 
       const table = document.createElement('table');
-      table.border = '1';
-      table.style.borderCollapse = 'collapse';
-      table.style.width = '100%';
-      table.style.marginTop = '1em';
+      table.className = 'plan-table';
 
       const header = table.insertRow();
       header.innerHTML = '<th>Date</th><th>Tasks</th>';
