@@ -22,6 +22,7 @@
   <section class="hero">
     <div class="container">
       <h2>Find any contest problem instantly</h2>
+      <p class="subtitle">Your AI-powered companion for Olympiad success.</p>
       <form class="lookup-form" onsubmit="handleSearch(event)">
         <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14" required>
         <button type="submit">Search</button>
@@ -43,12 +44,6 @@
       <h3>📚 Recommended Books</h3>
       <p>Explore curated reading to sharpen your skills.</p>
       <a href="books.html">Browse Books →</a>
-    </div>
-
-    <!-- ✅✅ NEW: Study Plan Section -->
-    <div class="card" style="width: 100%;">
-      <h3>📝 Your Study Plan</h3>
-      <div id="study-plan">Loading study plan...</div>
     </div>
   </main>
 
@@ -157,9 +152,6 @@
     }
   </script>
 
-  <script src="plan.js"></script>
-  <script>
-    loadStudyPlan('study-plan');
-  </script>
+  
 </body>
 </html>

@@ -56,7 +56,8 @@ function setupExport() {
   });
   gcal.addEventListener('click', () => {
     const ics = generateICS(window.loadedPlan);
-    const url = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent('data:text/calendar;charset=utf8,' + ics);
+    const dataUrl = 'data:text/calendar;charset=utf8,' + ics;
+    const url = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(dataUrl);
     window.open(url, '_blank');
   });
 }
