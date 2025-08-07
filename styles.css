@@ -166,6 +166,46 @@ footer {
   margin-top: auto;
   background: var(--card-bg);
 }
+
+/* Timeline table styling */
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px var(--shadow);
+  background: var(--card-bg);
+}
+.plan-table th,
+.plan-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+.plan-table th {
+  background: var(--primary);
+  color: #fff;
+}
+.plan-table tr:nth-child(even) td {
+  background: #f1f5f9;
+}
+
+.calendar-export {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+.calendar-export button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+}
+.calendar-export button:hover {
+  background: #1593b8;
+}
 @media (max-width: 600px) {
   .lookup-form { flex-direction: column; }
   .site-nav a { margin-left: 0.5rem; }

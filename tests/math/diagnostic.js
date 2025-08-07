@@ -103,7 +103,13 @@ function gradeTest(test, form) {
     reviewList.appendChild(li);
   });
   container.appendChild(reviewList);
-  loadStudyPlan('study-plan');
+  const summary = { correct, total: test.length, strengths, weaknesses };
+  try {
+    localStorage.setItem('lastTestResults', JSON.stringify(summary));
+  } catch (e) {
+    console.error('Failed to save summary', e);
+  }
+  window.location.href = 'timeline.html';
 }
 
 renderTest(diagnosticTests[level]);
