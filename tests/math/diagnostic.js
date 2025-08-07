@@ -103,6 +103,7 @@ function gradeTest(test, form) {
     reviewList.appendChild(li);
   });
   container.appendChild(reviewList);
+  loadStudyPlan('study-plan');
 }
 
 renderTest(diagnosticTests[level]);
