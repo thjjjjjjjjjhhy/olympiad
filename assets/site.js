@@ -47,14 +47,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   const searchForm=document.getElementById('search-form');
   if(searchForm){
     searchForm.addEventListener('submit',e=>{
-      e.preventDefault();
       const q=searchForm.querySelector('input[name="q"]').value.trim();
-      if(!q) return;
+      if(!q){e.preventDefault();return;}
       if(q.toLowerCase().startsWith('aops:')){
+        e.preventDefault();
         const query=encodeURIComponent(q.slice(5).trim());
         location.href=`https://www.google.com/search?q=site:artofproblemsolving.com+${query}`;
-      }else{
-        location.href=`search.html?q=${encodeURIComponent(q)}`;
       }
     });
   }
