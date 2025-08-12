@@ -1,39 +1,31 @@
-# olympiad
+# Olympiad Prep
 
-All in one olympiad prep resource.
+A lightweight static site for planning math olympiad study.
 
-## Study plan generator
-
-The repository includes a script that produces a day-by-day study schedule
-based on diagnostic results and the target contest date.
-
-1. Create a JSON file with the required metadata. Example:
-
-```json
-{
-  "today": "2025-01-01",
-  "test_date": "2025-05-15",
-  "level": "AMC10",
-  "diagnostic": {
-    "Algebra": 12,
-    "Geometry": 40,
-    "NumberTheory": 75,
-    "Combinatorics": 30,
-    "Probability": 20,
-    "Sequences": 50,
-    "Inequalities": 80,
-    "FunctionalEq": 60,
-    "CoordinateGeo": 35,
-    "Logic": 90
-  }
-}
-```
-
-2. Run the generator and redirect the output to a file:
+## Development
 
 ```bash
-python study_plan.py meta.json > plan.json
+npm ci
+npm test
+npm run build
 ```
 
-The resulting `plan.json` will contain the `study_plan` array with one entry
-per day until the contest.
+The build outputs to `dist/`. Serve the folder locally with any static server:
+
+```bash
+npx serve dist
+```
+
+## Deployment
+
+Push to `main` and GitHub Pages deploys automatically via the workflow in `.github/workflows/build.yml`.
+
+## Audits
+
+Run Lighthouse locally against the built site:
+
+```bash
+npx lighthouse http://localhost:3000/index.html --chrome-flags="--headless" --only-categories=performance,accessibility,best-practices,seo
+```
+
+Ensure scores are ≥95 on the home page and ≥90 elsewhere.

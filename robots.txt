@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thjjjjjjjjjhhy.github.io/olympiad/sitemap.xml

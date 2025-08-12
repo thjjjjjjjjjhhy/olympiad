@@ -1,34 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Books - OlympiadPrep</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recommended Books - Olympiad Prep</title>
+<meta name="description" content="Recommended books for AMC, AIME, and USAMO preparation.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="Recommended Books - Olympiad Prep">
+<meta property="og:description" content="Recommended books for AMC, AIME, and USAMO preparation.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://thjjjjjjjjjhhy.github.io/olympiad/books.html">
+<meta property="og:image" content="favicon.svg">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--color-bg:#fff;--color-text:#111;--color-accent:#0b79d0;--color-accent-hover:#095a9e;--color-muted:#f4f4f4;--transition:0.2s ease-in-out;}
+[data-theme="dark"]{--color-bg:#121212;--color-text:#eaeaea;--color-accent:#4dabf7;--color-accent-hover:#339af0;--color-muted:#1f1f1f;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.5;min-height:100vh;display:flex;flex-direction:column;}
+a{color:var(--color-accent);}a:hover,a:focus{color:var(--color-accent-hover);}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--color-accent);color:#fff;padding:0.5rem;z-index:100;}
+.skip-link:focus{left:0;}
+header{background:var(--color-bg);box-shadow:0 2px 4px rgba(0,0,0,0.1);position:sticky;top:0;z-index:10;}
+header .inner{max-width:60rem;margin:0 auto;padding:0.5rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{text-decoration:none;font-weight:bold;color:var(--color-text);}
+.menu-toggle{background:none;border:1px solid var(--color-text);padding:0.5rem;border-radius:0.25rem;}
+nav{position:fixed;top:0;right:0;bottom:0;width:70%;max-width:20rem;background:var(--color-bg);transform:translateX(100%);transition:transform var(--transition);padding:1rem;box-shadow:-2px 0 4px rgba(0,0,0,0.2);}
+nav.open{transform:translateX(0);}
+nav ul{list-style:none;display:flex;flex-direction:column;gap:1rem;}
+nav a{text-decoration:none;color:var(--color-text);}
+@media (min-width:700px){
+.menu-toggle{display:none;}
+nav{position:static;transform:none;box-shadow:none;width:auto;max-width:none;}
+nav ul{flex-direction:row;align-items:center;}
+}
+main{flex:1;max-width:60rem;margin:0 auto;padding:1rem;}
+.grid{display:grid;gap:1rem;}
+@media(min-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));}}
+.card{background:var(--color-muted);padding:1rem;border-radius:0.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.1);display:flex;flex-direction:column;gap:0.5rem;}
+.card h2{font-size:1.1rem;}
+.tags{display:flex;gap:0.25rem;flex-wrap:wrap;}
+.tag{background:var(--color-accent);color:#fff;padding:0 0.25rem;border-radius:0.25rem;font-size:0.75rem;}
+.card a{align-self:start;margin-top:auto;text-decoration:none;}
+.card a:hover,.card a:focus{ text-decoration:underline; }
+footer{background:var(--color-muted);text-align:center;padding:1rem;}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="logo">OlympiadPrep</h1>
-      <nav class="site-nav">
-        <a href="index.html">Home</a>
-        <a href="timeline.html">Timeline</a>
-        <a href="tutor.html">Need a Tutor</a>
-        <a href="books.html" class="active">Books</a>
-      </nav>
-    </div>
-  </header>
-  <main class="container">
-    <h2>📚 Recommended Books</h2>
-    <ul class="book-list">
-      <li><a href="https://artofproblemsolving.com/store/item/aops-vol1" target="_blank">Art of Problem Solving Volume 1</a></li>
-      <li><a href="https://artofproblemsolving.com/store/item/aops-vol2" target="_blank">Art of Problem Solving Volume 2</a></li>
-      <li><a href="https://www.amazon.com/Problem-Solving-Strategies-Arthur-Engel/dp/0387982191" target="_blank">Problem-Solving Strategies by Arthur Engel</a></li>
-      <li><a href="https://www.amazon.com/102-Combinatorial-Problems-Andreescu-Feng/dp/0817643346" target="_blank">102 Combinatorial Problems by Titu Andreescu & Zuming Feng</a></li>
-    </ul>
-  </main>
-  <footer>
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
-  </footer>
+<a href="#main" class="skip-link">Skip to content</a>
+<header>
+  <div class="inner">
+    <a href="index.html" class="logo">Olympiad Prep</a>
+    <button id="menu-button" class="menu-toggle" aria-controls="site-nav" aria-expanded="false">Menu</button>
+    <nav id="site-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="planning.html">Timeline</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a href="tutor.html">Tutor</a></li>
+        <li><button id="theme-toggle">Toggle theme</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <h1>Recommended Books</h1>
+  <p>Explore books that help at each stage of competition.</p>
+  <section id="books-grid" class="grid" aria-live="polite">
+    <!-- Fallback content -->
+    <article class="card">
+      <h2>Art of Problem Solving Volume 1</h2>
+      <p>Comprehensive intro to contest math.</p>
+      <div class="tags"><span class="tag">AMC</span></div>
+      <a href="https://artofproblemsolving.com/store/book/aops-vol-1" target="_blank" rel="noopener">Learn more</a>
+    </article>
+  </section>
+</main>
+<footer>
+  <p>&copy; 2024 Olympiad Prep</p>
+</footer>
+<script type="module" src="assets/site.js"></script>
 </body>
 </html>
