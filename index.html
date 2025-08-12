@@ -1,157 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OlympiadPrep - Home</title>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Olympiad Prep</title>
+<meta name="description" content="Plan your math olympiad journey with timelines, books, and tutoring resources.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="Olympiad Prep">
+<meta property="og:description" content="Resources for AMC, AIME, and USAMO">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://thjjjjjjjjjhhy.github.io/olympiad/">
+<meta property="og:image" content="favicon.svg">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--color-bg:#fff;--color-text:#111;--color-accent:#0b79d0;--color-accent-hover:#095a9e;--color-muted:#f4f4f4;--transition:0.2s ease-in-out;}
+[data-theme="dark"]{--color-bg:#121212;--color-text:#eaeaea;--color-accent:#4dabf7;--color-accent-hover:#339af0;--color-muted:#1f1f1f;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.5;min-height:100vh;display:flex;flex-direction:column;}
+a{color:var(--color-accent);}a:hover,a:focus{color:var(--color-accent-hover);}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--color-accent);color:#fff;padding:0.5rem;z-index:100;}
+.skip-link:focus{left:0;}
+header{background:var(--color-bg);box-shadow:0 2px 4px rgba(0,0,0,0.1);position:sticky;top:0;z-index:10;}
+header .inner{max-width:60rem;margin:0 auto;padding:0.5rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{text-decoration:none;font-weight:bold;color:var(--color-text);}
+.menu-toggle{background:none;border:1px solid var(--color-text);padding:0.5rem;border-radius:0.25rem;}
+nav{position:fixed;top:0;right:0;bottom:0;width:70%;max-width:20rem;background:var(--color-bg);transform:translateX(100%);transition:transform var(--transition);padding:1rem;box-shadow:-2px 0 4px rgba(0,0,0,0.2);}
+nav.open{transform:translateX(0);}
+nav ul{list-style:none;display:flex;flex-direction:column;gap:1rem;}
+nav a{text-decoration:none;color:var(--color-text);}
+@media (min-width:700px){
+.menu-toggle{display:none;}
+nav{position:static;transform:none;box-shadow:none;width:auto;max-width:none;}
+nav ul{flex-direction:row;align-items:center;}
+}
+main{flex:1;max-width:60rem;margin:0 auto;padding:1rem;}
+.hero{text-align:center;padding:2rem 1rem;}
+.hero h1{margin-bottom:0.5rem;font-size:2rem;}
+.hero p{margin-bottom:1rem;}
+.hero input[type=search]{padding:0.5rem;width:100%;max-width:20rem;}
+.features{display:grid;gap:1rem;margin-top:2rem;}
+@media(min-width:700px){.features{grid-template-columns:repeat(3,1fr);}}
+.card{background:var(--color-muted);padding:1rem;border-radius:0.5rem;text-decoration:none;color:inherit;box-shadow:0 1px 4px rgba(0,0,0,0.1);transition:transform var(--transition),box-shadow var(--transition);}
+.card:hover,.card:focus{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+footer{background:var(--color-muted);text-align:center;padding:1rem;}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+<link rel="stylesheet" href="assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Olympiad Prep","url":"https://thjjjjjjjjjhhy.github.io/olympiad/","potentialAction":{"@type":"SearchAction","target":"https://thjjjjjjjjjhhy.github.io/olympiad/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="logo">OlympiadPrep</h1>
-      <nav class="site-nav">
-        <a href="index.html" class="active">Home</a>
-        <a href="timeline.html">Timeline</a>
-        <a href="tutor.html">Need a Tutor</a>
-        <a href="books.html">Books</a>
-      </nav>
-    </div>
-  </header>
+<a href="#main" class="skip-link">Skip to content</a>
+<header>
+  <div class="inner">
+    <a href="index.html" class="logo">Olympiad Prep</a>
+    <button id="menu-button" class="menu-toggle" aria-controls="site-nav" aria-expanded="false">Menu</button>
+    <nav id="site-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="planning.html">Timeline</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a href="tutor.html">Tutor</a></li>
+        <li><button id="theme-toggle">Toggle theme</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
   <section class="hero">
-    <div class="container">
-      <h2>Find any contest problem instantly</h2>
-      <p class="subtitle">Your AI-powered companion for Olympiad success.</p>
-      <form class="lookup-form" onsubmit="handleSearch(event)">
-        <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14" required>
-        <button type="submit">Search</button>
-      </form>
-    </div>
+    <h1>Olympiad Prep Made Easy</h1>
+    <p>Plan your journey through AMC, AIME, and beyond.</p>
+    <form role="search" aria-label="Site search" onsubmit="return false;">
+      <label for="search" class="visually-hidden">Search</label>
+      <input id="search" type="search" placeholder="Search resources" autocomplete="off">
+    </form>
   </section>
-  <main class="features container">
-    <div class="card">
-      <h3>📅 Build a Timeline</h3>
-      <p>Plan your preparation with a clear schedule.</p>
-      <a href="planning.html">Start Planning →</a>
-    </div>
-    <div class="card">
-      <h3>👩‍🏫 Need a Tutor?</h3>
-      <p>Connect with experienced mentors for one-on-one help.</p>
-      <a href="tutor.html">Find a Tutor →</a>
-    </div>
-    <div class="card">
-      <h3>📚 Recommended Books</h3>
-      <p>Explore curated reading to sharpen your skills.</p>
-      <a href="books.html">Browse Books →</a>
-    </div>
-  </main>
-
-  <footer>
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
-  </footer>
-
-  <!-- Existing script -->
-  <script>
-    function handleSearch(event) {
-      event.preventDefault();
-      const q = document.getElementById('lookup-query').value.toUpperCase();
-      const tokens = q.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean);
-
-      let year, problem, contest, level, variant;
-
-      tokens.forEach(t => {
-        if (!year && /^\d{4}$/.test(t)) {
-          year = t;
-          return;
-        }
-        if (t === 'USAMO') {
-          contest = 'USAMO';
-          return;
-        }
-        if (t.startsWith('AIME')) {
-          contest = 'AIME';
-          const m = t.match(/AIME(.*)/);
-          if (m && m[1]) variant = m[1];
-          return;
-        }
-        if (t === 'AIME') {
-          contest = 'AIME';
-          return;
-        }
-        if (t.startsWith('AMC')) {
-          contest = 'AMC';
-          const m = t.match(/AMC(\d*)([AB])?/);
-          if (m) {
-            if (m[1]) level = m[1];
-            if (m[2]) variant = m[2];
-          }
-          return;
-        }
-        if (contest === 'AMC' && !level) {
-          const m = t.match(/(8|10|12)([AB])?/);
-          if (m) {
-            level = m[1];
-            if (m[2]) variant = m[2];
-            return;
-          }
-        }
-        if (contest === 'AMC' && !variant && /^[AB]$/.test(t)) {
-          variant = t;
-          return;
-        }
-        if (contest === 'AIME' && !variant && /^(I|II|1|2)$/.test(t)) {
-          variant = t.replace('1', 'I').replace('2', 'II');
-          return;
-        }
-        if (!problem && /^\d{1,2}$/.test(t)) {
-          problem = t;
-        }
-      });
-
-      if (contest === 'AIME' && variant) {
-        variant = variant.replace('1', 'I').replace('2', 'II').toUpperCase();
-      }
-
-      let url = null;
-      if (!year || !problem || !contest) {
-        alert('Please include a year, contest, and problem number');
-        return;
-      }
-
-      if (contest === 'AMC') {
-        if (!level) {
-          alert('Please specify AMC level (8, 10, or 12)');
-          return;
-        }
-        if (parseInt(year) >= 2002) {
-          if (!variant) {
-            alert('Please specify A or B');
-            return;
-          }
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
-        } else {
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
-        }
-      } else if (contest === 'AIME') {
-        if (parseInt(year) >= 2000) {
-          variant = variant || 'I';
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${problem}`;
-        } else {
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems/Problem_${problem}`;
-        }
-      } else if (contest === 'USAMO') {
-        url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${problem}`;
-      }
-
-      if (url) {
-        window.open(url, '_blank');
-      } else {
-        alert('Unable to construct a link for that query');
-      }
-    }
-  </script>
-
-  
+  <section class="features">
+    <a class="card" href="planning.html"><h2>Build a Timeline</h2><p>Create a personalized study schedule.</p></a>
+    <a class="card" href="books.html"><h2>Recommended Books</h2><p>Find the best books for each exam level.</p></a>
+    <a class="card" href="tutor.html"><h2>Find a Tutor</h2><p>Join the waitlist for expert coaching.</p></a>
+  </section>
+</main>
+<footer>
+  <p>&copy; 2024 Olympiad Prep</p>
+</footer>
+<script type="module" src="assets/site.js"></script>
 </body>
 </html>

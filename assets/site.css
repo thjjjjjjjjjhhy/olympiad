@@ -1,0 +1,10 @@
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme='light']){
+    --color-bg:#121212;
+    --color-text:#eaeaea;
+    --color-accent:#4dabf7;
+    --color-accent-hover:#339af0;
+    --color-muted:#1f1f1f;
+  }
+}

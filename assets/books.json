@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Art of Problem Solving Volume 1",
+    "why": "Comprehensive intro to contest math.",
+    "tags": ["AMC"],
+    "link": "https://artofproblemsolving.com/store/book/aops-vol-1"
+  },
+  {
+    "title": "Competition Math for Middle School",
+    "why": "Great for early preparation.",
+    "tags": ["AMC"],
+    "link": "https://www.amazon.com/dp/1463781541"
+  },
+  {
+    "title": "AIME Problem Series",
+    "why": "Focuses on AIME-style problems.",
+    "tags": ["AIME"],
+    "link": "https://artofproblemsolving.com/store/aime-problems"
+  },
+  {
+    "title": "The IMO Compendium",
+    "why": "Advanced olympiad problems.",
+    "tags": ["USAMO"],
+    "link": "https://imocompendium.com/"
+  }
+]

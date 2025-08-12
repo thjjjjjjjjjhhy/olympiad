@@ -1,29 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Need a Tutor - OlympiadPrep</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Find a Tutor - Olympiad Prep</title>
+<meta name="description" content="Join the waitlist for olympiad tutoring.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="Find a Tutor - Olympiad Prep">
+<meta property="og:description" content="Join the waitlist for olympiad tutoring.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://thjjjjjjjjjhhy.github.io/olympiad/tutor.html">
+<meta property="og:image" content="favicon.svg">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--color-bg:#fff;--color-text:#111;--color-accent:#0b79d0;--color-accent-hover:#095a9e;--color-muted:#f4f4f4;--transition:0.2s ease-in-out;}
+[data-theme="dark"]{--color-bg:#121212;--color-text:#eaeaea;--color-accent:#4dabf7;--color-accent-hover:#339af0;--color-muted:#1f1f1f;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.5;min-height:100vh;display:flex;flex-direction:column;}
+a{color:var(--color-accent);}a:hover,a:focus{color:var(--color-accent-hover);}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--color-accent);color:#fff;padding:0.5rem;z-index:100;}
+.skip-link:focus{left:0;}
+header{background:var(--color-bg);box-shadow:0 2px 4px rgba(0,0,0,0.1);position:sticky;top:0;z-index:10;}
+header .inner{max-width:60rem;margin:0 auto;padding:0.5rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{text-decoration:none;font-weight:bold;color:var(--color-text);}
+.menu-toggle{background:none;border:1px solid var(--color-text);padding:0.5rem;border-radius:0.25rem;}
+nav{position:fixed;top:0;right:0;bottom:0;width:70%;max-width:20rem;background:var(--color-bg);transform:translateX(100%);transition:transform var(--transition);padding:1rem;box-shadow:-2px 0 4px rgba(0,0,0,0.2);}
+nav.open{transform:translateX(0);}
+nav ul{list-style:none;display:flex;flex-direction:column;gap:1rem;}
+nav a{text-decoration:none;color:var(--color-text);}
+@media (min-width:700px){
+.menu-toggle{display:none;}
+nav{position:static;transform:none;box-shadow:none;width:auto;max-width:none;}
+nav ul{flex-direction:row;align-items:center;}
+}
+main{flex:1;max-width:60rem;margin:0 auto;padding:1rem;}
+.form-group{margin-bottom:1rem;display:flex;flex-direction:column;}
+label{margin-bottom:0.25rem;}
+input,textarea{padding:0.5rem;border:1px solid #ccc;border-radius:0.25rem;}
+.error{color:#c00;font-size:0.875rem;}
+button{background:var(--color-accent);color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.25rem;cursor:pointer;transition:background var(--transition);}
+button:hover,button:focus{background:var(--color-accent-hover);}
+footer{background:var(--color-muted);text-align:center;padding:1rem;}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="logo">OlympiadPrep</h1>
-      <nav class="site-nav">
-        <a href="index.html">Home</a>
-        <a href="timeline.html">Timeline</a>
-        <a href="tutor.html" class="active">Need a Tutor</a>
-        <a href="books.html">Books</a>
-      </nav>
+<a href="#main" class="skip-link">Skip to content</a>
+<header>
+  <div class="inner">
+    <a href="index.html" class="logo">Olympiad Prep</a>
+    <button id="menu-button" class="menu-toggle" aria-controls="site-nav" aria-expanded="false">Menu</button>
+    <nav id="site-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="planning.html">Timeline</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a href="tutor.html">Tutor</a></li>
+        <li><button id="theme-toggle">Toggle theme</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <h1>Find a Tutor</h1>
+  <p>Join the waitlist and we'll reach out when slots open.</p>
+  <form id="tutor-form" novalidate>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" name="name" required>
+      <span class="error" id="name-error"></span>
     </div>
-  </header>
-  <main class="container">
-    <h2>👩‍🏫 Need a Tutor?</h2>
-    <p>Connect with experienced mentors for personalized guidance. This page is under construction.</p>
-  </main>
-  <footer>
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
-  </footer>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required>
+      <span class="error" id="email-error"></span>
+    </div>
+    <div class="form-group">
+      <label for="goals">Goals</label>
+      <textarea id="goals" name="goals" rows="4" required></textarea>
+      <span class="error" id="goals-error"></span>
+    </div>
+    <button type="submit">Join waitlist</button>
+  </form>
+  <p id="form-status" aria-live="polite"></p>
+</main>
+<footer>
+  <p>&copy; 2024 Olympiad Prep</p>
+</footer>
+<script type="module" src="assets/site.js"></script>
 </body>
 </html>
