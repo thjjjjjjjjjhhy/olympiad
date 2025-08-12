@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Build a Timeline",
+    "url": "planning.html",
+    "tags": ["timeline","plan"],
+    "summary": "Create a personalized study schedule."
+  },
+  {
+    "title": "Recommended Books",
+    "url": "books.html",
+    "tags": ["books","resources"],
+    "summary": "Find books for AMC, AIME, and beyond."
+  },
+  {
+    "title": "Find a Tutor",
+    "url": "tutor.html",
+    "tags": ["tutor","coaching"],
+    "summary": "Join the waitlist for expert coaching."
+  },
+  {
+    "title": "Take Diagnostic",
+    "url": "diagnostic.html",
+    "tags": ["diagnostic","quiz"],
+    "summary": "Assess your skills to build a study plan."
+  }
+]
+

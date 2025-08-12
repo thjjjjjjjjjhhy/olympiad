@@ -1,26 +1,75 @@
 [
   {
-    "title": "Art of Problem Solving Volume 1",
-    "why": "Comprehensive intro to contest math.",
-    "tags": ["AMC"],
-    "link": "https://artofproblemsolving.com/store/book/aops-vol-1"
+    "title": "Art of Problem Solving Volume 1: The Basics",
+    "level": ["AMC10","AMC12"],
+    "author": "Rusczyk & Lehoczky",
+    "isbn13": "978-1934124128",
+    "asin": "1934124122",
+    "amazon_url": ""
   },
   {
-    "title": "Competition Math for Middle School",
-    "why": "Great for early preparation.",
-    "tags": ["AMC"],
-    "link": "https://www.amazon.com/dp/1463781541"
+    "title": "Art of Problem Solving Volume 2: And Beyond",
+    "level": ["AIME","USAMO"],
+    "author": "Rusczyk & Lehoczky",
+    "isbn13": "978-1934124241",
+    "asin": "",
+    "amazon_url": ""
   },
   {
-    "title": "AIME Problem Series",
-    "why": "Focuses on AIME-style problems.",
-    "tags": ["AIME"],
-    "link": "https://artofproblemsolving.com/store/aime-problems"
+    "title": "Introduction to Algebra",
+    "level": ["AMC10","AMC12"],
+    "author": "Rusczyk",
+    "isbn13": "978-1934124142",
+    "asin": "",
+    "amazon_url": ""
   },
   {
-    "title": "The IMO Compendium",
-    "why": "Advanced olympiad problems.",
-    "tags": ["USAMO"],
-    "link": "https://imocompendium.com/"
+    "title": "Intermediate Algebra",
+    "level": ["AIME"],
+    "author": "Rusczyk",
+    "isbn13": "978-1934124210",
+    "asin": "",
+    "amazon_url": ""
+  },
+  {
+    "title": "Introduction to Number Theory",
+    "level": ["AMC10","AMC12"],
+    "author": "Cai, Rusczyk & Shea",
+    "isbn13": "978-1934124012",
+    "asin": "",
+    "amazon_url": ""
+  },
+  {
+    "title": "Introduction to Counting & Probability",
+    "level": ["AMC10","AMC12"],
+    "author": "Cai & Rusczyk",
+    "isbn13": "978-1934124074",
+    "asin": "1934124079",
+    "amazon_url": ""
+  },
+  {
+    "title": "Intermediate Counting & Probability",
+    "level": ["AIME"],
+    "author": "Cai & Rusczyk",
+    "isbn13": "978-1934124098",
+    "asin": "",
+    "amazon_url": ""
+  },
+  {
+    "title": "Introduction to Geometry",
+    "level": ["AMC10","AMC12"],
+    "author": "Rusczyk & Lehoczky",
+    "isbn13": "978-1934124234",
+    "asin": "",
+    "amazon_url": ""
+  },
+  {
+    "title": "Precalculus",
+    "level": ["AIME","USAMO"],
+    "author": "Rusczyk",
+    "isbn13": "978-1934124319",
+    "asin": "",
+    "amazon_url": "https://www.amazon.com/Art-Problem-Solving-Precalculus-Second/dp/1934124310"
   }
 ]
+
