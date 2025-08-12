@@ -1,0 +1,7 @@
+{
+  "user": { "target_exam": "AIME", "target_date": "2025-11-12", "daily_minutes": 90 },
+  "responses": [
+    { "id": "Q1", "section": "Algebra", "skill": "algebra.quadratics", "correct": false, "time_sec": 120, "difficulty": 0.8 },
+    { "id": "Q2", "section": "Number Theory", "skill": "nt.congruences", "correct": true, "time_sec": 95, "difficulty": 1.1 }
+  ]
+}

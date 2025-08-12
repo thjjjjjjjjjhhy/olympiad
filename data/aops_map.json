@@ -1,0 +1,15 @@
+{
+  "algebra.lines": [
+    { "book_id": "AOPS_Vol1", "chapter": "Lines", "pages": [50, 70], "problems": ["1-15 odd"] }
+  ],
+  "algebra.quadratics": [
+    { "book_id": "AOPS_Vol1", "chapter": "Quadratics", "pages": [123, 146], "problems": ["1-20 odd", "Challenge 1-5"] },
+    { "book_id": "Intermediate_Algebra", "chapter": "Quadratic Equations", "pages": [57, 92], "problems": ["1-30 all"] }
+  ],
+  "nt.divisibility": [
+    { "book_id": "Intro_Number_Theory", "chapter": "Divisibility", "pages": [100, 120], "problems": ["1-20 odd"] }
+  ],
+  "nt.congruences": [
+    { "book_id": "Intro_Number_Theory", "chapter": "Congruences", "pages": [201, 228], "problems": ["1-25 odd", "Review 1-10"] }
+  ]
+}
