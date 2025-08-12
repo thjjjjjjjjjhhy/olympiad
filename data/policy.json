@@ -1,0 +1,8 @@
+{
+  "speed": { "slow_sec": 150, "fast_sec": 60 },
+  "gains": { "reading": 0.05, "problems": 0.07, "practice": 0.1, "review": 0.02 },
+  "durations": { "reading_per_page": 1.5, "problem_per_item": 3 },
+  "review_percentages": [0.2, 0.2, 0.2],
+  "spacing": [1, 7, 21],
+  "slack": 0.1
+}

@@ -2,8 +2,15 @@
   "name": "olympiad",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "node build.mjs",
-    "test": "node -e \"console.log('No tests')\""
+    "build": "tsc",
+    "test": "vitest run",
+    "plan": "node dist/cli.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vitest": "^0.34.6"
   }
 }
