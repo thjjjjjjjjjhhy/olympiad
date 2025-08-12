@@ -8,3 +8,7 @@
     --color-muted:#1f1f1f;
   }
 }
+#diagnostic-pref{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0;}
+#diagnostic-pref label{display:flex;flex-direction:column;font-size:.875rem;}
+.results ul{list-style:none;padding:0;}
+.results li{margin-bottom:1rem;}
