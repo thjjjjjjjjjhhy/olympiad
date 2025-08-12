@@ -1,10 +1,6 @@
 import fs from 'fs';
-import { estimateTheta } from './irt';
-import { thetaToMastery, smoothMastery } from './mastery';
-import { generateBlocks } from './blocks';
-import { schedule } from './schedule';
-import { planToJSON, planToMarkdown, planToICS } from './exporters';
-import { validateAopsMap } from './utils/validate';
+import { planFromDiagnostic, PlanInputs } from './plan.js';
+import { validateAopsMap } from './utils/validate.js';
 
 function getArg(flag: string): string | undefined {
   const idx = process.argv.indexOf(flag);
@@ -35,26 +31,20 @@ async function main() {
     process.exit(1);
   }
 
-  const bySkill: Record<string, any[]> = {};
-  diagnostic.responses.forEach((r: any) => {
-    (bySkill[r.skill] = bySkill[r.skill] || []).push(r);
-  });
-  const mastery: Record<string, number> = {};
-  const allSkills = new Set<string>([...Object.keys(skills), ...Object.keys(bySkill)]);
-  for (const skill of allSkills) {
-    const theta = estimateTheta(bySkill[skill] || []);
-    mastery[skill] = thetaToMastery(theta);
-  }
-  const smoothed = smoothMastery(mastery, skills);
+  const inputs: PlanInputs = {
+    diagnosticResults: diagnostic,
+    skillsGraph: skills,
+    aopsMap: aops,
+    practiceBank: practice,
+    policy,
+  };
 
-  const blocks = generateBlocks(smoothed, skills, aops, practice, policy, diagnostic.user.target_exam);
-  const startDate = new Date().toISOString().slice(0, 10);
-  const plan = schedule(blocks, startDate, diagnostic.user.target_date, diagnostic.user.daily_minutes, policy);
+  const { planJson, planMd, icsText } = await planFromDiagnostic(inputs);
 
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(outDir + '/plan.json', planToJSON(plan));
-  fs.writeFileSync(outDir + '/plan.md', planToMarkdown(plan));
-  fs.writeFileSync(outDir + '/study.ics', planToICS(plan));
+  fs.writeFileSync(outDir + '/plan.json', planJson);
+  fs.writeFileSync(outDir + '/plan.md', planMd);
+  fs.writeFileSync(outDir + '/study.ics', icsText);
 
   console.log('Plan written to', outDir);
 }

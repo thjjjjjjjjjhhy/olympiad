@@ -58,7 +58,7 @@ export interface Block {
   id: string;
   skill: string;
   domain: string;
-  type: 'reading' | 'problems' | 'practice' | 'review';
+  type: 'reading' | 'problems' | 'practice' | 'review' | 'todo';
   resource: any;
   minutes: number;
   expected_gain: number;
