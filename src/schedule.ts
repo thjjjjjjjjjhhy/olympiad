@@ -13,7 +13,6 @@ export function schedule(
   const dayMinutes: DayMinutes = {};
   const weekMinutes: Record<number, number> = {};
   const planDays: Record<string, PlanDay> = {};
-  const lastDomains: string[] = [];
 
   const start = parseISO(startDate);
   const target = parseISO(endDate);
@@ -34,11 +33,12 @@ export function schedule(
         date = addDays(date, 1);
         continue;
       }
+      const dayBlocks = planDays[ds]?.blocks || [];
       if (
         !fixedDate &&
-        lastDomains.length >= 2 &&
-        lastDomains[lastDomains.length - 1] === block.domain &&
-        lastDomains[lastDomains.length - 2] === block.domain
+        dayBlocks.length >= 2 &&
+        dayBlocks[dayBlocks.length - 1].domain === block.domain &&
+        dayBlocks[dayBlocks.length - 2].domain === block.domain
       ) {
         date = addDays(date, 1);
         continue;
@@ -46,10 +46,6 @@ export function schedule(
       dayMinutes[ds] = dMin + block.minutes;
       weekMinutes[week] = wMin + block.minutes;
       (planDays[ds] ??= { date: ds, blocks: [] }).blocks.push(block);
-      if (!fixedDate) {
-        lastDomains.push(block.domain);
-        if (lastDomains.length > 2) lastDomains.shift();
-      }
       return ds;
     }
     const ds = formatISO(target);

@@ -2,11 +2,11 @@
   "name": "olympiad",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "plan": "node dist/cli.js"
+    "plan": "node dist/cli.js --diagnostic data/diagnostic_results.json --skills data/skills_graph.json --aops data/aops_map.json --practice data/practice_bank.json --policy data/policy.json --out out"
   },
   "dependencies": {},
   "devDependencies": {

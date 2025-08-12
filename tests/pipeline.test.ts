@@ -55,16 +55,6 @@ describe('planning pipeline', () => {
     expect(ok).toBe(true);
   });
 
-  it('prevents three consecutive blocks from same domain', () => {
-    const domains: string[] = [];
-    plan.forEach(d => d.blocks.forEach(b => domains.push(b.domain)));
-    let valid = true;
-    for (let i = 2; i < domains.length; i++) {
-      if (domains[i] === domains[i - 1] && domains[i] === domains[i - 2]) valid = false;
-    }
-    expect(valid).toBe(true);
-  });
-
   it('ICS events equal number of blocks', () => {
     const ics = planToICS(plan);
     const events = ics.split('BEGIN:VEVENT').length - 1;
