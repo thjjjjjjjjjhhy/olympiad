@@ -1,5 +1,3 @@
 node_modules/
 dist/
 out/
-package-lock.json
-!engine/package-lock.json
