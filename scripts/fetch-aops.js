@@ -2,15 +2,6 @@
 import fs from 'fs';
 import path from 'path';
 
-let load;
-try {
-  ({ load } = await import('cheerio'));
-} catch {
-  console.warn('cheerio not installed; AoPS scraping skipped');
-}
-
-async function scrapeProblem(url, format) {
-  if (!load) return {};
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

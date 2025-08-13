@@ -33,11 +33,7 @@ function renderTest(test) {
     const pEl = document.createElement('p');
     pEl.textContent = `${i + 1}. ${statement}`;
     div.appendChild(pEl);
-    if (test.format === 'multiple-choice') {
-      const opts = Array.isArray(p.choices) && p.choices.length === 5
-        ? p.choices
-        : ['', '', '', '', ''];
-      opts.forEach((choice, idx) => {
+
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'radio';
@@ -59,6 +55,7 @@ function renderTest(test) {
     link.href = p.aops;
     link.target = '_blank';
     link.textContent = 'View on AoPS';
+
     div.appendChild(link);
     form.appendChild(div);
   });
@@ -76,13 +73,7 @@ function renderTest(test) {
 function gradeTest(test, form) {
   const data = new FormData(form);
   let correct = 0;
-  let total = 0;
-  const topicStats = {};
-  test.problems.forEach((p, i) => {
-    const official = String(p.officialAnswer || '').toUpperCase();
-    if (!official) return;
-    total += 1;
-    const userAns = (data.get(`q${i}`) || '').toString().trim().toUpperCase();
+
     const isCorrect = userAns === official;
     if (isCorrect) correct += 1;
     (p.topic || []).forEach(t => {
@@ -92,7 +83,7 @@ function gradeTest(test, form) {
     });
   });
   const container = document.getElementById('quiz');
-  container.innerHTML = `<p>You scored ${correct} out of ${total}.</p>`;
+
   const strengths = [], weaknesses = [];
   Object.entries(topicStats).forEach(([topic, stats]) => {
     const ratio = stats.correct / stats.total;
@@ -101,7 +92,7 @@ function gradeTest(test, form) {
   });
   if (strengths.length) container.innerHTML += `<p>Strengths: ${strengths.join(', ')}</p>`;
   if (weaknesses.length) container.innerHTML += `<p>Topics to review: ${weaknesses.join(', ')}</p>`;
-  const summary = { correct, total, strengths, weaknesses };
+
   try {
     localStorage.setItem('lastTestResults', JSON.stringify(summary));
   } catch (e) {

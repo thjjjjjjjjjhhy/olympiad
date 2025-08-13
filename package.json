@@ -4,5 +4,6 @@
   "type": "module",
   "scripts": {
     "fetch-aops": "node scripts/fetch-aops.js data/tests.json public/tests.bundled.json"
+
   }
 }
