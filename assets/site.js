@@ -320,18 +320,14 @@ if(typeof document!=='undefined'){
             fetch('assets/policy.json').then(r=>r.json())
           ]);
           const plan=await window.OlympiadEngine.planFromDiagnostic(results,{skills,bank,map,policy});
-          download('plan.json',JSON.stringify(plan.plan,null,2));
-          download('plan.md',plan.markdown);
-          download('study.ics',plan.ics);
-          try{localStorage.setItem('studyPlan',plan.markdown);}catch(e){}
+
           location.href='study-plan.html';
         }catch(err){
           console.error(err);
           alert('Could not generate plan.');
         }
       }else{
-        download('diagnostic_results.json',JSON.stringify(results,null,2));
-        alert('Engine not loaded. Diagnostic results downloaded.');
+
       }
     });
   }
@@ -339,17 +335,27 @@ if(typeof document!=='undefined'){
   // study plan page
   const planDisplay=document.getElementById('plan-display');
   if(planDisplay){
-    const md=localStorage.getItem('studyPlan');
-    planDisplay.textContent=md||'No plan found. Please take the diagnostic first.';
-  }
-
-  function download(name,content){
-    const blob=new Blob([content]);
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=name;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const planJson=localStorage.getItem('studyPlanJson');
+    if(planJson){
+      const plan=JSON.parse(planJson);
+      planDisplay.innerHTML='';
+      plan.forEach(day=>{
+        const sec=document.createElement('section');
+        const h2=document.createElement('h2');
+        h2.textContent=new Date(day.date).toDateString();
+        sec.appendChild(h2);
+        const ul=document.createElement('ul');
+        day.blocks.forEach(b=>{
+          const li=document.createElement('li');
+          li.textContent=`${b.title} (${b.minutes} min)`;
+          ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+        planDisplay.appendChild(sec);
+      });
+    }else{
+      planDisplay.textContent='No plan found. Please take the diagnostic first.';
+    }
   }
 
   // dev link checker
