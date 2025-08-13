@@ -1,5 +1,16 @@
 const params = new URLSearchParams(window.location.search);
-const level = params.get('goal') || 'amc10';
+const goal = params.get('goal') || 'amc10';
+
+// Map the selected goal to one of the three test levels.
+const levelMap = {
+  amc10: 'amc',
+  amc12: 'amc',
+  aime: 'aime',
+  usamo: 'usamo',
+  usajmo: 'usamo',
+};
+
+const level = levelMap[goal] || 'amc';
 
 function renderTest(test) {
   const container = document.getElementById('quiz');
@@ -96,25 +107,25 @@ function gradeTest(test, form) {
   if (weaknesses.length) {
     container.innerHTML += `<p>Topics to review: ${weaknesses.join(', ')}</p>`;
   }
-  if (level === 'amc10') {
+  if (goal === 'amc10') {
     if (correct >= 15) {
       container.innerHTML += '<p>Great job! Consider trying an AMC 12 diagnostic.</p>';
     } else if (correct < 10) {
       container.innerHTML += '<p>Review foundational topics or try an easier level.</p>';
     }
-  } else if (level === 'amc12') {
+  } else if (goal === 'amc12') {
     if (correct >= 15) {
       container.innerHTML += '<p>You may be ready for AIME practice.</p>';
     } else if (correct < 10) {
       container.innerHTML += '<p>Consider reviewing AMC 10 material.</p>';
     }
-  } else if (level === 'aime') {
+  } else if (goal === 'aime') {
     if (correct >= 10) {
       container.innerHTML += '<p>Strong performance! You may start USAMO preparation.</p>';
     } else if (correct < 5) {
       container.innerHTML += '<p>Consider practicing AMC 12 level problems first.</p>';
     }
-  } else if (level === 'usamo' || level === 'usajmo') {
+  } else if (goal === 'usamo' || goal === 'usajmo') {
     if (correct >= 8) {
       container.innerHTML += '<p>Outstanding work! Keep challenging yourself with proof-based problems.</p>';
     } else if (correct < 5) {
@@ -138,11 +149,9 @@ function gradeTest(test, form) {
 }
 
 const files = {
-  amc10: 'tests/math/amc_mixed_medium.json',
-  amc12: 'tests/math/amc_mixed_medium.json',
+  amc: 'tests/math/amc_mixed_medium.json',
   aime: 'tests/math/aime_mixed_medium.json',
   usamo: 'tests/math/usamo_mixed_medium.json',
-  usajmo: 'tests/math/usamo_mixed_medium.json',
 };
 
 const file = files[level];
