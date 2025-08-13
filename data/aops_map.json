@@ -11,5 +11,11 @@
   ],
   "nt.congruences": [
     { "book_id": "Intro_Number_Theory", "chapter": "Congruences", "pages": [201, 228], "problems": ["1-25 odd", "Review 1-10"] }
+  ],
+  "geo.triangles": [
+    { "book_id": "AOPS_Vol1", "chapter": "Geometry: Triangles", "pages": [200, 230], "problems": ["1-20 odd"] }
+  ],
+  "combo.counting": [
+    { "book_id": "AOPS_Vol1", "chapter": "Counting", "pages": [300, 340], "problems": ["1-25 odd"] }
   ]
 }

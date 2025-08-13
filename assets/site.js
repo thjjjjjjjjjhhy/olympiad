@@ -50,51 +50,63 @@ if(typeof document!=='undefined'){
     function problemRedirect(q){
       const ql=q.toLowerCase();
       const tokens=(ql.match(/\w+/g)||[]);
-      let year,problem,exam='',grade;
+      let year,problem,exam,grade,variant;
 
-      const ym=ql.match(/(19|20)\d{2}/);
-      if(ym) year=ym[0];
+      for(const t of tokens){
+        if(/^(19|20)\d{2}$/.test(t)) year=t;
+      }
 
-      if(/aime/.test(ql)){
-        const m=ql.match(/aime\s*(i{1,3}|1|2)?/);
-        if(m){
-          const v=m[1];
-          if(!v) exam='AIME';
-          else if(v==='i'||v==='1') exam='AIME_I';
-          else if(v==='ii'||v==='2') exam='AIME_II';
-          else exam=`AIME_${v.toUpperCase()}`;
-        }else exam='AIME';
-      }else if(/amc/.test(ql)){
-        const m=ql.match(/amc\s*(8|10|12)\s*([ab])?/);
-        if(m){
+      if(tokens.some(t=>t.includes('amc'))){
+        let combo=tokens.find(t=>/^amc(8|10|12)([ab])?$/i.test(t));
+        if(combo){
+          const m=combo.match(/^amc(8|10|12)([ab])?$/i);
           grade=m[1];
-          const letter=m[2]?m[2].toUpperCase():'';
-          exam=`AMC_${grade}${letter}`;
+          variant=m[2];
         }else{
-          const combo=ql.match(/amc(8|10|12)([ab])?/);
+          combo=tokens.find(t=>/^(8|10|12)([ab])?$/i.test(t));
           if(combo){
-            grade=combo[1];
-            const letter=combo[2]?combo[2].toUpperCase():'';
-            exam=`AMC_${grade}${letter}`;
+            const m=combo.match(/^(8|10|12)([ab])?$/i);
+            grade=m[1];
+            variant=m[2];
           }
         }
-      }else if(/usamo|usmo/.test(ql)){
+        if(!grade){
+          const g=tokens.find(t=>/^(8|10|12)$/i.test(t));
+          if(g) grade=g;
+        }
+        if(!variant){
+          const v=tokens.find(t=>/^[ab]$/i.test(t));
+          if(v) variant=v;
+        }
+        if(grade) exam=`AMC_${grade}${variant?variant.toUpperCase():''}`;
+      }else if(tokens.includes('aime')){
+        exam='AIME';
+        const v=tokens.find(t=>/^(i{1,3}|1|2)$/i.test(t));
+        if(v){
+          const vv=v.toLowerCase();
+          if(vv==='1'||vv==='i') exam='AIME_I';
+          else if(vv==='2'||vv==='ii') exam='AIME_II';
+          else exam=`AIME_${vv.toUpperCase()}`;
+          variant=vv;
+        }
+      }else if(tokens.some(t=>t==='usamo'||t==='usmo')){
         exam='USAMO';
-      }else if(/usajmo|usa\s*jmo/.test(ql)){
+      }else if(tokens.some(t=>t==='usajmo'||(t==='usa'&&tokens.includes('jmo')))){
         exam='USAJMO';
       }
 
-      const pm=ql.match(/problem\s*(\d{1,2})/);
-      if(pm) problem=pm[1];
       if(!problem){
-        const nums=ql.match(/\b\d{1,2}\b/g)||[];
-        for(const n of nums){
-          if(n!==year&&n!==grade){problem=n;break;}
+        for(const t of tokens){
+          if(/^\d{1,2}$/.test(t)&&t!==year&&t!==grade&&t!==variant){problem=t;break;}
         }
       }
 
       if(exam&&year&&problem){
         location.href=`https://artofproblemsolving.com/wiki/index.php/${year}_${exam}_Problems/Problem_${Number(problem)}`;
+        return true;
+      }
+      if(exam&&year){
+        location.href=`https://artofproblemsolving.com/wiki/index.php/${year}_${exam}_Problems`;
         return true;
       }
       return false;
@@ -222,9 +234,64 @@ if(typeof document!=='undefined'){
     }
     [prefExam,prefDate,prefMinutes].forEach(el=>el.addEventListener('change',savePrefs));
 
-    diagForm.querySelectorAll('.question').forEach(q=>{
-      q.addEventListener('focusin',()=>{if(!q.dataset.start) q.dataset.start=Date.now();});
-    });
+    let questionBank=null;
+    async function loadQuestions(){
+      questionBank=await fetch('assets/diagnostic_bank.json').then(r=>r.json());
+      renderQuestions();
+    }
+    function renderQuestions(){
+      if(!questionBank) return;
+      const container=document.getElementById('questions-container');
+      let questions=[];
+      const exam=prefExam.value;
+      if(exam==='AIME'){
+        questions=questionBank.AMC.slice(0,10).concat(questionBank.AIME.slice(0,5));
+      }else if(exam==='USAMO'){
+        questions=questionBank.AIME.slice(0,15);
+      }else{
+        questions=questionBank.AMC.slice(0,15);
+      }
+      container.innerHTML='';
+      const sections={};
+      questions.forEach(q=>{(sections[q.section]=sections[q.section]||[]).push(q);});
+      let idx=1;
+      Object.entries(sections).forEach(([section,qs])=>{
+        const sec=document.createElement('section');
+        const h2=document.createElement('h2');
+        h2.textContent=section;
+        sec.appendChild(h2);
+        qs.forEach(q=>{
+          const div=document.createElement('div');
+          div.className='question';
+          div.dataset.skill=q.skill;
+          div.dataset.difficulty=q.difficulty;
+          const fieldset=document.createElement('fieldset');
+          const legend=document.createElement('legend');
+          legend.textContent=`${idx}. ${q.problem}`;
+          fieldset.appendChild(legend);
+          q.choices.forEach((choice,i)=>{
+            const label=document.createElement('label');
+            const input=document.createElement('input');
+            input.type='radio';
+            input.name=`q${idx}`;
+            input.value=choice;
+            if(i===q.answer) input.dataset.correct='1';
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(choice));
+            fieldset.appendChild(label);
+          });
+          div.appendChild(fieldset);
+          sec.appendChild(div);
+          idx++;
+        });
+        container.appendChild(sec);
+      });
+      container.querySelectorAll('.question').forEach(q=>{
+        q.addEventListener('focusin',()=>{if(!q.dataset.start) q.dataset.start=Date.now();});
+      });
+    }
+    prefExam.addEventListener('change',renderQuestions);
+    loadQuestions();
 
     document.getElementById('finish-diagnostic').addEventListener('click',async()=>{
       const responses=[];
@@ -244,7 +311,6 @@ if(typeof document!=='undefined'){
         target_date:prefDate.value,
         daily_minutes:Number(prefMinutes.value||0)
       },responses};
-      const planPre=document.getElementById('plan-md');
       if(window.OlympiadEngine&&typeof window.OlympiadEngine.planFromDiagnostic==='function'){
         try{
           const [skills,bank,map,policy]=await Promise.all([
@@ -254,19 +320,17 @@ if(typeof document!=='undefined'){
             fetch('assets/policy.json').then(r=>r.json())
           ]);
           const plan=await window.OlympiadEngine.planFromDiagnostic(results,{skills,bank,map,policy});
-          planPre.textContent=plan.markdown;
-          download('plan.json',JSON.stringify(plan.plan,null,2));
-          download('plan.md',plan.markdown);
-          download('study.ics',plan.ics);
-          try{localStorage.setItem('studyPlan',plan.markdown);}catch(e){}
+          try{
+            localStorage.setItem('studyPlanJson',JSON.stringify(plan.plan));
+            localStorage.setItem('studyPlanMd',plan.markdown);
+          }catch(e){}
           location.href='study-plan.html';
         }catch(err){
           console.error(err);
-          planPre.textContent='Could not generate plan.';
+          alert('Could not generate plan.');
         }
       }else{
-        download('diagnostic_results.json',JSON.stringify(results,null,2));
-        planPre.textContent='Engine not loaded. Diagnostic results downloaded.';
+        alert('Engine not loaded. Please try again later.');
       }
     });
   }
@@ -274,17 +338,27 @@ if(typeof document!=='undefined'){
   // study plan page
   const planDisplay=document.getElementById('plan-display');
   if(planDisplay){
-    const md=localStorage.getItem('studyPlan');
-    planDisplay.textContent=md||'No plan found. Please take the diagnostic first.';
-  }
-
-  function download(name,content){
-    const blob=new Blob([content]);
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=name;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const planJson=localStorage.getItem('studyPlanJson');
+    if(planJson){
+      const plan=JSON.parse(planJson);
+      planDisplay.innerHTML='';
+      plan.forEach(day=>{
+        const sec=document.createElement('section');
+        const h2=document.createElement('h2');
+        h2.textContent=new Date(day.date).toDateString();
+        sec.appendChild(h2);
+        const ul=document.createElement('ul');
+        day.blocks.forEach(b=>{
+          const li=document.createElement('li');
+          li.textContent=`${b.title} (${b.minutes} min)`;
+          ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+        planDisplay.appendChild(sec);
+      });
+    }else{
+      planDisplay.textContent='No plan found. Please take the diagnostic first.';
+    }
   }
 
   // dev link checker
