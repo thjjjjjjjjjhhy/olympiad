@@ -150,7 +150,7 @@ function gradeTest(test, form) {
 
 const files = {
   amc: 'tests/math/amc_mixed_medium.json',
-  aime: 'tests/math/aime_mixed_medium.json',
+  aime: 'tests/math/aime_mixed.json',
   usamo: 'tests/math/usamo_mixed_medium.json',
 };
 

@@ -1,0 +1,150 @@
+{
+  "id": "aime_mixed",
+  "title": "AIME-Prep Mixed Diagnostic (Hard AMC + Easy AIME, 10 Problems)",
+  "format": "free-response-000-999 or multiple-choice (per source)",
+  "timeSuggestMin": 75,
+  "problems": [
+    {
+      "contest": "AMC 12A",
+      "year": 2019,
+      "number": 17,
+      "topic": [
+        "Algebra/Number Theory"
+      ],
+      "subject": "Algebra/Number Theory",
+      "question": "Roots r1,r2,r3 of x^3-5x^2+8x-13 have sums s_k. Given s0=3,s1=5,s2=9 and s_{k+1}=a s_k + b s_{k-1}+ c s_{k-2}, find a+b+c.",
+      "choices": [
+        "A. -6",
+        "B. 0",
+        "C. 6",
+        "D. 10",
+        "E. 26"
+      ],
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 12A",
+      "year": 2018,
+      "number": 16,
+      "topic": [
+        "Algebra/Analytic Geometry"
+      ],
+      "subject": "Algebra/Analytic Geometry",
+      "question": "Determine all a where circle x^2+y^2=a^2 and parabola y=x^2-a meet at exactly three points.",
+      "choices": [
+        "A. a=1/4",
+        "B. 1/4 < a < 1/2",
+        "C. a>1/4",
+        "D. a=1/2",
+        "E. a>1/2"
+      ],
+      "answer": "E",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10B",
+      "year": 2017,
+      "number": 21,
+      "topic": [
+        "Geometry"
+      ],
+      "subject": "Geometry",
+      "question": "In right triangle ABC with sides 6,8,10, D midpoint of BC. Find sum of inradii of triangles ADB and ADC.",
+      "choices": [
+        "A. sqrt(5)",
+        "B. 11/4",
+        "C. 2*sqrt(2)",
+        "D. 17/6",
+        "E. 3"
+      ],
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 12A",
+      "year": 2016,
+      "number": 17,
+      "topic": [
+        "Combinatorics/Probability"
+      ],
+      "subject": "Combinatorics/Probability",
+      "question": "Problem statement unavailable; refer to AoPS link.",
+      "choices": [],
+      "answer": null,
+      "type": "mc"
+    },
+    {
+      "contest": "AIME I",
+      "year": 2019,
+      "number": 4,
+      "topic": [
+        "Combinatorics"
+      ],
+      "subject": "Combinatorics",
+      "question": "22-player soccer team uses up to three substitutions, order matters, no re-entry. Let n be number of possible substitution sequences. Find n mod 1000.",
+      "answer": 122,
+      "type": "num"
+    },
+    {
+      "contest": "AIME II",
+      "year": 2019,
+      "number": 4,
+      "topic": [
+        "Probability/Combinatorics"
+      ],
+      "subject": "Probability/Combinatorics",
+      "question": "Four rolls of a fair die; product is a perfect square with probability m/n. Find m+n.",
+      "answer": 187,
+      "type": "num"
+    },
+    {
+      "contest": "AIME I",
+      "year": 2015,
+      "number": 3,
+      "topic": [
+        "Combinatorics"
+      ],
+      "subject": "Combinatorics",
+      "question": "Find prime p such that 16p+1 is a perfect cube.",
+      "answer": 307,
+      "type": "num"
+    },
+    {
+      "contest": "AIME II",
+      "year": 2014,
+      "number": 1,
+      "topic": [
+        "Rates/Algebra"
+      ],
+      "subject": "Rates/Algebra",
+      "question": "Abe paints room in 15h, Bea 50% faster, Coe twice Abe. Abe works 1.5h, then Abe+Bea to half, then all three to finish. How many minutes total?",
+      "answer": 334,
+      "type": "num"
+    },
+    {
+      "contest": "AIME I",
+      "year": 2017,
+      "number": 2,
+      "topic": [
+        "Number Theory"
+      ],
+      "subject": "Number Theory",
+      "question": "Problem statement unavailable; refer to AoPS link.",
+      "answer": null,
+      "type": "num"
+    },
+    {
+      "contest": "AIME I",
+      "year": 2015,
+      "number": 7,
+      "topic": [
+        "Probability"
+      ],
+      "subject": "Probability",
+      "question": "Square ABCD with midpoint E on AD. Squares FGHJ on CE and KLMN on GH constructed. Area of FGHJ is 99. Find area of KLMN.",
+      "answer": null,
+      "type": "num"
+    }
+  ]
+}
