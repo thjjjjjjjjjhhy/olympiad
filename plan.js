@@ -1,13 +1,49 @@
 function formatTask(task) {
   if (typeof task === 'string') return task;
-  const parts = [];
-  if (task.type) parts.push(task.type);
-  if (task.resource) parts.push(task.resource);
-  if (task.topic) parts.push(`(${task.topic})`);
-  if (task.pages) parts.push(`pp. ${task.pages}`);
-  if (Array.isArray(task.problems)) parts.push(`problems ${task.problems.join(', ')}`);
-  if (typeof task.timed === 'boolean') parts.push(task.timed ? '[timed]' : '[untimed]');
-  return parts.join(' ');
+
+  switch (task.type) {
+    case 'contest_set': {
+      if (task.resource) {
+        const match = task.resource.match(/#(\d+)(?:-(\d+))?/);
+        if (match) {
+          const start = match[1];
+          const end = match[2];
+          if (end) return `Do the past contest problems ${start} through ${end}`;
+          return `Do past contest problem ${start}`;
+        }
+      }
+      return 'Do a set of past contest problems';
+    }
+    case 'reading': {
+      let text = `Read ${task.resource || ''}`.trim();
+      if (task.pages) text += ` pages ${task.pages}`;
+      if (Array.isArray(task.problems) && task.problems.length) {
+        const problems = task.problems;
+        const isRange =
+          problems.length > 1 &&
+          problems.every((p, i) => i === 0 || problems[i] - problems[i - 1] === 1);
+        if (isRange) {
+          text += ` and do problems ${problems[0]}-${
+            problems[problems.length - 1]
+          }`;
+        } else {
+          text += ` and do problems ${problems.join(', ')}`;
+        }
+      }
+      return text;
+    }
+    case 'review':
+    case 'rest':
+      return task.resource || task.type;
+    default: {
+      const parts = [];
+      if (task.type) parts.push(task.type);
+      if (task.resource) parts.push(task.resource);
+      if (task.pages) parts.push(`pages ${task.pages}`);
+      if (Array.isArray(task.problems)) parts.push(`problems ${task.problems.join(', ')}`);
+      return parts.join(' ');
+    }
+  }
 }
 
 function loadStudyPlan(containerId, perPage = 7) {
