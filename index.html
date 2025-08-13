@@ -24,7 +24,7 @@
       <h2>Find any contest problem instantly</h2>
       <p class="subtitle">Your AI-powered companion for Olympiad success.</p>
       <form class="lookup-form" onsubmit="handleSearch(event)">
-        <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14" required>
+        <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14 or AIME I 2022" required>
         <button type="submit">Search</button>
       </form>
     </div>
@@ -114,34 +114,61 @@
       }
 
       let url = null;
-      if (!year || !problem || !contest) {
-        alert('Please include a year, contest, and problem number');
+      if (!year || !contest) {
+        alert('Please include a year and contest');
         return;
       }
 
-      if (contest === 'AMC') {
-        if (!level) {
-          alert('Please specify AMC level (8, 10, or 12)');
-          return;
-        }
-        if (parseInt(year) >= 2002) {
-          if (!variant) {
-            alert('Please specify A or B');
+      if (problem) {
+        if (contest === 'AMC') {
+          if (!level) {
+            alert('Please specify AMC level (8, 10, or 12)');
             return;
           }
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
-        } else {
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
+          if (parseInt(year) >= 2002) {
+            if (!variant) {
+              alert('Please specify A or B');
+              return;
+            }
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
+          } else {
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
+          }
+        } else if (contest === 'AIME') {
+          if (parseInt(year) >= 2000) {
+            variant = variant || 'I';
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${problem}`;
+          } else {
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems/Problem_${problem}`;
+          }
+        } else if (contest === 'USAMO') {
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${problem}`;
         }
-      } else if (contest === 'AIME') {
-        if (parseInt(year) >= 2000) {
-          variant = variant || 'I';
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${problem}`;
-        } else {
-          url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems/Problem_${problem}`;
+      } else {
+        if (contest === 'AMC') {
+          if (!level) {
+            alert('Please specify AMC level (8, 10, or 12)');
+            return;
+          }
+          if (parseInt(year) >= 2002) {
+            if (!variant) {
+              alert('Please specify A or B');
+              return;
+            }
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems`;
+          } else {
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems`;
+          }
+        } else if (contest === 'AIME') {
+          if (parseInt(year) >= 2000) {
+            variant = variant || 'I';
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems`;
+          } else {
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems`;
+          }
+        } else if (contest === 'USAMO') {
+          url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems`;
         }
-      } else if (contest === 'USAMO') {
-        url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${problem}`;
       }
 
       if (url) {
