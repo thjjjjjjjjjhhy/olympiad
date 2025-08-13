@@ -222,9 +222,64 @@ if(typeof document!=='undefined'){
     }
     [prefExam,prefDate,prefMinutes].forEach(el=>el.addEventListener('change',savePrefs));
 
-    diagForm.querySelectorAll('.question').forEach(q=>{
-      q.addEventListener('focusin',()=>{if(!q.dataset.start) q.dataset.start=Date.now();});
-    });
+    let questionBank=null;
+    async function loadQuestions(){
+      questionBank=await fetch('assets/diagnostic_bank.json').then(r=>r.json());
+      renderQuestions();
+    }
+    function renderQuestions(){
+      if(!questionBank) return;
+      const container=document.getElementById('questions-container');
+      let questions=[];
+      const exam=prefExam.value;
+      if(exam==='AIME'){
+        questions=questionBank.AMC.slice(0,10).concat(questionBank.AIME.slice(0,5));
+      }else if(exam==='USAMO'){
+        questions=questionBank.AIME.slice(0,15);
+      }else{
+        questions=questionBank.AMC.slice(0,15);
+      }
+      container.innerHTML='';
+      const sections={};
+      questions.forEach(q=>{(sections[q.section]=sections[q.section]||[]).push(q);});
+      let idx=1;
+      Object.entries(sections).forEach(([section,qs])=>{
+        const sec=document.createElement('section');
+        const h2=document.createElement('h2');
+        h2.textContent=section;
+        sec.appendChild(h2);
+        qs.forEach(q=>{
+          const div=document.createElement('div');
+          div.className='question';
+          div.dataset.skill=q.skill;
+          div.dataset.difficulty=q.difficulty;
+          const fieldset=document.createElement('fieldset');
+          const legend=document.createElement('legend');
+          legend.textContent=`${idx}. ${q.problem}`;
+          fieldset.appendChild(legend);
+          q.choices.forEach((choice,i)=>{
+            const label=document.createElement('label');
+            const input=document.createElement('input');
+            input.type='radio';
+            input.name=`q${idx}`;
+            input.value=choice;
+            if(i===q.answer) input.dataset.correct='1';
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(choice));
+            fieldset.appendChild(label);
+          });
+          div.appendChild(fieldset);
+          sec.appendChild(div);
+          idx++;
+        });
+        container.appendChild(sec);
+      });
+      container.querySelectorAll('.question').forEach(q=>{
+        q.addEventListener('focusin',()=>{if(!q.dataset.start) q.dataset.start=Date.now();});
+      });
+    }
+    prefExam.addEventListener('change',renderQuestions);
+    loadQuestions();
 
     document.getElementById('finish-diagnostic').addEventListener('click',async()=>{
       const responses=[];
