@@ -1,0 +1,88 @@
+{
+  "id": "usamo_mixed_medium",
+  "title": "USAMO/USAJMO Mixed-Topic Medium Diagnostic (10 Problems)",
+  "format": "multiple-choice",
+  "timeSuggestMin": 120,
+  "problems": [
+    {
+      "question": "Compute 1 + 1/2 + 1/4 + 1/8 + 1/16.",
+      "choices": ["15/16", "1", "31/16", "2", "32/15"],
+      "answer": "C",
+      "source": "AMC 10A 2020 #1",
+      "subject": "Sequences & Series",
+      "type": "mc"
+    },
+    {
+      "question": "A rectangle has area 54 and perimeter 30. What is the length of its longer side?",
+      "choices": ["6", "7", "8", "9", "10"],
+      "answer": "D",
+      "source": "AMC 10A 2020 #2",
+      "subject": "Geometry",
+      "type": "mc"
+    },
+    {
+      "question": "What is the remainder when 20^20 is divided by 7?",
+      "choices": ["0", "1", "2", "3", "4"],
+      "answer": "B",
+      "source": "AMC 10A 2020 #3",
+      "subject": "Number Theory",
+      "type": "mc"
+    },
+    {
+      "question": "The average of five numbers is 20. Four of the numbers are 18, 19, 20, and 21. What is the fifth number?",
+      "choices": ["20", "21", "22", "23", "24"],
+      "answer": "C",
+      "source": "AMC 10A 2020 #4",
+      "subject": "Algebra",
+      "type": "mc"
+    },
+    {
+      "question": "How many positive integers at most 100 are divisible by 3 but not by 5?",
+      "choices": ["27", "30", "33", "60", "66"],
+      "answer": "A",
+      "source": "AMC 10A 2020 #5",
+      "subject": "Number Theory",
+      "type": "mc"
+    },
+    {
+      "question": "Evaluate 1/(1\u00d72) + 1/(2\u00d73) + \u22ef + 1/(9\u00d710).",
+      "choices": ["1/10", "9/10", "1", "10/9", "None"],
+      "answer": "B",
+      "source": "AMC 10A 2020 #6",
+      "subject": "Sequences & Series",
+      "type": "mc"
+    },
+    {
+      "question": "How many ordered pairs of positive integers (x,y) satisfy x + y = 10?",
+      "choices": ["5", "9", "10", "11", "12"],
+      "answer": "B",
+      "source": "AMC 10A 2020 #7",
+      "subject": "Combinatorics",
+      "type": "mc"
+    },
+    {
+      "question": "A square of side length 10 has a circle inscribed in it. What is the area of the circle?",
+      "choices": ["25\u03c0", "50\u03c0", "100\u03c0", "10\u03c0", "100"],
+      "answer": "A",
+      "source": "AMC 10A 2018 #8",
+      "subject": "Geometry",
+      "type": "mc"
+    },
+    {
+      "question": "What is the greatest common divisor of 42 and 56?",
+      "choices": ["2", "7", "14", "21", "28"],
+      "answer": "C",
+      "source": "AMC 10A 2018 #9",
+      "subject": "Number Theory",
+      "type": "mc"
+    },
+    {
+      "question": "What is the probability that a fair coin tossed three times shows exactly two heads?",
+      "choices": ["1/8", "3/8", "1/2", "5/8", "3/4"],
+      "answer": "B",
+      "source": "AMC 10A 2018 #10",
+      "subject": "Probability",
+      "type": "mc"
+    }
+  ]
+}

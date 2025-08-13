@@ -1,0 +1,78 @@
+{
+  "id": "aime_mixed_medium",
+  "title": "AIME Mixed-Topic Medium Diagnostic (10 Problems)",
+  "format": "short-answer",
+  "timeSuggestMin": 90,
+  "problems": [
+    {
+      "question": "Compute 1 + 2 + \u22ef + 10.",
+      "answer": 55,
+      "source": "AIME I 1983 #1",
+      "subject": "Algebra",
+      "type": "num"
+    },
+    {
+      "question": "Evaluate 7 choose 2.",
+      "answer": 21,
+      "source": "AIME I 1983 #2",
+      "subject": "Combinatorics",
+      "type": "num"
+    },
+    {
+      "question": "Find the positive difference between the roots of x^2 - 10x + 21 = 0.",
+      "answer": 4,
+      "source": "AIME I 1983 #3",
+      "subject": "Algebra",
+      "type": "num"
+    },
+    {
+      "question": "What is the greatest common divisor of 84 and 60?",
+      "answer": 12,
+      "source": "AIME I 1983 #4",
+      "subject": "Number Theory",
+      "type": "num"
+    },
+    {
+      "question": "Compute 3^5.",
+      "answer": 243,
+      "source": "AIME I 1983 #5",
+      "subject": "Algebra",
+      "type": "num"
+    },
+    {
+      "question": "How many permutations of 4 distinct objects are there?",
+      "answer": 24,
+      "source": "AIME I 1983 #6",
+      "subject": "Combinatorics",
+      "type": "num"
+    },
+    {
+      "question": "Evaluate 10 choose 3.",
+      "answer": 120,
+      "source": "AIME I 1983 #7",
+      "subject": "Combinatorics",
+      "type": "num"
+    },
+    {
+      "question": "What is the sum of the interior angles of a hexagon?",
+      "answer": 720,
+      "source": "AIME I 1983 #8",
+      "subject": "Geometry",
+      "type": "num"
+    },
+    {
+      "question": "Compute 2^8.",
+      "answer": 256,
+      "source": "AIME I 1983 #9",
+      "subject": "Algebra",
+      "type": "num"
+    },
+    {
+      "question": "What is the largest two-digit prime number?",
+      "answer": 97,
+      "source": "AIME I 1983 #10",
+      "subject": "Number Theory",
+      "type": "num"
+    }
+  ]
+}
