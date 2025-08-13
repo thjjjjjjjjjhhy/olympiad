@@ -20,7 +20,33 @@
   </header>
   <main class="container">
     <h2>👩‍🏫 Need a Tutor?</h2>
-    <p>Connect with experienced mentors for personalized guidance. This page is under construction.</p>
+    <p>Connect with experienced mentors for personalized guidance. Fill out the form below and we'll be in touch.</p>
+    <form class="tutor-form">
+      <div class="form-group">
+        <label for="tutor-name">Name</label>
+        <input type="text" id="tutor-name" required>
+      </div>
+      <div class="form-group">
+        <label for="tutor-email">Email</label>
+        <input type="email" id="tutor-email" required>
+      </div>
+      <div class="form-group">
+        <label for="tutor-level">Contest Level</label>
+        <select id="tutor-level" required>
+          <option value="">Select level</option>
+          <option>AMC 8</option>
+          <option>AMC 10</option>
+          <option>AMC 12</option>
+          <option>AIME</option>
+          <option>USAMO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="tutor-message">Message</label>
+        <textarea id="tutor-message" rows="4"></textarea>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
   </main>
   <footer>
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
