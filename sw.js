@@ -1,9 +1,9 @@
-const CACHE='olympiad-v2';
+const CACHE='olympiad-v3';
 const ASSETS=[
   './',
   './index.html','./search.html','./diagnostic.html','./planning.html','./books.html','./tutor.html','./404.html',
   './assets/site.css','./assets/site.js','./assets/books.json','./assets/search-index.json',
-  './assets/skills_graph.json','./assets/practice_bank.json','./assets/aops_map.json','./assets/policy.json',
+  './assets/skills_graph.json','./assets/practice_bank.json','./assets/aops_map.json','./assets/policy.json','./assets/diagnostic_bank.json',
   './manifest.webmanifest','./favicon.svg'
 ];
 
