@@ -320,17 +320,14 @@ if(typeof document!=='undefined'){
             fetch('assets/policy.json').then(r=>r.json())
           ]);
           const plan=await window.OlympiadEngine.planFromDiagnostic(results,{skills,bank,map,policy});
-          try{
-            localStorage.setItem('studyPlanJson',JSON.stringify(plan.plan));
-            localStorage.setItem('studyPlanMd',plan.markdown);
-          }catch(e){}
+
           location.href='study-plan.html';
         }catch(err){
           console.error(err);
           alert('Could not generate plan.');
         }
       }else{
-        alert('Engine not loaded. Please try again later.');
+
       }
     });
   }
