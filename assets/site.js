@@ -50,51 +50,63 @@ if(typeof document!=='undefined'){
     function problemRedirect(q){
       const ql=q.toLowerCase();
       const tokens=(ql.match(/\w+/g)||[]);
-      let year,problem,exam='',grade;
+      let year,problem,exam,grade,variant;
 
-      const ym=ql.match(/(19|20)\d{2}/);
-      if(ym) year=ym[0];
+      for(const t of tokens){
+        if(/^(19|20)\d{2}$/.test(t)) year=t;
+      }
 
-      if(/aime/.test(ql)){
-        const m=ql.match(/aime\s*(i{1,3}|1|2)?/);
-        if(m){
-          const v=m[1];
-          if(!v) exam='AIME';
-          else if(v==='i'||v==='1') exam='AIME_I';
-          else if(v==='ii'||v==='2') exam='AIME_II';
-          else exam=`AIME_${v.toUpperCase()}`;
-        }else exam='AIME';
-      }else if(/amc/.test(ql)){
-        const m=ql.match(/amc\s*(8|10|12)\s*([ab])?/);
-        if(m){
+      if(tokens.some(t=>t.includes('amc'))){
+        let combo=tokens.find(t=>/^amc(8|10|12)([ab])?$/i.test(t));
+        if(combo){
+          const m=combo.match(/^amc(8|10|12)([ab])?$/i);
           grade=m[1];
-          const letter=m[2]?m[2].toUpperCase():'';
-          exam=`AMC_${grade}${letter}`;
+          variant=m[2];
         }else{
-          const combo=ql.match(/amc(8|10|12)([ab])?/);
+          combo=tokens.find(t=>/^(8|10|12)([ab])?$/i.test(t));
           if(combo){
-            grade=combo[1];
-            const letter=combo[2]?combo[2].toUpperCase():'';
-            exam=`AMC_${grade}${letter}`;
+            const m=combo.match(/^(8|10|12)([ab])?$/i);
+            grade=m[1];
+            variant=m[2];
           }
         }
-      }else if(/usamo|usmo/.test(ql)){
+        if(!grade){
+          const g=tokens.find(t=>/^(8|10|12)$/i.test(t));
+          if(g) grade=g;
+        }
+        if(!variant){
+          const v=tokens.find(t=>/^[ab]$/i.test(t));
+          if(v) variant=v;
+        }
+        if(grade) exam=`AMC_${grade}${variant?variant.toUpperCase():''}`;
+      }else if(tokens.includes('aime')){
+        exam='AIME';
+        const v=tokens.find(t=>/^(i{1,3}|1|2)$/i.test(t));
+        if(v){
+          const vv=v.toLowerCase();
+          if(vv==='1'||vv==='i') exam='AIME_I';
+          else if(vv==='2'||vv==='ii') exam='AIME_II';
+          else exam=`AIME_${vv.toUpperCase()}`;
+          variant=vv;
+        }
+      }else if(tokens.some(t=>t==='usamo'||t==='usmo')){
         exam='USAMO';
-      }else if(/usajmo|usa\s*jmo/.test(ql)){
+      }else if(tokens.some(t=>t==='usajmo'||(t==='usa'&&tokens.includes('jmo')))){
         exam='USAJMO';
       }
 
-      const pm=ql.match(/problem\s*(\d{1,2})/);
-      if(pm) problem=pm[1];
       if(!problem){
-        const nums=ql.match(/\b\d{1,2}\b/g)||[];
-        for(const n of nums){
-          if(n!==year&&n!==grade){problem=n;break;}
+        for(const t of tokens){
+          if(/^\d{1,2}$/.test(t)&&t!==year&&t!==grade&&t!==variant){problem=t;break;}
         }
       }
 
       if(exam&&year&&problem){
         location.href=`https://artofproblemsolving.com/wiki/index.php/${year}_${exam}_Problems/Problem_${Number(problem)}`;
+        return true;
+      }
+      if(exam&&year){
+        location.href=`https://artofproblemsolving.com/wiki/index.php/${year}_${exam}_Problems`;
         return true;
       }
       return false;
