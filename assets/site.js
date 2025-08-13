@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded',()=>{
+if(typeof document!=='undefined'){
+  document.addEventListener('DOMContentLoaded',()=>{
   const root=document.documentElement;
   const themeBtn=document.getElementById('theme-toggle');
   const storedTheme=localStorage.getItem('theme');
@@ -46,9 +47,66 @@ document.addEventListener('DOMContentLoaded',()=>{
   // search form submit
   const searchForm=document.getElementById('search-form');
   if(searchForm){
+    function problemRedirect(q){
+      const ql=q.toLowerCase();
+      const tokens=(ql.match(/\w+/g)||[]);
+      let year,problem,exam='',grade;
+
+      const ym=ql.match(/(19|20)\d{2}/);
+      if(ym) year=ym[0];
+
+      if(/aime/.test(ql)){
+        const m=ql.match(/aime\s*(i{1,3}|1|2)?/);
+        if(m){
+          const v=m[1];
+          if(!v) exam='AIME';
+          else if(v==='i'||v==='1') exam='AIME_I';
+          else if(v==='ii'||v==='2') exam='AIME_II';
+          else exam=`AIME_${v.toUpperCase()}`;
+        }else exam='AIME';
+      }else if(/amc/.test(ql)){
+        const m=ql.match(/amc\s*(8|10|12)\s*([ab])?/);
+        if(m){
+          grade=m[1];
+          const letter=m[2]?m[2].toUpperCase():'';
+          exam=`AMC_${grade}${letter}`;
+        }else{
+          const combo=ql.match(/amc(8|10|12)([ab])?/);
+          if(combo){
+            grade=combo[1];
+            const letter=combo[2]?combo[2].toUpperCase():'';
+            exam=`AMC_${grade}${letter}`;
+          }
+        }
+      }else if(/usamo|usmo/.test(ql)){
+        exam='USAMO';
+      }else if(/usajmo|usa\s*jmo/.test(ql)){
+        exam='USAJMO';
+      }
+
+      const pm=ql.match(/problem\s*(\d{1,2})/);
+      if(pm) problem=pm[1];
+      if(!problem){
+        const nums=ql.match(/\b\d{1,2}\b/g)||[];
+        for(const n of nums){
+          if(n!==year&&n!==grade){problem=n;break;}
+        }
+      }
+
+      if(exam&&year&&problem){
+        location.href=`https://artofproblemsolving.com/wiki/index.php/${year}_${exam}_Problems/Problem_${Number(problem)}`;
+        return true;
+      }
+      return false;
+    }
+
     searchForm.addEventListener('submit',e=>{
       const q=searchForm.querySelector('input[name="q"]').value.trim();
       if(!q){e.preventDefault();return;}
+      if(problemRedirect(q)){
+        e.preventDefault();
+        return;
+      }
       if(q.toLowerCase().startsWith('aops:')){
         e.preventDefault();
         const query=encodeURIComponent(q.slice(5).trim());
@@ -234,4 +292,5 @@ document.addEventListener('DOMContentLoaded',()=>{
     navigator.serviceWorker.register('sw.js');
   }
 });
+}
 
