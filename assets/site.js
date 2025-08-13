@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded',()=>{
+if(typeof document!=='undefined'){
+  document.addEventListener('DOMContentLoaded',()=>{
   const root=document.documentElement;
   const themeBtn=document.getElementById('theme-toggle');
   const storedTheme=localStorage.getItem('theme');
@@ -300,4 +301,5 @@ document.addEventListener('DOMContentLoaded',()=>{
     navigator.serviceWorker.register('sw.js');
   }
 });
+}
 
