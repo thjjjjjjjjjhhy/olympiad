@@ -1,0 +1,128 @@
+{
+  "id": "usamo_mixed_medium",
+  "title": "USAMO/USAJMO Mixed-Topic Medium Diagnostic (10 Problems)",
+  "format": "multiple-choice",
+  "timeSuggestMin": 60,
+  "problems": [
+    {
+      "contest": "AMC 12A",
+      "year": 2018,
+      "number": 7,
+      "topic": ["Number Theory"],
+      "subject": "Number Theory",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_7",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_7",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>For how many (not necessarily positive) integer values of  is the value of  an integer?\n</p><img alt=\"$n$\" class=\"latex\" height=\"8\" src=\"https://latex.artofproblemsolving.com/1/7/4/174fadd07fd54c9afe288e96558c92e0c1da733a.png\" width=\"10\"/><img alt=\"$4000\\cdot \\left(\\tfrac{2}{5}\\right)^n$\" class=\"latex\" height=\"22\" src=\"https://latex.artofproblemsolving.com/7/7/2/7728ccd643a9ca4505b5fa61fdcc32eec45aa172.png\" style=\"vertical-align: -6px\" width=\"84\"/><p>\n</p><img alt=\"$\\textbf{(A) }3 \\qquad \\textbf{(B) }4 \\qquad \\textbf{(C) }6 \\qquad \\textbf{(D) }8 \\qquad \\textbf{(E) }9 \\qquad$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/6/6/f/66f186ed67e815eba219f18765a25e974c831706.png\" style=\"vertical-align: -4px\" width=\"353\"/></div></div>",
+      "answer": "E",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10A",
+      "year": 2019,
+      "number": 16,
+      "topic": ["Algebra"],
+      "subject": "Algebra",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_16",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_16",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>The figure below shows  circles of radius  within a larger circle. All the intersections occur at points of tangency. What is the area of the region, shaded in the figure, inside the larger circle but outside all the circles of radius \n</p><img alt=\"$13$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/0/3/0/030e19e4e2f1c074127cb50581e8496470c5419f.png\" style=\"vertical-align: 0px\" width=\"17\"/><img alt=\"$1$\" class=\"latex\" height=\"14\" src=\"https://latex.artofproblemsolving.com/d/c/e/dce34f4dfb2406144304ad0d6106c5382ddd1446.png\" style=\"vertical-align: -1px\" width=\"11\"/><img alt=\"$1 ?$\" class=\"latex\" height=\"14\" src=\"https://latex.artofproblemsolving.com/8/4/0/840ada191969e6fa3a7d80cd83ed73e46ea56082.png\" style=\"vertical-align: -1px\" width=\"20\"/><p>\n</p><img alt=\"[asy]unitsize(20);filldraw(circle((0,0),2*sqrt(3)+1),rgb(0.5,0.5,0.5));filldraw(circle((-2,0),1),white);filldraw(circle((0,0),1),white);filldraw(circle((2,0),1),white);filldraw(circle((1,sqrt(3)),1),white);filldraw(circle((3,sqrt(3)),1),white);filldraw(circle((-1,sqrt(3)),1),white);filldraw(circle((-3,sqrt(3)),1),white);filldraw(circle((1,-1*sqrt(3)),1),white);filldraw(circle((3,-1*sqrt(3)),1),white);filldraw(circle((-1,-1*sqrt(3)),1),white);filldraw(circle((-3,-1*sqrt(3)),1),white);filldraw(circle((0,2*sqrt(3)),1),white);filldraw(circle((0,-2*sqrt(3)),1),white);[/asy]\" class=\"latexcenter\" height=\"302\" src=\"https://latex.artofproblemsolving.com/f/c/4/fc485e1337895925d85375cce1a9d3908ca8b7e3.png\" width=\"302\"/><p>\n</p><img alt=\"$\\textbf{(A) } 4 \\pi \\sqrt{3} \\qquad\\textbf{(B) } 7 \\pi \\qquad\\textbf{(C) } \\pi\\left(3\\sqrt{3} +2\\right) \\qquad\\textbf{(D) } 10 \\pi \\left(\\sqrt{3} - 1\\right) \\qquad\\textbf{(E) } \\pi\\left(\\sqrt{3} + 6\\right)$\" class=\"latex\" height=\"32\" src=\"https://latex.artofproblemsolving.com/c/8/a/c8af64604ae67be27e0fa6e8131b5e1c1508d4d3.png\" style=\"vertical-align: -11px\" width=\"675\"/></div></div>",
+      "answer": "A",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10B",
+      "year": 2017,
+      "number": 18,
+      "topic": ["Geometry"],
+      "subject": "Geometry",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AMC_10B_Problems/Problem_18",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2017_AMC_10B_Problems/Problem_18",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>In the figure below,  of the  disks are to be painted blue,  are to be painted red, and  is to be painted green. Two paintings that can be obtained from one another by a rotation or a reflection of the entire figure are considered the same. How many different paintings are possible?\n</p><img alt=\"$3$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/7/c/d/7cde695f2e4542fd01f860a89189f47a27143b66.png\" width=\"8\"/><img alt=\"$6$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/6/0/1/601a7806cbfad68196c43a4665871f8c3186802e.png\" width=\"8\"/><img alt=\"$2$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/4/1/c/41c544263a265ff15498ee45f7392c5f86c6d151.png\" width=\"8\"/><img alt=\"$1$\" class=\"latex\" height=\"14\" src=\"https://latex.artofproblemsolving.com/d/c/e/dce34f4dfb2406144304ad0d6106c5382ddd1446.png\" style=\"vertical-align: -1px\" width=\"11\"/><p>\n</p><img alt=\"[asy] size(110); pair A, B, C, D, E, F; A = (0,0); B = (1,0); C = (2,0); D = rotate(60, A)*B; E = B + D; F = rotate(60, A)*C; draw(Circle(A, 0.5)); draw(Circle(B, 0.5)); draw(Circle(C, 0.5)); draw(Circle(D, 0.5)); draw(Circle(E, 0.5)); draw(Circle(F, 0.5)); [/asy]\" class=\"latexcenter\" height=\"168\" src=\"https://latex.artofproblemsolving.com/8/1/8/818c703b705b0707a63dee8af6f4b5c1d50be4a2.png\" width=\"185\"/><p>\n</p><img alt=\"$\\textbf{(A)}\\ 6\\qquad\\textbf{(B)}\\ 8\\qquad\\textbf{(C)}\\ 9\\qquad\\textbf{(D)}\\ 12\\qquad\\textbf{(E)}\\ 15$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/1/d/9/1d982467f4ad6b06f9100b3de3025535fffc5927.png\" style=\"vertical-align: -4px\" width=\"366\"/></div></div>",
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 12B",
+      "year": 2007,
+      "number": 13,
+      "topic": ["3D Geometry"],
+      "subject": "3D Geometry",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2007_AMC_12B_Problems/Problem_13",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2007_AMC_12B_Problems/Problem_13",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>A traffic light runs repeatedly through the following cycle: green for  seconds, then yellow for  seconds, and then red for  seconds. Leah picks a random three-second time interval to watch the light. What is the probability that the color changes while she is watching?\n</p><img alt=\"$30$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/6/5/1/651ba418a810d971dbc8a326d49a71fe1541fae0.png\" width=\"17\"/><img alt=\"$3$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/7/c/d/7cde695f2e4542fd01f860a89189f47a27143b66.png\" width=\"8\"/><img alt=\"$30$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/6/5/1/651ba418a810d971dbc8a326d49a71fe1541fae0.png\" width=\"17\"/><p>\n</p><img alt=\"$\\mathrm{(A)}\\ \\frac{1}{63} \\qquad \\mathrm{(B)}\\ \\frac{1}{21} \\qquad \\mathrm{(C)}\\ \\frac{1}{10} \\qquad \\mathrm{(D)}\\ \\frac{1}{7} \\qquad \\mathrm{(E)}\\ \\frac{1}{3}$\" class=\"latex\" height=\"37\" src=\"https://latex.artofproblemsolving.com/c/b/9/cb936f6a90994c11f4b4c8e396dafbd5f1d22d6c.png\" style=\"vertical-align: -13px\" width=\"388\"/></div></div>",
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10A",
+      "year": 2019,
+      "number": 10,
+      "topic": ["Combinatorics"],
+      "subject": "Combinatorics",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_10",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_10",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>A rectangular floor that is  feet wide and  feet long is tiled with  one-foot square tiles. A bug walks from one corner to the opposite corner in a straight line. Including the first and the last tile, how many tiles does the bug visit?\n</p><img alt=\"$10$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/f/c/6/fc606f7f1e530731ab4f1cc364c01dc64a4455ee.png\" style=\"vertical-align: 0px\" width=\"17\"/><img alt=\"$17$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/b/7/6/b7616a230c77f0d9a577e5bca01aa06f1c35c457.png\" style=\"vertical-align: 0px\" width=\"18\"/><img alt=\"$170$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/8/0/6/8066ce3115c8a4f144f69b4cffd01d33c402419b.png\" style=\"vertical-align: 0px\" width=\"26\"/><p>\n</p><img alt=\"$\\textbf{(A) } 17 \\qquad\\textbf{(B) } 25 \\qquad\\textbf{(C) } 26 \\qquad\\textbf{(D) } 27 \\qquad\\textbf{(E) } 28$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/5/f/c/5fc9414598bfed7a80e804f8a3dc7cbd7effe95d.png\" style=\"vertical-align: -4px\" width=\"398\"/></div></div>",
+      "answer": "C",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 12A",
+      "year": 2015,
+      "number": 12,
+      "topic": ["Probability"],
+      "subject": "Probability",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AMC_12A_Problems/Problem_12",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2015_AMC_12A_Problems/Problem_12",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>The parabolas  and  intersect the coordinate axes in exactly four points, and these four points are the vertices of a kite of area . What is ?\n</p><img alt=\"$y=ax^2 - 2$\" class=\"latex\" height=\"18\" src=\"https://latex.artofproblemsolving.com/0/d/3/0d378a20f6ff5fdb410d3cc766e8b29fd870e1fa.png\" style=\"vertical-align: -3px\" width=\"92\"/><img alt=\"$y=4 - bx^2$\" class=\"latex\" height=\"20\" src=\"https://latex.artofproblemsolving.com/a/8/b/a8b1c322d02a45124028f44b1dcd92020ca740d2.png\" style=\"vertical-align: -4px\" width=\"93\"/><img alt=\"$12$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/e/d/f/edf074831eb5bc9e61d6d6e09f525a86e3068f6a.png\" style=\"vertical-align: 0px\" width=\"17\"/><img alt=\"$a+b$\" class=\"latex\" height=\"16\" src=\"https://latex.artofproblemsolving.com/a/d/d/add2609af1bb7632cc22b68fd49fdd94de06b327.png\" style=\"vertical-align: -2px\" width=\"41\"/><p>\n</p><img alt=\"$\\textbf{(A)}\\ 1\\qquad\\textbf{(B)}\\ 1.5\\qquad\\textbf{(C)}\\ 2\\qquad\\textbf{(D)}\\ 2.5\\qquad\\textbf{(E)}\\ 3$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/5/9/d/59d20d448d04681481e2e779ccae06af77a28316.png\" style=\"vertical-align: -4px\" width=\"377\"/></div></div>",
+      "answer": "B",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 12B",
+      "year": 2004,
+      "number": 10,
+      "topic": ["Inequalities"],
+      "subject": "Inequalities",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2004_AMC_12B_Problems/Problem_10",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2004_AMC_12B_Problems/Problem_10",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>An annulus is the region between two concentric circles. The concentric circles in the figure have radii  and , with . Let  be a radius of the larger circle, let  be tangent to the smaller circle at , and let  be the radius of the larger circle that contains . Let , , and . What is the area of the annulus? \n</p><img alt=\"$b$\" class=\"latex\" height=\"14\" src=\"https://latex.artofproblemsolving.com/8/1/3/8136a7ef6a03334a7246df9097e5bcc31ba33fd2.png\" style=\"vertical-align: -1px\" width=\"10\"/><img alt=\"$c$\" class=\"latex\" height=\"8\" src=\"https://latex.artofproblemsolving.com/3/3/7/3372c1cb6d68cf97c2d231acc0b47b95a9ed04cc.png\" width=\"8\"/><img alt=\"$b>c$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/d/b/d/dbd3932fd8be042b3b42f1e4bd56fbd1902b1c3f.png\" style=\"vertical-align: 0px\" width=\"40\"/><img alt=\"$OX$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/4/a/9/4a903f7c677cbaadb6e72741b95730648ab1d442.png\" width=\"30\"/><img alt=\"$XZ$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/3/b/b/3bb2419be49ff83cbed7db9a2f366858ccabf2e5.png\" width=\"30\"/><img alt=\"$Z$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/3/e/a/3ead47fb9fb4a4c273feee398f72ff2a09702b84.png\" width=\"13\"/><img alt=\"$OY$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/8/a/f/8afe773cd5709ee6b1f9f84680829802825cfab9.png\" width=\"28\"/><img alt=\"$Z$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/3/e/a/3ead47fb9fb4a4c273feee398f72ff2a09702b84.png\" width=\"13\"/><img alt=\"$a=XZ$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/8/6/6/866d92a48eb831ff5c70b73e13313adfdbeb7ce2.png\" width=\"64\"/><img alt=\"$d=YZ$\" class=\"latex\" height=\"12\" src=\"https://latex.artofproblemsolving.com/8/b/a/8ba9c97c3ba09034c27152dc55f71b0534b17e36.png\" width=\"62\"/><img alt=\"$e=XY$\" class=\"latex\" height=\"14\" src=\"https://latex.artofproblemsolving.com/a/7/a/a7ae3f367a4080971e73933e8903ddd7e2ea5aee.png\" style=\"vertical-align: -1px\" width=\"66\"/><p>\n</p><img alt='[asy] unitsize(1.5cm); defaultpen(0.8); real r1=1.5, r2=2.5; pair O=(0,0); path inner=Circle(O,r1), outer=Circle(O,r2); pair Y=(0,r2), Z=(0,r1), X=intersectionpoint( Z--(Z+(10,0)), outer ); filldraw(outer,lightgray,black); filldraw(inner,white,black); draw(X--O--Y); draw(Y--X--Z); label(\"$O$\",O,SW); label(\"$X$\",X,E); label(\"$Y$\",Y,N); label(\"$Z$\",Z,SW); label(\"$a$\",X--Z,N); label(\"$b$\",0.25*X,SE); label(\"$c$\",O--Z,E); label(\"$d$\",Y--Z,W); label(\"$e$\",Y*0.65 + X*0.35,SW); defaultpen(0.5); dot(O); dot(X); dot(Z); dot(Y); [/asy]' class=\"latexcenter\" height=\"378\" src=\"https://latex.artofproblemsolving.com/0/c/a/0ca2ea60f3f8c72bd6e0bb1dd3335aaf69a85ba9.png\" width=\"358\"/><p>\n</p><img alt=\"$\\mathrm{(A) \\ } \\pi a^2 \\qquad \\mathrm{(B) \\ } \\pi b^2 \\qquad \\mathrm{(C) \\ } \\pi c^2 \\qquad \\mathrm{(D) \\ } \\pi d^2 \\qquad \\mathrm{(E) \\ } \\pi e^2$\" class=\"latex\" height=\"19\" src=\"https://latex.artofproblemsolving.com/c/d/e/cdec9c388f68af76ed27a201f7be85c80df158ff.png\" style=\"vertical-align: -4px\" width=\"431\"/></div></div>",
+      "answer": "A",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10B",
+      "year": 2016,
+      "number": 17,
+      "topic": ["Analytic Geometry"],
+      "subject": "Analytic Geometry",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2016_AMC_10B_Problems/Problem_17",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2016_AMC_10B_Problems/Problem_17",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>All the numbers  are assigned to the six faces of a cube, one number to each face. For each of the eight vertices of the cube, a product of three numbers is computed, where the three numbers are the numbers assigned to the three faces that include that vertex. What is the greatest possible value of the sum of these eight products?\n</p><img alt=\"$2, 3, 4, 5, 6, 7$\" class=\"latex\" height=\"16\" src=\"https://latex.artofproblemsolving.com/3/8/0/380264eeecdaa2e001ecc6a81415cefc2aff6a31.png\" style=\"vertical-align: -3px\" width=\"95\"/><p>\n</p><img alt=\"$\\textbf{(A)}\\ 312 \\qquad \\textbf{(B)}\\ 343 \\qquad \\textbf{(C)}\\ 625 \\qquad \\textbf{(D)}\\ 729 \\qquad \\textbf{(E)}\\ 1680$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/5/6/e/56e0b40f41a69edf0717127cf181c173cd4d27d0.png\" style=\"vertical-align: -4px\" width=\"448\"/></div></div>",
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10B",
+      "year": 2012,
+      "number": 14,
+      "topic": ["Sequences"],
+      "subject": "Sequences",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2012_AMC_10B_Problems/Problem_14",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2012_AMC_10B_Problems/Problem_14",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>Two equilateral triangles are contained in square whose side length is . The bases of these triangles are the opposite side of the square, and their intersection is a rhombus. What is the area of the rhombus?\n</p><img alt=\"$2\\sqrt 3$\" class=\"latex\" height=\"18\" src=\"https://latex.artofproblemsolving.com/c/d/8/cd8259912929d3140ef16477ddfb545a4331623b.png\" style=\"vertical-align: -1px\" width=\"33\"/><p>\n</p><img alt=\"$\\text{(A) } \\frac{3}{2} \\qquad \\text{(B) } \\sqrt 3 \\qquad \\text{(C) } 2\\sqrt 2 -   1  \\qquad \\text{(D) } 8\\sqrt 3 - 12 \\qquad \\text{(E)}  \\frac{4\\sqrt 3}{3}$\" class=\"latex\" height=\"41\" src=\"https://latex.artofproblemsolving.com/3/9/a/39ac23b1e03bac20b278c15ad58c757275af6353.png\" style=\"vertical-align: -12px\" width=\"491\"/></div></div>",
+      "answer": "D",
+      "type": "mc"
+    },
+    {
+      "contest": "AMC 10A",
+      "year": 2013,
+      "number": 15,
+      "topic": ["Functional Equations"],
+      "subject": "Functional Equations",
+      "aops": "https://artofproblemsolving.com/wiki/index.php/2013_AMC_10A_Problems/Problem_15",
+      "source": "https://artofproblemsolving.com/wiki/index.php/2013_AMC_10A_Problems/Problem_15",
+      "html": "<div><p>Problem (excerpted from AoPS Wiki; math may appear as images):</p><div class=\"aops-problem\"><span class=\"mw-headline\" id=\"Problem\">Problem</span><p>Two sides of a triangle have lengths  and .  The length of the altitude to the third side is the average of the lengths of the altitudes to the two given sides.  How long is the third side?\n</p><img alt=\"$10$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/f/c/6/fc606f7f1e530731ab4f1cc364c01dc64a4455ee.png\" style=\"vertical-align: 0px\" width=\"17\"/><img alt=\"$15$\" class=\"latex\" height=\"13\" src=\"https://latex.artofproblemsolving.com/f/1/9/f1965fae079a9ba2c0726c307070c2355dfcb213.png\" style=\"vertical-align: 0px\" width=\"17\"/><p>\n\n</p><br/><img alt=\"$\\textbf{(A)}\\ 6 \\qquad\\textbf{(B)}\\ 8 \\qquad\\textbf{(C)}\\ 9 \\qquad\\textbf{(D)}\\ 12 \\qquad\\textbf{(E)}\\ 18$\" class=\"latex\" height=\"17\" src=\"https://latex.artofproblemsolving.com/6/2/3/623b19a8c844811c8da9e1d0f99787c836868c04.png\" style=\"vertical-align: -4px\" width=\"366\"/></div></div>",
+      "answer": "D",
+      "type": "mc"
+    }
+  ]
+}
