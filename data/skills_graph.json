@@ -2,5 +2,7 @@
   "algebra.lines": { "prereq": [], "weight": { "AMC10": 0.8, "AMC12": 0.9, "AIME": 0.6, "USAMO": 0.3 } },
   "algebra.quadratics": { "prereq": ["algebra.lines"], "weight": { "AMC10": 0.9, "AMC12": 1.0, "AIME": 1.1, "USAMO": 0.5 } },
   "nt.divisibility": { "prereq": [], "weight": { "AMC10": 0.7, "AMC12": 0.9, "AIME": 1.0, "USAMO": 0.6 } },
-  "nt.congruences": { "prereq": ["nt.divisibility"], "weight": { "AMC10": 0.6, "AMC12": 0.9, "AIME": 1.2, "USAMO": 0.8 } }
+  "nt.congruences": { "prereq": ["nt.divisibility"], "weight": { "AMC10": 0.6, "AMC12": 0.9, "AIME": 1.2, "USAMO": 0.8 } },
+  "geo.triangles": { "prereq": [], "weight": { "AMC10": 0.7, "AMC12": 0.8, "AIME": 1.0, "USAMO": 0.9 } },
+  "combo.counting": { "prereq": [], "weight": { "AMC10": 0.8, "AMC12": 0.8, "AIME": 1.1, "USAMO": 0.9 } }
 }

@@ -2,5 +2,7 @@
   { "skill": "algebra.quadratics", "exam": "AIME", "year": 2020, "number": 5, "est_minutes": 10, "difficulty": 1.0 },
   { "skill": "nt.congruences", "exam": "AIME", "year": 2021, "number": 3, "est_minutes": 12, "difficulty": 1.1 },
   { "skill": "algebra.lines", "exam": "AIME", "year": 2019, "number": 2, "est_minutes": 8, "difficulty": 0.9 },
-  { "skill": "nt.divisibility", "exam": "AIME", "year": 2018, "number": 4, "est_minutes": 9, "difficulty": 0.8 }
+  { "skill": "nt.divisibility", "exam": "AIME", "year": 2018, "number": 4, "est_minutes": 9, "difficulty": 0.8 },
+  { "skill": "geo.triangles", "exam": "AIME", "year": 2017, "number": 6, "est_minutes": 12, "difficulty": 1.0 },
+  { "skill": "combo.counting", "exam": "AIME", "year": 2016, "number": 7, "est_minutes": 10, "difficulty": 1.0 }
 ]

@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node build.mjs",
     "test": "vitest run",
     "plan": "node dist/cli.js --diagnostic data/diagnostic_results.json --skills data/skills_graph.json --aops data/aops_map.json --practice data/practice_bank.json --policy data/policy.json --out out"
   },
