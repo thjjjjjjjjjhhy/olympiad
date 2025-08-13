@@ -311,7 +311,6 @@ if(typeof document!=='undefined'){
         target_date:prefDate.value,
         daily_minutes:Number(prefMinutes.value||0)
       },responses};
-      const planPre=document.getElementById('plan-md');
       if(window.OlympiadEngine&&typeof window.OlympiadEngine.planFromDiagnostic==='function'){
         try{
           const [skills,bank,map,policy]=await Promise.all([
@@ -321,7 +320,6 @@ if(typeof document!=='undefined'){
             fetch('assets/policy.json').then(r=>r.json())
           ]);
           const plan=await window.OlympiadEngine.planFromDiagnostic(results,{skills,bank,map,policy});
-          planPre.textContent=plan.markdown;
           download('plan.json',JSON.stringify(plan.plan,null,2));
           download('plan.md',plan.markdown);
           download('study.ics',plan.ics);
@@ -329,11 +327,11 @@ if(typeof document!=='undefined'){
           location.href='study-plan.html';
         }catch(err){
           console.error(err);
-          planPre.textContent='Could not generate plan.';
+          alert('Could not generate plan.');
         }
       }else{
         download('diagnostic_results.json',JSON.stringify(results,null,2));
-        planPre.textContent='Engine not loaded. Diagnostic results downloaded.';
+        alert('Engine not loaded. Diagnostic results downloaded.');
       }
     });
   }
