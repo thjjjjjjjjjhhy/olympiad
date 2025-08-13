@@ -20,10 +20,32 @@
   </header>
   <main class="container">
     <h2>👩‍🏫 Need a Tutor?</h2>
-    <p>Connect with experienced mentors for personalized guidance. This page is under construction.</p>
+    <p>Connect with experienced mentors for personalized guidance. Fill out the form below and we'll be in touch.</p>
+    <form class="tutor-form" onsubmit="handleTutorSubmit(event)">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="form-group">
+        <label for="needs">What do you need help with?</label>
+        <textarea id="needs" rows="4" required></textarea>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
   </main>
   <footer>
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
+  <script>
+    function handleTutorSubmit(e) {
+      e.preventDefault();
+      alert('Thanks! Our tutors will reach out soon.');
+      e.target.reset();
+    }
+  </script>
 </body>
 </html>
