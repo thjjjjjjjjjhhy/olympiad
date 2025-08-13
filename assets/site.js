@@ -257,6 +257,8 @@ document.addEventListener('DOMContentLoaded',()=>{
           download('plan.json',JSON.stringify(plan.plan,null,2));
           download('plan.md',plan.markdown);
           download('study.ics',plan.ics);
+          try{localStorage.setItem('studyPlan',plan.markdown);}catch(e){}
+          location.href='study-plan.html';
         }catch(err){
           console.error(err);
           planPre.textContent='Could not generate plan.';
@@ -266,6 +268,13 @@ document.addEventListener('DOMContentLoaded',()=>{
         planPre.textContent='Engine not loaded. Diagnostic results downloaded.';
       }
     });
+  }
+
+  // study plan page
+  const planDisplay=document.getElementById('plan-display');
+  if(planDisplay){
+    const md=localStorage.getItem('studyPlan');
+    planDisplay.textContent=md||'No plan found. Please take the diagnostic first.';
   }
 
   function download(name,content){

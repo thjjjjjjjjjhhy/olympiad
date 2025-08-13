@@ -22,6 +22,12 @@
     "url": "diagnostic.html",
     "tags": ["diagnostic","quiz"],
     "summary": "Assess your skills to build a study plan."
+  },
+  {
+    "title": "Your Study Plan",
+    "url": "study-plan.html",
+    "tags": ["plan","schedule"],
+    "summary": "View the personalized study plan from your diagnostic."
   }
 ]
 
