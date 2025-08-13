@@ -11,25 +11,44 @@ function renderTest(test) {
   test.forEach((q, i) => {
     const div = document.createElement('div');
     div.className = 'question';
-    const p = document.createElement('p');
-    p.textContent = `${i + 1}. ${q.question}`;
-    div.appendChild(p);
-    if (q.type === 'mc') {
-      q.choices.forEach((choice, idx) => {
+    if (q.html) {
+      const num = document.createElement('p');
+      num.textContent = `${i + 1}.`;
+      div.appendChild(num);
+      const content = document.createElement('div');
+      content.innerHTML = q.html;
+      div.appendChild(content);
+      ['A', 'B', 'C', 'D', 'E'].forEach((letter) => {
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'radio';
         input.name = `q${i}`;
-        input.value = String.fromCharCode(65 + idx);
+        input.value = letter;
         label.appendChild(input);
-        label.append(` ${String.fromCharCode(65 + idx)}. ${choice}`);
+        label.append(` ${letter}`);
         div.appendChild(label);
       });
     } else {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.name = `q${i}`;
-      div.appendChild(input);
+      const p = document.createElement('p');
+      p.textContent = `${i + 1}. ${q.question}`;
+      div.appendChild(p);
+      if (q.type === 'mc') {
+        q.choices.forEach((choice, idx) => {
+          const label = document.createElement('label');
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = `q${i}`;
+          input.value = String.fromCharCode(65 + idx);
+          label.appendChild(input);
+          label.append(` ${String.fromCharCode(65 + idx)}. ${choice}`);
+          div.appendChild(label);
+        });
+      } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = `q${i}`;
+        div.appendChild(input);
+      }
     }
     form.appendChild(div);
   });
@@ -95,6 +114,12 @@ function gradeTest(test, form) {
     } else if (correct < 5) {
       container.innerHTML += '<p>Consider practicing AMC 12 level problems first.</p>';
     }
+  } else if (level === 'usamo' || level === 'usajmo') {
+    if (correct >= 8) {
+      container.innerHTML += '<p>Outstanding work! Keep challenging yourself with proof-based problems.</p>';
+    } else if (correct < 5) {
+      container.innerHTML += '<p>Review AIME-level topics to strengthen your foundation.</p>';
+    }
   }
   const reviewList = document.createElement('ul');
   test.forEach((q, i) => {
@@ -112,5 +137,24 @@ function gradeTest(test, form) {
   window.location.href = 'timeline.html';
 }
 
-renderTest(diagnosticTests[level]);
+const files = {
+  amc10: 'tests/math/amc_mixed_medium.json',
+  amc12: 'tests/math/amc_mixed_medium.json',
+  aime: 'tests/math/aime_mixed_medium.json',
+  usamo: 'tests/math/usamo_mixed_medium.json',
+  usajmo: 'tests/math/usamo_mixed_medium.json',
+};
+
+const file = files[level];
+if (file) {
+  fetch(file)
+    .then((res) => res.json())
+    .then((data) => renderTest(data.problems))
+    .catch(() => {
+      const container = document.getElementById('quiz');
+      container.innerHTML = '<p>Failed to load test.</p>';
+    });
+} else {
+  renderTest(null);
+}
 
