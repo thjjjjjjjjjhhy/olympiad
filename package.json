@@ -1,0 +1,8 @@
+{
+  "name": "olympiad-prep",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "fetch-aops": "node scripts/fetch-aops.js data/tests.json public/tests.bundled.json"
+  }
+}

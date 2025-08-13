@@ -1,0 +1,365 @@
+{
+  "generatedBy": "Competition Diagnostics v1",
+  "tests": [
+    {
+      "id": "amc_readiness",
+      "title": "AMC 10/12 Readiness Diagnostic",
+      "format": "multiple-choice",
+      "timeSuggestMin": 60,
+      "problems": [
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 6,
+          "topic": [
+            "Statistics",
+            "Algebra"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_6"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 7,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_7"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 8,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_8"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 11,
+          "topic": [
+            "Algebra"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_11"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 12,
+          "topic": [
+            "Number Theory",
+            "Sets"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_12"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 16,
+          "topic": [
+            "Algebra",
+            "Analytic Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_16"
+        },
+        {
+          "contest": "AMC 12B",
+          "year": 2018,
+          "number": 9,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_9"
+        },
+        {
+          "contest": "AMC 10A",
+          "year": 2019,
+          "number": 10,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_10"
+        },
+        {
+          "contest": "AMC 10A",
+          "year": 2019,
+          "number": 14,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_14"
+        },
+        {
+          "contest": "AMC 10A",
+          "year": 2019,
+          "number": 16,
+          "topic": [
+            "Algebra"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_16"
+        }
+      ],
+      "topicBreakdown": {
+        "Algebra": [
+          "2018-12A-11",
+          "2018-12A-16",
+          "2019-10A-16"
+        ],
+        "Number Theory": [
+          "2018-12A-7",
+          "2018-12A-12",
+          "2018-12B-9",
+          "2019-10A-14"
+        ],
+        "Geometry": [
+          "2018-12A-8"
+        ],
+        "Combinatorics": [
+          "2019-10A-10"
+        ],
+        "Statistics": [
+          "2018-12A-6"
+        ]
+      }
+    },
+    {
+      "id": "aime_10plus",
+      "title": "AIME 10+ Readiness Diagnostic",
+      "format": "free-response-000-999",
+      "timeSuggestMin": 90,
+      "problems": [
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 2,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_2"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 3,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_3"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2019,
+          "number": 4,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AIME_I_Problems/Problem_4"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2019,
+          "number": 4,
+          "topic": [
+            "Probability",
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AIME_II_Problems/Problem_4"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2014,
+          "number": 1,
+          "topic": [
+            "Rates",
+            "Algebra"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2014_AIME_II_Problems/Problem_1"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 7,
+          "topic": [
+            "Probability"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_7"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 8,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_8"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2015,
+          "number": 8,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_II_Problems/Problem_8"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 9,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_9"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 10,
+          "topic": [
+            "Algebra",
+            "Sequences"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_10"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2015,
+          "number": 11,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_II_Problems/Problem_11"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 12,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_12"
+        }
+      ]
+    },
+    {
+      "id": "usamo_track",
+      "title": "USAMO-Track Diagnostic (Hard AIME proxy)",
+      "format": "free-response-000-999",
+      "timeSuggestMin": 120,
+      "problems": [
+        {
+          "contest": "AMC 12A",
+          "year": 2020,
+          "number": 21,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2020_AMC_12A_Problems/Problem_21"
+        },
+        {
+          "contest": "AMC 12A",
+          "year": 2018,
+          "number": 21,
+          "topic": [
+            "Algebra"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_21"
+        },
+        {
+          "contest": "AMC 12B",
+          "year": 2018,
+          "number": 22,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_22"
+        },
+        {
+          "contest": "AMC 10A",
+          "year": 2019,
+          "number": 22,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems/Problem_22"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 13,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_13"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 13,
+          "topic": [
+            "Algebra",
+            "Inequalities"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_13"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2015,
+          "number": 12,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_II_Problems/Problem_12"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 14,
+          "topic": [
+            "Probability"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_14"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 14,
+          "topic": [
+            "Number Theory"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_14"
+        },
+        {
+          "contest": "AIME II",
+          "year": 2015,
+          "number": 14,
+          "topic": [
+            "Geometry"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_II_Problems/Problem_14"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2017,
+          "number": 15,
+          "topic": [
+            "Algebra",
+            "Floor/Ceil"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_15"
+        },
+        {
+          "contest": "AIME I",
+          "year": 2015,
+          "number": 15,
+          "topic": [
+            "Combinatorics"
+          ],
+          "aops": "https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_15"
+        }
+      ]
+    }
+  ]
+}

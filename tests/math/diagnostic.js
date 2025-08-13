@@ -1,5 +1,22 @@
 const params = new URLSearchParams(window.location.search);
-const level = params.get('goal') || 'amc10';
+const goal = params.get('goal') || '';
+const testMap = {
+  amc10: 'amc_readiness',
+  amc12: 'amc_readiness',
+  aime: 'aime_10plus',
+  usamo: 'usamo_track',
+  usajmo: 'usamo_track'
+};
+
+async function loadTests() {
+  try {
+    const res = await fetch('public/tests.bundled.json');
+    return (await res.json()).tests || [];
+  } catch (e) {
+    console.error('Failed to load tests', e);
+    return [];
+  }
+}
 
 function renderTest(test) {
   const container = document.getElementById('quiz');
@@ -8,14 +25,19 @@ function renderTest(test) {
     return;
   }
   const form = document.createElement('form');
-  test.forEach((q, i) => {
+  test.problems.forEach((p, i) => {
     const div = document.createElement('div');
     div.className = 'question';
-    const p = document.createElement('p');
-    p.textContent = `${i + 1}. ${q.question}`;
-    div.appendChild(p);
-    if (q.type === 'mc') {
-      q.choices.forEach((choice, idx) => {
+    const title = `${p.contest} ${p.year} Problem ${p.number}`;
+    const statement = p.statement || title;
+    const pEl = document.createElement('p');
+    pEl.textContent = `${i + 1}. ${statement}`;
+    div.appendChild(pEl);
+    if (test.format === 'multiple-choice') {
+      const opts = Array.isArray(p.choices) && p.choices.length === 5
+        ? p.choices
+        : ['', '', '', '', ''];
+      opts.forEach((choice, idx) => {
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'radio';
@@ -24,13 +46,20 @@ function renderTest(test) {
         label.appendChild(input);
         label.append(` ${String.fromCharCode(65 + idx)}. ${choice}`);
         div.appendChild(label);
+        div.appendChild(document.createElement('br'));
       });
     } else {
       const input = document.createElement('input');
       input.type = 'text';
       input.name = `q${i}`;
+      input.maxLength = 3;
       div.appendChild(input);
     }
+    const link = document.createElement('a');
+    link.href = p.aops;
+    link.target = '_blank';
+    link.textContent = 'View on AoPS';
+    div.appendChild(link);
     form.appendChild(div);
   });
   const submit = document.createElement('button');
@@ -47,63 +76,32 @@ function renderTest(test) {
 function gradeTest(test, form) {
   const data = new FormData(form);
   let correct = 0;
-  const subjectStats = {};
-  test.forEach((q, i) => {
-    const userAns = data.get(`q${i}`);
-    const isCorrect = q.type === 'mc' ? userAns === q.answer : parseInt(userAns, 10) === q.answer;
-    if (!subjectStats[q.subject]) {
-      subjectStats[q.subject] = { total: 0, correct: 0 };
-    }
-    subjectStats[q.subject].total += 1;
-    if (isCorrect) {
-      correct += 1;
-      subjectStats[q.subject].correct += 1;
-    }
+  let total = 0;
+  const topicStats = {};
+  test.problems.forEach((p, i) => {
+    const official = String(p.officialAnswer || '').toUpperCase();
+    if (!official) return;
+    total += 1;
+    const userAns = (data.get(`q${i}`) || '').toString().trim().toUpperCase();
+    const isCorrect = userAns === official;
+    if (isCorrect) correct += 1;
+    (p.topic || []).forEach(t => {
+      if (!topicStats[t]) topicStats[t] = { total: 0, correct: 0 };
+      topicStats[t].total += 1;
+      if (isCorrect) topicStats[t].correct += 1;
+    });
   });
   const container = document.getElementById('quiz');
-  container.innerHTML = `<p>You scored ${correct} out of ${test.length}.</p>`;
+  container.innerHTML = `<p>You scored ${correct} out of ${total}.</p>`;
   const strengths = [], weaknesses = [];
-  Object.entries(subjectStats).forEach(([sub, stats]) => {
+  Object.entries(topicStats).forEach(([topic, stats]) => {
     const ratio = stats.correct / stats.total;
-    if (ratio >= 0.7) {
-      strengths.push(sub);
-    } else if (ratio <= 0.4) {
-      weaknesses.push(sub);
-    }
+    if (ratio >= 0.7) strengths.push(topic);
+    else if (ratio <= 0.4) weaknesses.push(topic);
   });
-  if (strengths.length) {
-    container.innerHTML += `<p>Strengths: ${strengths.join(', ')}</p>`;
-  }
-  if (weaknesses.length) {
-    container.innerHTML += `<p>Topics to review: ${weaknesses.join(', ')}</p>`;
-  }
-  if (level === 'amc10') {
-    if (correct >= 15) {
-      container.innerHTML += '<p>Great job! Consider trying an AMC 12 diagnostic.</p>';
-    } else if (correct < 10) {
-      container.innerHTML += '<p>Review foundational topics or try an easier level.</p>';
-    }
-  } else if (level === 'amc12') {
-    if (correct >= 15) {
-      container.innerHTML += '<p>You may be ready for AIME practice.</p>';
-    } else if (correct < 10) {
-      container.innerHTML += '<p>Consider reviewing AMC 10 material.</p>';
-    }
-  } else if (level === 'aime') {
-    if (correct >= 10) {
-      container.innerHTML += '<p>Strong performance! You may start USAMO preparation.</p>';
-    } else if (correct < 5) {
-      container.innerHTML += '<p>Consider practicing AMC 12 level problems first.</p>';
-    }
-  }
-  const reviewList = document.createElement('ul');
-  test.forEach((q, i) => {
-    const li = document.createElement('li');
-    li.textContent = `${i + 1}. ${q.source} — Answer: ${q.type === 'mc' ? q.answer : q.answer}`;
-    reviewList.appendChild(li);
-  });
-  container.appendChild(reviewList);
-  const summary = { correct, total: test.length, strengths, weaknesses };
+  if (strengths.length) container.innerHTML += `<p>Strengths: ${strengths.join(', ')}</p>`;
+  if (weaknesses.length) container.innerHTML += `<p>Topics to review: ${weaknesses.join(', ')}</p>`;
+  const summary = { correct, total, strengths, weaknesses };
   try {
     localStorage.setItem('lastTestResults', JSON.stringify(summary));
   } catch (e) {
@@ -112,5 +110,7 @@ function gradeTest(test, form) {
   window.location.href = 'timeline.html';
 }
 
-renderTest(diagnosticTests[level]);
-
+loadTests().then(tests => {
+  const test = tests.find(t => t.id === testMap[goal]);
+  renderTest(test);
+});
