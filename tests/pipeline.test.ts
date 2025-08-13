@@ -38,7 +38,7 @@ describe('planning pipeline', () => {
     const first14 = plan.filter(d => parseISO(d.date) < addDays(parseISO(startDate), 14));
     const skillsSet = new Set<string>();
     first14.forEach(day => day.blocks.forEach(b => skillsSet.add(b.skill)));
-    const expected = ['algebra.lines', 'algebra.quadratics', 'nt.divisibility', 'nt.congruences'];
+    const expected = ['algebra.lines', 'algebra.quadratics', 'nt.divisibility', 'nt.congruences', 'geo.triangles', 'combo.counting'];
     expect([...skillsSet].every(s => expected.includes(s))).toBe(true);
   });
 

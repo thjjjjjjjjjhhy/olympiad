@@ -1,0 +1,36 @@
+{
+  "AMC": [
+    {"id":"AMC1","section":"Algebra","skill":"algebra.lines","problem":"Solve for x: 3x-5=10","choices":["3","4","5","6"],"answer":2,"difficulty":0.4},
+    {"id":"AMC2","section":"Algebra","skill":"algebra.lines","problem":"For y=2x-1, what is y when x=3?","choices":["3","4","5","6"],"answer":2,"difficulty":0.4},
+    {"id":"AMC3","section":"Algebra","skill":"algebra.lines","problem":"Solve 4x=32","choices":["6","7","8","9"],"answer":2,"difficulty":0.4},
+    {"id":"AMC4","section":"Algebra","skill":"algebra.quadratics","problem":"What is the product of the roots of x^2-3x+2=0?","choices":["1","2","3","5"],"answer":1,"difficulty":0.4},
+    {"id":"AMC5","section":"Algebra","skill":"algebra.quadratics","problem":"How many integer solutions satisfy x^2=9?","choices":["1","2","3","4"],"answer":1,"difficulty":0.4},
+    {"id":"AMC6","section":"Algebra","skill":"algebra.quadratics","problem":"What is the sum of solutions to (x-3)(x+3)=0?","choices":["-6","-3","0","3"],"answer":2,"difficulty":0.4},
+    {"id":"AMC7","section":"Number Theory","skill":"nt.divisibility","problem":"What is the remainder when 14 is divided by 5?","choices":["1","2","3","4"],"answer":3,"difficulty":0.4},
+    {"id":"AMC8","section":"Number Theory","skill":"nt.divisibility","problem":"What is the smallest positive integer divisible by both 3 and 4?","choices":["6","8","12","24"],"answer":2,"difficulty":0.4},
+    {"id":"AMC9","section":"Number Theory","skill":"nt.divisibility","problem":"How many positive divisors does 12 have?","choices":["4","6","8","12"],"answer":1,"difficulty":0.4},
+    {"id":"AMC10","section":"Geometry","skill":"geo.triangles","problem":"A right triangle has legs 3 and 4. What is the hypotenuse?","choices":["5","6","7","8"],"answer":0,"difficulty":0.4},
+    {"id":"AMC11","section":"Geometry","skill":"geo.triangles","problem":"What is the sum of the angles in any triangle?","choices":["90","120","180","360"],"answer":2,"difficulty":0.4},
+    {"id":"AMC12","section":"Geometry","skill":"geo.triangles","problem":"What is the area of a triangle with base 10 and height 6?","choices":["15","30","60","120"],"answer":1,"difficulty":0.4},
+    {"id":"AMC13","section":"Counting","skill":"combo.counting","problem":"How many ways are there to choose 2 objects from 5?","choices":["5","10","20","25"],"answer":1,"difficulty":0.4},
+    {"id":"AMC14","section":"Counting","skill":"combo.counting","problem":"How many permutations of the letters ABC are possible?","choices":["3","4","5","6"],"answer":3,"difficulty":0.4},
+    {"id":"AMC15","section":"Counting","skill":"combo.counting","problem":"A coin is flipped twice. How many outcomes are possible?","choices":["2","3","4","5"],"answer":2,"difficulty":0.4}
+  ],
+  "AIME": [
+    {"id":"AIME1","section":"Algebra","skill":"algebra.lines","problem":"Solve for x: 2x-3=7","choices":["4","5","6","7"],"answer":1,"difficulty":1.0},
+    {"id":"AIME2","section":"Algebra","skill":"algebra.lines","problem":"Find the slope of the line through (0,1) and (2,5)","choices":["1","2","3","4"],"answer":1,"difficulty":1.0},
+    {"id":"AIME3","section":"Algebra","skill":"algebra.lines","problem":"Solve for x: 7x+2=3x+18","choices":["3","4","5","6"],"answer":1,"difficulty":1.0},
+    {"id":"AIME4","section":"Algebra","skill":"algebra.quadratics","problem":"What is the sum of the roots of x^2-7x+12=0?","choices":["5","6","7","8"],"answer":2,"difficulty":1.0},
+    {"id":"AIME5","section":"Algebra","skill":"algebra.quadratics","problem":"Find the positive root of x^2-4x-5=0","choices":["3","4","5","6"],"answer":2,"difficulty":1.0},
+    {"id":"AIME6","section":"Algebra","skill":"algebra.quadratics","problem":"Find the nonzero solution to x^2=2x","choices":["1","2","3","4"],"answer":1,"difficulty":1.0},
+    {"id":"AIME7","section":"Number Theory","skill":"nt.congruences","problem":"Find the smallest x with x≡2 (mod 5) and x≡3 (mod 7)","choices":["12","17","22","27"],"answer":1,"difficulty":1.0},
+    {"id":"AIME8","section":"Number Theory","skill":"nt.congruences","problem":"What is the remainder when 1234 is divided by 11?","choices":["1","2","3","4"],"answer":1,"difficulty":1.0},
+    {"id":"AIME9","section":"Number Theory","skill":"nt.congruences","problem":"Solve for the smallest positive x: 3x≡1 (mod 7)","choices":["2","3","4","5"],"answer":3,"difficulty":1.0},
+    {"id":"AIME10","section":"Geometry","skill":"geo.triangles","problem":"An isosceles triangle has sides 5, 5, and 6. What is its perimeter?","choices":["15","16","17","18"],"answer":1,"difficulty":1.0},
+    {"id":"AIME11","section":"Geometry","skill":"geo.triangles","problem":"What is the area of a right triangle with legs 5 and 12?","choices":["25","30","35","40"],"answer":1,"difficulty":1.0},
+    {"id":"AIME12","section":"Geometry","skill":"geo.triangles","problem":"What is the area of an equilateral triangle with side length 6?","choices":["9","9√3","18","18√3"],"answer":1,"difficulty":1.0},
+    {"id":"AIME13","section":"Counting","skill":"combo.counting","problem":"How many distinct permutations are there of the letters in MISS?","choices":["6","12","24","48"],"answer":1,"difficulty":1.0},
+    {"id":"AIME14","section":"Counting","skill":"combo.counting","problem":"How many ways to choose 2 elements from {1,2,3,4,5,6}?","choices":["10","15","20","30"],"answer":1,"difficulty":1.0},
+    {"id":"AIME15","section":"Counting","skill":"combo.counting","problem":"How many subsets of {1,2,3,4} contain at least one even number?","choices":["8","12","14","16"],"answer":1,"difficulty":1.0}
+  ]
+}
