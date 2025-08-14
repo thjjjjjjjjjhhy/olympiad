@@ -122,17 +122,6 @@ body {
 main.container {
   padding: 2rem 0;
 }
-.card.diagnostic-card {
-  max-width: 500px;
-  margin: 1rem auto;
-  text-align: left;
-}
-.diagnostic-form {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
 .tutor-form {
   margin-top: 1rem;
   display: flex;
@@ -147,8 +136,6 @@ main.container {
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
-.diagnostic-form select,
-.diagnostic-form button,
 .tutor-form input,
 .tutor-form textarea,
 .tutor-form button {
@@ -157,7 +144,6 @@ main.container {
   border-radius: 6px;
   font-size: 1rem;
 }
-.diagnostic-form button,
 .tutor-form button {
   background: var(--accent);
   color: #fff;
@@ -166,7 +152,6 @@ main.container {
   transition: background 0.2s;
   align-self: flex-start;
 }
-.diagnostic-form button:hover,
 .tutor-form button:hover {
   background: #4f46e5;
 }
