@@ -29,16 +29,23 @@ function renderTest(test) {
       const content = document.createElement('div');
       content.innerHTML = q.html;
       div.appendChild(content);
-      ['A', 'B', 'C', 'D', 'E'].forEach((letter) => {
-        const label = document.createElement('label');
+      if (q.type === 'mc') {
+        ['A', 'B', 'C', 'D', 'E'].forEach((letter) => {
+          const label = document.createElement('label');
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = `q${i}`;
+          input.value = letter;
+          label.appendChild(input);
+          label.append(` ${letter}`);
+          div.appendChild(label);
+        });
+      } else {
         const input = document.createElement('input');
-        input.type = 'radio';
+        input.type = 'text';
         input.name = `q${i}`;
-        input.value = letter;
-        label.appendChild(input);
-        label.append(` ${letter}`);
-        div.appendChild(label);
-      });
+        div.appendChild(input);
+      }
     } else {
       const p = document.createElement('p');
       p.textContent = `${i + 1}. ${q.question}`;
