@@ -93,8 +93,7 @@
     return;
   }
 
-  // Config
-  const PRACTICE_LOAD = 0.5;                // global knob to shrink/expand practice volume
+  // Minimum minutes per block to schedule
   const THRESH = {read:10, drill:10, timed:8};
 
   // Toolbar defaults
@@ -226,28 +225,27 @@
     return 'Final';
   }
 
-  // ---- NEW: problem-count is derived from the minutes of that block (not minutes per day) ----
+  // Estimated minutes per problem by track/phase
   function perProblemMinutes(phaseName){
     if(onAIMETrack){
-      // Tougher problems, especially on USAMO track
       if(phaseName==='Foundation') return isUSAMOTrack ? 16 : 14;
       if(phaseName==='Mixed')      return isUSAMOTrack ? 18 : 16;
-      return                         isUSAMOTrack ? 20 : 18; // Final
+      return                         isUSAMOTrack ? 20 : 18;
     } else {
-      // AMC problems are faster
       if(phaseName==='Foundation') return 9;
       if(phaseName==='Mixed')      return 10;
-      return                         12; // Final
+      return                         12;
     }
   }
+
+  // Count problems to approximately fill the allocated minutes for that block
   function countFromMinutes(blockMinutes, phaseName, isTimed=false){
     const per = perProblemMinutes(phaseName) * (isTimed ? 1.15 : 1.0);
-    const raw = blockMinutes / Math.max(6, per); // safety floor
-    // base target scaled by PRACTICE_LOAD, with sensible caps
-    let minCnt = onAIMETrack ? 2 : 2;
-    let maxCnt = onAIMETrack ? 6 : 8;
-    let cnt = Math.max(minCnt, Math.round(raw * PRACTICE_LOAD));
-    return Math.min(maxCnt, cnt);
+    // Slight “top-off” before flooring to avoid chronic underfilling
+    const target = Math.max(1, Math.floor((blockMinutes + per*0.25) / per));
+    const minCnt = 1;
+    const maxCnt = onAIMETrack ? 8 : 10;
+    return Math.min(Math.max(minCnt, target), maxCnt);
   }
 
   // Problem pick tuned by goal
@@ -273,7 +271,7 @@
     return rnd(VAI);
   }
 
-  // Updated to use block minutes
+  // Build link lists sized by blockMinutes
   function makeDrillLinks(phaseName, blockMinutes){
     const count = countFromMinutes(blockMinutes, phaseName, false);
     if(onAIMETrack){
@@ -305,7 +303,7 @@
     const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.`, href:amcSetURL(amcLevel,y,v)};
   }
 
-  // Build tasks by day
+  // Build tasks by day (reading-first, then drills, then timed). Counts fill block minutes.
   const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
     const pName = phaseNameForDay(d);
@@ -315,12 +313,12 @@
     let mDrill=Math.round(minutesPerDay*mix.drill);
     let mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
 
-    // Reading-first rebalance if small
+    // Reading-first floor
     if(minutesPerDay >= THRESH.read && mRead < THRESH.read){
       let need = THRESH.read - mRead;
       const takeT = Math.min(need, mTimed); mTimed -= takeT; need -= takeT;
       const takeD = Math.min(need, mDrill); mDrill -= takeD; need -= takeD;
-      mRead += (THRESH.read - Math.max(0,need));
+      mRead = Math.min(minutesPerDay, mRead + (THRESH.read - Math.max(0,need)));
       if(mRead + mDrill + mTimed > minutesPerDay){
         const diff = mRead + mDrill + mTimed - minutesPerDay;
         const t2 = Math.min(diff, mTimed); mTimed -= t2;
@@ -348,7 +346,7 @@
       todayTasks.push({html: makeTimedSet(pName, mTimed)+` (${mTimed} minutes)`});
     }
 
-    // Fallback (now multiple problems if minutes allow)
+    // Fallback: fill with drills sized to the full available minutes if reading unavailable
     if(!todayTasks.length){
       const cat=pickTopic();
       const ref=nextReading(cat, onAIMETrack);
@@ -399,7 +397,7 @@
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=10';
+    location.href = 'timeline.html?v=11';
   };
 
   // Helpers
