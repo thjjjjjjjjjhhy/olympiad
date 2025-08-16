@@ -64,12 +64,13 @@
       <button id="rebuildBtn" class="secondary">Rebuild plan</button>
       <button id="downloadIcs">Download calendar (.ics)</button>
       <button class="secondary" onclick="window.print()">Print</button>
-      <span class="hint">Low time per day → more Art of Problem Solving reading; final days still include full mocks.</span>
+      <span class="hint">Low time per day → more Art of Problem Solving reading; final days dedicate to full mocks.</span>
     </div>
 
     <div class="legend">
       <span>📘 Reading (Art of Problem Solving Volume 1 or Volume 2)</span>
-      <span>🧩 Targeted drills (links to exact problems)</span>
+      <span>🧠 Book exercises (specific problem numbers)</span>
+      <span>🧩 Targeted drills (links to exact AMC/AIME problems)</span>
       <span>⏱️ Timed set (links to specific problems)</span>
       <span>📝 Full mock and review</span>
     </div>
@@ -95,6 +96,7 @@
 
   // Minimum minutes per block to schedule
   const THRESH = {read:10, drill:10, timed:8};
+  const QUOTA_SLACK = 2; // +/- minutes allowed before we top-off or trim
 
   // Toolbar defaults
   const today = new Date(); today.setHours(0,0,0,0);
@@ -118,64 +120,77 @@
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // ---------- Reading references as structured ranges (so we can size by minutes) ----------
+  // ---------- Structured reading references (with problem counts for exercises) ----------
   const V1 = 1, V2 = 2;
   const READS_VOL1 = {
     "Number Theory":[
-      {vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45},
-      {vol:V1, chapter:"Chapter 5.6–5.7: Primes and Factors", pStart:47, pEnd:48},
+      {id:"V1-NT-5.4", vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45, exCount:30},
+      {id:"V1-NT-5.6-5.7", vol:V1, chapter:"Chapter 5.6–5.7: Primes and Factors", pStart:47, pEnd:48, exCount:18},
     ],
     "Combinatorics":[
-      {vol:V1, chapter:"Chapter 25: Learning to Count", pStart:221, pEnd:229},
+      {id:"V1-C-25", vol:V1, chapter:"Chapter 25: Learning to Count", pStart:221, pEnd:229, exCount:40},
     ],
     "Probability":[
-      {vol:V1, chapter:"Chapter 25: Counting as a foundation for Probability", pStart:221, pEnd:229},
+      {id:"V1-P-25", vol:V1, chapter:"Chapter 25: Counting as a foundation for Probability", pStart:221, pEnd:229, exCount:24},
     ],
     "Sequences and Series":[
-      {vol:V1, chapter:"Chapter 24: Sequences and Series", pStart:211, pEnd:217},
+      {id:"V1-S-24", vol:V1, chapter:"Chapter 24: Sequences and Series", pStart:211, pEnd:217, exCount:28},
     ],
     "Functions":[
-      {vol:V1, chapter:"Chapter 21: Functions", pStart:187, pEnd:190},
+      {id:"V1-F-21", vol:V1, chapter:"Chapter 21: Functions", pStart:187, pEnd:190, exCount:16},
     ],
     "Polynomials and Algebra":[
-      {vol:V1, chapter:"Chapter 6: Quadratic Equations", pStart:52, pEnd:60},
+      {id:"V1-A-6", vol:V1, chapter:"Chapter 6: Quadratic Equations", pStart:52, pEnd:60, exCount:32},
     ],
     "Geometry":[
-      {vol:V1, chapter:"Chapter 11.8: Area of a Triangle", pStart:109, pEnd:109},
-      {vol:V1, chapter:"Chapter 14: Angle Chasing and Chapter 15: Area", pStart:133, pEnd:138},
-      {vol:V1, chapter:"Chapter 18: Three-Dimensional Geometry", pStart:165, pEnd:169},
+      {id:"V1-G-11.8", vol:V1, chapter:"Chapter 11.8: Area of a Triangle", pStart:109, pEnd:109, exCount:12},
+      {id:"V1-G-14-15", vol:V1, chapter:"Chapter 14: Angle Chasing and Chapter 15: Area", pStart:133, pEnd:138, exCount:36},
+      {id:"V1-G-18", vol:V1, chapter:"Chapter 18: Three-Dimensional Geometry", pStart:165, pEnd:169, exCount:20},
     ],
   };
   const READS_VOL2 = {
     "Number Theory":[
-      {vol:V2, chapter:"Chapter 23: Divisibility and Congruences", pStart:252, pEnd:262},
-      {vol:V2, chapter:"Chapter 24: Diophantine Equations", pStart:266, pEnd:274},
+      {id:"V2-NT-23", vol:V2, chapter:"Chapter 23: Divisibility and Congruences", pStart:252, pEnd:262, exCount:34},
+      {id:"V2-NT-24", vol:V2, chapter:"Chapter 24: Diophantine Equations", pStart:266, pEnd:274, exCount:26},
     ],
     "Combinatorics":[
-      {vol:V2, chapter:"Chapter 15: Combinatorics and the Binomial Theorem", pStart:170, pEnd:176},
-      {vol:V2, chapter:"Chapter 25.6: Colorings", pStart:280, pEnd:280},
+      {id:"V2-C-15", vol:V2, chapter:"Chapter 15: Combinatorics and the Binomial Theorem", pStart:170, pEnd:176, exCount:30},
+      {id:"V2-C-25.6", vol:V2, chapter:"Chapter 25.6: Colorings", pStart:280, pEnd:280, exCount:12},
     ],
     "Probability":[
-      {vol:V2, chapter:"Chapter 15.5: Binomial Theorem for distributions", pStart:175, pEnd:175},
+      {id:"V2-P-15.5", vol:V2, chapter:"Chapter 15.5: Binomial Theorem for distributions", pStart:175, pEnd:175, exCount:10},
     ],
     "Sequences and Series":[
-      {vol:V2, chapter:"Chapter 16: Sequences and Recurrences", pStart:180, pEnd:191},
+      {id:"V2-S-16", vol:V2, chapter:"Chapter 16: Sequences and Recurrences", pStart:180, pEnd:191, exCount:36},
     ],
     "Functions":[
-      {vol:V2, chapter:"Chapter 7: Functional Equations", pStart:69, pEnd:73},
+      {id:"V2-F-7", vol:V2, chapter:"Chapter 7: Functional Equations", pStart:69, pEnd:73, exCount:18},
     ],
     "Polynomials and Algebra":[
-      {vol:V2, chapter:"Chapter 6: Polynomials", pStart:52, pEnd:65},
+      {id:"V2-A-6", vol:V2, chapter:"Chapter 6: Polynomials", pStart:52, pEnd:65, exCount:34},
     ],
     "Geometry":[
-      {vol:V2, chapter:"Chapter 22: Geometry Tidbits — Inversion and Homothety", pStart:241, pEnd:247},
+      {id:"V2-G-22", vol:V2, chapter:"Chapter 22: Geometry Tidbits — Inversion and Homothety", pStart:241, pEnd:247, exCount:16},
     ],
   };
 
+  // Track per-chapter progress through exercises within this generated plan
+  const exerciseCursor = {}; // key: ref.id -> next problem number (1-based)
+
   function minutesPerPage(vol, isUSAMOTrack){
-    // Reading is denser in Volume 2, especially for USAMO track
-    if(vol === V1) return 2.0;                 // ≈ 2 minutes per page
-    return isUSAMOTrack ? 3.2 : 2.7;           // Volume 2: ≈ 2.7–3.2 minutes per page
+    if(vol === V1) return 2.0;
+    return isUSAMOTrack ? 3.2 : 2.7;
+  }
+  function minutesPerBookExercise(vol, phaseName){
+    if(vol === V1){
+      if(phaseName==='Foundation') return 5.5;
+      if(phaseName==='Mixed')      return 6.0;
+      return                         6.5;
+    } else {
+      if(phaseName==='Foundation') return 7.0;
+      if(phaseName==='Mixed')      return 8.0;
+      return                         9.0;
+    }
   }
 
   function pickTopic(){
@@ -193,7 +208,7 @@
     return `Volume ${ref.vol}, ${ref.chapter} (pages ${from}–${to})`;
   }
 
-  // ---------- AoPS URL builders (for problems) ----------
+  // ---------- AoPS URL builders (for AMC/AIME problems) ----------
   function aimeProblemURL(y,v,n){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems/Problem_${n}`; }
   function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
   function amcProblemURL(level,y,v,n){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems/Problem_${n}`; }
@@ -235,7 +250,7 @@
     return 'Final';
   }
 
-  // Estimated minutes per problem by track/phase
+  // Estimated minutes per AMC/AIME problem by phase
   function perProblemMinutes(phaseName){
     if(onAIMETrack){
       if(phaseName==='Foundation') return isUSAMOTrack ? 16 : 14;
@@ -248,7 +263,6 @@
     }
   }
 
-  // Count problems to approximately fill the allocated minutes for that block
   function countFromMinutes(blockMinutes, phaseName, isTimed=false){
     const per = perProblemMinutes(phaseName) * (isTimed ? 1.15 : 1.0);
     const target = Math.max(1, Math.floor((blockMinutes + per*0.25) / per));
@@ -256,7 +270,6 @@
     return Math.min(target, maxCnt);
   }
 
-  // Problem pick tuned by goal
   function chooseAIMEProblems(count, phaseName){
     let low=1, high=15;
     if(phaseName==='Foundation'){ low=1; high=isUSAMOTrack?8:7; }
@@ -273,71 +286,142 @@
     const set=new Set(); while(set.size<count) set.add(Math.floor(Math.random()*(high-low+1))+low);
     return [...set].sort((a,b)=>a-b);
   }
-
   function aimeVariant(){
     if(isUSAMOTrack) return Math.random()<0.7 ? 'II' : 'I';
     return rnd(VAI);
   }
 
+  // Build link lists sized by blockMinutes
   function makeDrillLinks(phaseName, blockMinutes){
     const count = countFromMinutes(blockMinutes, phaseName, false);
     if(onAIMETrack){
       const y=rnd(YEARS_AIME), v=aimeVariant();
       const nums=chooseAIMEProblems(count, phaseName);
-      return nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`);
+      const html = nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`).join(', ');
+      return {html, mins:blockMinutes, type:'drill'};
     } else {
       const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
       const nums=chooseAMCProblems(amcLevel, count, phaseName);
-      return nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`);
+      const html = nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`).join(', ');
+      return {html, mins:blockMinutes, type:'drill'};
     }
   }
-
   function makeTimedSet(phaseName, blockMinutes){
     const count = countFromMinutes(blockMinutes, phaseName, true);
     if(onAIMETrack){
       const y=rnd(YEARS_AIME), v=aimeVariant();
       const nums=chooseAIMEProblems(count, phaseName);
-      return `⏱️ Timed: ${nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`).join(', ')}`;
+      const html = `⏱️ Timed: ${nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`).join(', ')}`;
+      return {html, mins:blockMinutes, type:'timed'};
     } else {
       const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
       const nums=chooseAMCProblems(amcLevel, count, phaseName);
-      return `⏱️ Timed: ${nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`).join(', ')}`;
+      const html = `⏱️ Timed: ${nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`).join(', ')}`;
+      return {html, mins:blockMinutes, type:'timed'};
     }
   }
-
-  function makeMock(){
-    if(onAIMETrack){ const y=rnd(YEARS_AIME), v=aimeVariant(); return {text:`📝 Full mock: ${y} AIME ${v} (15 problems). Review and update your error log.`, href:aimeSetURL(y,v)}; }
-    const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.`, href:amcSetURL(amcLevel,y,v)};
+  function makeMock(totalMinutes){
+    if(onAIMETrack){ const y=rnd(YEARS_AIME), v=aimeVariant(); return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (15 problems). Review and update your error log.</a>`, mins:totalMinutes, type:'mock'}; }
+    const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {html:`<a href="${amcSetURL(amcLevel,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.</a>`, mins:totalMinutes, type:'mock'};
   }
 
-  // ---------- NEW: Reading scheduler that fills minutes with pages ----------
-  function scheduleReading(blockMinutes){
-    const tasks=[]; let remain = blockMinutes; const maxBlocks = 3; let blocks=0;
-    while(remain >= 4 && blocks < maxBlocks){ // need at least ~2 pages of V1
+  // --------- NEW: Reading + Book-exercise scheduler that uses minutes fully ----------
+  function scheduleReading(phaseName, blockMinutes){
+    // Split reading vs book exercises (later phases shift toward exercises)
+    const phaseBias = (phaseName==='Foundation') ? 0.65 : (phaseName==='Mixed' ? 0.55 : 0.45);
+    let minutesForReading = Math.max(6, Math.round(blockMinutes * phaseBias));
+    let minutesForExercises = Math.max(0, blockMinutes - minutesForReading);
+
+    const tasks = [];
+    let remainRead = minutesForReading;
+    let remainEx   = minutesForExercises;
+
+    // Up to 3 reading chunks to cover multiple topics if time allows
+    let chunks = 0;
+    while(remainRead >= 4 && chunks < 3){
       const cat = pickTopic();
       const ref = pickReadingObj(cat, onAIMETrack);
-      if(!ref){ break; }
+      if(!ref) break;
       const rate = minutesPerPage(ref.vol, isUSAMOTrack);
-      const available = ref.pEnd - ref.pStart + 1;
-      // pages we can fit from this reference
-      const pagesTarget = Math.max(2, Math.min(available, Math.floor((remain + 0.3*rate) / rate)));
+      const availablePages = ref.pEnd - ref.pStart + 1;
+
+      const pagesTarget = Math.max(2, Math.min(availablePages, Math.floor((remainRead + 0.3*rate) / rate)));
       const from = ref.pStart;
       const to   = ref.pStart + pagesTarget - 1;
-      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages • ${Math.round(pagesTarget*rate)} minutes)`});
-      remain -= pagesTarget * rate;
-      blocks++;
-      // If we still have a lot of time, loop to add another reading segment (possibly a different topic)
-      if(remain < Math.min(THRESH.read/2, rate)) break; // too little time to add another meaningful chunk
+      const readMins = Math.round(pagesTarget * rate);
+
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages • ${readMins} minutes)`, mins:readMins, type:'reading', _ref:ref});
+
+      remainRead -= readMins;
+      chunks++;
     }
+
+    // Book exercises: use per-chapter cursors to pick specific problem numbers
+    // Try to pair exercises with the most recent reading chunk when possible
+    function addExercisesFor(ref, wantMins){
+      if(!ref || wantMins < 4) return null;
+      const per = minutesPerBookExercise(ref.vol, phaseName);
+      const count = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
+      const key = ref.id;
+      if(!(key in exerciseCursor)) exerciseCursor[key] = 1;
+      const start = exerciseCursor[key];
+      const end   = Math.min(ref.exCount, start + count - 1);
+      // If we ran out, wrap back to 1 to keep giving concrete numbers
+      exerciseCursor[key] = (end >= ref.exCount) ? 1 : (end + 1);
+      const used = (end - start + 1) * per;
+      const minsUsed = Math.round(used);
+      return {html:`🧠 <b>Book exercises</b> (Volume ${ref.vol}, ${ref.chapter}): Problems ${start}–${end} (${end-start+1} problems • ${minsUsed} minutes)`, mins:minsUsed, type:'bookex', _ref:ref, _start:start, _end:end, _per:per};
+    }
+
+    // Prefer to attach exercises to the last reading chunk; if more time, attach to previous ones
+    let exAdded = 0;
+    for(let i=tasks.length-1; i>=0 && remainEx >= 4; i--){
+      const t = tasks[i];
+      if(t.type==='reading'){
+        const ex = addExercisesFor(t._ref, Math.min(remainEx, Math.max(6, Math.round(blockMinutes*0.4))));
+        if(ex){ tasks.push(ex); remainEx -= ex.mins; exAdded++; }
+      }
+    }
+
+    // If still have exercise minutes with no reading chunks (rare), create exercises from a fresh ref
+    while(remainEx >= 4 && exAdded < 3){
+      const cat = pickTopic();
+      const ref = pickReadingObj(cat, onAIMETrack);
+      const ex = addExercisesFor(ref, remainEx);
+      if(!ex) break;
+      tasks.push(ex);
+      remainEx -= ex.mins;
+      exAdded++;
+    }
+
+    // If reading scheduled nothing (e.g., very small block), at least create one short reading
+    if(!tasks.length && blockMinutes >= 4){
+      const cat = pickTopic();
+      const ref = pickReadingObj(cat, onAIMETrack);
+      if(ref){
+        const rate = minutesPerPage(ref.vol, isUSAMOTrack);
+        const pagesTarget = Math.max(1, Math.min(ref.pEnd - ref.pStart + 1, Math.floor((blockMinutes + 0.3*rate)/rate)));
+        const from = ref.pStart, to = ref.pStart + pagesTarget - 1;
+        const readMins = Math.round(pagesTarget * rate);
+        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages • ${readMins} minutes)`, mins:readMins, type:'reading', _ref:ref});
+      }
+    }
+
+    // Return reading + book-exercise tasks; the caller will quota-balance for the whole day
     return tasks;
   }
 
-  // ---------- Build tasks by day (reading-first, then drills, then timed) ----------
+  // ---------- Build tasks by day ----------
   const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
     const pName = phaseNameForDay(d);
-    const mix  = adjustedMix(baseMixForPhase(pName), minutesPerDay);
+    // Final three days = full mocks (use the entire quota to keep total minutes exact)
+    if(d >= totalDays-3){
+      tasksByDay.push([ makeMock(minutesPerDay) ]);
+      continue;
+    }
 
+    const mix  = adjustedMix(baseMixForPhase(pName), minutesPerDay);
     let mRead=Math.round(minutesPerDay*mix.read);
     let mDrill=Math.round(minutesPerDay*mix.drill);
     let mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
@@ -354,40 +438,121 @@
         const rem = diff - t2; if(rem>0) mDrill = Math.max(0, mDrill - rem);
       }
     }
-
     if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){
       mRead = minutesPerDay; mDrill = 0; mTimed = 0;
     }
 
-    const todayTasks=[];
-    if(mRead >= Math.min(THRESH.read, minutesPerDay/2) || (minutesPerDay < THRESH.read && mRead>0)){
-      const rTasks = scheduleReading(mRead);
-      rTasks.forEach(t => todayTasks.push(t));
+    const dayTasks=[];
+    // Reading + book exercises
+    if(mRead > 0){
+      const r = scheduleReading(pName, mRead);
+      r.forEach(t=>dayTasks.push(t));
     }
+    // Drills
     if(mDrill>=THRESH.drill){
-      const cat=pickTopic(), links=makeDrillLinks(pName, mDrill);
-      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.join(', ')} (${mDrill} minutes)`});
+      const dTask = makeDrillLinks(pName, mDrill);
+      dayTasks.push({html:`🧩 ${dTask.html} (${mDrill} minutes)`, mins:mDrill, type:'drill'});
     }
-    if(d>=totalDays-3){
-      const mk=makeMock();
-      todayTasks.push({html:`<a href="${mk.href}" target="_blank" rel="noopener">${mk.text}</a>`});
-    } else if(mTimed>=THRESH.timed){
-      todayTasks.push({html: makeTimedSet(pName, mTimed)+` (${mTimed} minutes)`});
+    // Timed set
+    if(mTimed>=THRESH.timed){
+      const tTask = makeTimedSet(pName, mTimed);
+      dayTasks.push({html: tTask.html + ` (${mTimed} minutes)`, mins:mTimed, type:'timed'});
     }
 
-    // Fallback: if nothing scheduled (rare), fill with reading sized to full minutes
-    if(!todayTasks.length){
-      const rTasks = scheduleReading(minutesPerDay);
-      if(rTasks.length){ rTasks.forEach(t=>todayTasks.push(t)); }
+    // Fallback: if empty, fill with reading sized to full minutes
+    if(!dayTasks.length){
+      const r = scheduleReading(pName, minutesPerDay);
+      if(r.length){ r.forEach(t=>dayTasks.push(t)); }
       else {
-        const links=makeDrillLinks(pName, minutesPerDay);
-        todayTasks.push({html:`🧩 <b>${pickTopic()}</b>: ${links.join(', ')} (${minutesPerDay} minutes)`});
+        const dTask = makeDrillLinks(pName, minutesPerDay);
+        dayTasks.push({html:`🧩 ${dTask.html} (${minutesPerDay} minutes)`, mins:minutesPerDay, type:'drill'});
       }
     }
-    tasksByDay.push(todayTasks);
+
+    // Balance to hit the day quota exactly (within +/- QUOTA_SLACK)
+    balanceToQuota(dayTasks, minutesPerDay, pName);
+
+    tasksByDay.push(dayTasks);
   }
 
-  // Map date -> tasks
+  // ---------- Quota balancer ----------
+  function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
+
+  function balanceToQuota(arr, target, phaseName){
+    let cur = totalMins(arr);
+    if(Math.abs(cur - target) <= QUOTA_SLACK) return;
+
+    if(cur < target){
+      // Top off with extra practice
+      const gap = target - cur;
+      const extra = makeDrillLinks(phaseName, gap);
+      arr.push({html:`🧩 Extra practice: ${extra.html} (${gap} minutes)`, mins:gap, type:'drill'});
+      return;
+    }
+
+    // Trim minutes by shrinking practice or exercises, then reading
+    let over = cur - target;
+
+    // Helper to shrink a practice task by delta minutes
+    function shrinkPractice(idx, delta){
+      const t = arr[idx];
+      if(!t || (t.type!=='drill' && t.type!=='timed')) return 0;
+      const newBlock = Math.max(THRESH[t.type]||6, t.mins - delta);
+      if(newBlock >= t.mins) return 0;
+      // Rebuild links to reflect the new block size
+      let rebuilt;
+      if(t.type==='drill') rebuilt = makeDrillLinks(phaseName, newBlock);
+      else                 rebuilt = makeTimedSet(phaseName, newBlock);
+      t.html = (t.type==='timed' ? rebuilt.html : `🧩 ${rebuilt.html}`) + ` (${newBlock} minutes)`;
+      const saved = t.mins - newBlock;
+      t.mins = newBlock;
+      return saved;
+    }
+
+    // Try to trim drills/timed from the end
+    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
+      over -= shrinkPractice(i, over) || 0;
+    }
+
+    if(over <= QUOTA_SLACK) return;
+
+    // Next trim book exercises by reducing problem count
+    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
+      const t = arr[i];
+      if(t && t.type==='bookex'){
+        const per = t._per || 7;
+        const newBlock = Math.max(4, t.mins - over);
+        if(newBlock < t.mins){
+          const newCount = Math.max(1, Math.floor((newBlock + 0.25*per)/per));
+          const newEnd = t._start + newCount - 1;
+          t.html = `🧠 <b>Book exercises</b> (Volume ${t._ref.vol}, ${t._ref.chapter}): Problems ${t._start}–${newEnd} (${newCount} problems • ${newBlock} minutes)`;
+          over -= (t.mins - newBlock);
+          t.mins = newBlock;
+        }
+      }
+    }
+
+    if(over <= QUOTA_SLACK) return;
+
+    // Finally, trim reading by reducing pages on the last reading task
+    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
+      const t = arr[i];
+      if(t && t.type==='reading' && t._ref){
+        const rate = minutesPerPage(t._ref.vol, isUSAMOTrack);
+        const newBlock = Math.max(4, t.mins - over);
+        if(newBlock < t.mins){
+          const pages = Math.max(1, Math.floor((newBlock + 0.3*rate)/rate));
+          const from = t._ref.pStart;
+          const to   = from + pages - 1;
+          t.html = `📘 <b>Reading</b>: ${formatReading(t._ref, from, to)} (${pages} pages • ${newBlock} minutes)`;
+          over -= (t.mins - newBlock);
+          t.mins = newBlock;
+        }
+      }
+    }
+  }
+
+  // ---------- Map dates to tasks ----------
   const taskMap = new Map();
   for(let i=0;i<totalDays;i++){
     const d = new Date(start.getTime()+i*86400000);
@@ -395,10 +560,9 @@
     taskMap.set(key, tasksByDay[i]);
   }
 
-  // Month pager state
-  const months = buildMonthList(start, end); // array of {year, month}
-  let monthIdx = 0; // start month
-
+  // ---------- Month pager ----------
+  const months = buildMonthList(start, end);
+  let monthIdx = 0;
   renderOneMonth(months[monthIdx]);
 
   document.getElementById('prevMonth').onclick = ()=>{
@@ -408,26 +572,26 @@
     if(monthIdx<months.length-1){ monthIdx++; renderOneMonth(months[monthIdx]); }
   };
 
-  // ICS
+  // ---------- ICS ----------
   document.getElementById('downloadIcs').onclick = ()=>{
-    const ics = buildICS(start, totalDays, tasksByDay, Number(input.minutesPerDay), input);
+    const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
     const blob = new Blob([ics], {type:'text/calendar'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'OlympiadPrep-StudyPlan.ics';
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   };
 
-  // Rebuild
+  // ---------- Rebuild ----------
   document.getElementById('rebuildBtn').onclick = ()=>{
     const m = Number(document.getElementById('mPerDay').value||0);
     const t = document.getElementById('testDate').value;
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=12';
+    location.href = 'timeline.html?v=13';
   };
 
-  // Helpers
+  // ---------- Helpers ----------
   function buildMonthList(startDate, endDate){
     const out=[];
     let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
@@ -475,6 +639,9 @@
         tasks.forEach(t=>{
           html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`;
         });
+        // show the day's total at the bottom (useful for sanity)
+        const total = tasks.reduce((s,x)=>s+(x.mins||0),0);
+        html += `<div class="task" style="margin-top:4px;color:#64748b"><em>Total for day: ${total} minutes</em></div>`;
       }
       box.innerHTML = html; grid.appendChild(box);
     }
