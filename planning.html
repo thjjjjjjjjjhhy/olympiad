@@ -290,17 +290,43 @@
     return wrap;
   }
 
+ <script>
   function canonicalTopic(name){
-    const s = name.toLowerCase();
-    if(s.includes('number')) return 'Number Theory';
-    if(s.includes('diophantine') || s.includes('crt') || s.includes('mod') ) return 'Number Theory';
-    if(s.includes('probab')) return 'Probability';
-    if(s.includes('count') || s.includes('parity') || s.includes('burnside')) return 'Combinatorics';
-    if(s.includes('sequence')) return 'Sequences & Series';
-    if(s.includes('function')) return 'Functions';
-    if(s.includes('polynomial') || s.includes('quadratic')) return 'Polynomials & Algebra';
-    if(s.includes('line') || s.includes('triangle') || s.includes('inradius') || s.includes('heron') || s.includes('geometry')) return 'Geometry';
+    const s = name.toLowerCase().trim();
+
+    // Number Theory
+    if (s.includes('number') || s.includes('mod') || s.includes('diophantine') ||
+        s.includes('crt') || s.includes('gcd') || s.includes('divisor') ||
+        s.includes('valuation') || s.includes('factorial')) return 'Number Theory';
+
+    // Probability
+    if (s.includes('probab')) return 'Probability';
+
+    // Combinatorics
+    if (s.includes('count') || s.includes('parity') || s.includes('burnside') ||
+        s.includes('color') || s.includes('pigeon') || s.includes('inclusion')) return 'Combinatorics';
+
+    // Sequences / Series
+    if (s.includes('sequence') || s.includes('recurrence') || s.includes('series')) return 'Sequences & Series';
+
+    // Functions
+    if (s.includes('function')) return 'Functions';
+
+    // Algebra (polynomials, quadratics)
+    if (s.includes('polynomial') || s.includes('quadratic')) return 'Polynomials & Algebra';
+
+    // Geometry (be careful not to match "linear")
+    const isLinesTopic = /^lines?$/.test(s);            // exact "line" or "lines"
+    const geoHints = ['triangle','inradius','heron','geometry','circle','polygon','angle','area','perimeter',
+                      'radius','diameter','similar','congruent','3d','cube','sphere','altitude','coordinate','slope'];
+    const looksGeo = isLinesTopic || geoHints.some(h => s.includes(h));
+    if (looksGeo && !s.includes('linear')) return 'Geometry';
+
+    // Default
     return 'Algebra';
+  }
+</script>
+
   }
 
   function grade(t, resultBox, testId){
