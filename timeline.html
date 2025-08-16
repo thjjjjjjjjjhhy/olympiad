@@ -1,10 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Timeline - OlympiadPrep</title>
+  <meta charset="utf-8">
+  <title>Your Study Timeline - OlympiadPrep</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; --grid:#e5e7eb;}
+    body { color:var(--fg) }
+    .container{max-width:1000px;margin:0 auto;padding:0 16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
+    header .logo{font-weight:800}
+    .hint{color:var(--muted);font-size:.92rem}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    button{cursor:pointer;border:0;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
+    button.secondary{background:#e5e7eb;color:#111}
+    input,select{border:1px solid var(--grid);border-radius:10px;padding:8px 10px}
+    .cal-wrap{display:grid;gap:12px;margin-top:12px}
+    .month{border:1px solid var(--grid);border-radius:14px;padding:10px}
+    .month h3{margin:4px 6px 8px}
+    .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:110px;background:#fff}
+    .day .date{font-weight:700;font-size:.9rem;margin-bottom:2px}
+    .past{opacity:.55}
+    .today{outline:2px solid var(--accent)}
+    .task{font-size:.86rem;margin:2px 0;line-height:1.25}
+    .task b{font-weight:700}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .legend span{font-size:.86rem;background:#f8fafc;border:1px solid var(--grid);padding:4px 8px;border-radius:999px}
+    @media print{
+      .site-header, .toolbar { display:none!important; }
+      .month{break-inside:avoid}
+      body{background:#fff}
+      .card{box-shadow:none;border:1px solid var(--grid)}
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -12,28 +42,301 @@
       <h1 class="logo">OlympiadPrep</h1>
       <nav class="site-nav">
         <a href="index.html">Home</a>
-        <a href="timeline.html" class="active">Timeline</a>
-        <a href="tutor.html">Need a Tutor</a>
+        <a href="planning.html">Planning</a>
         <a href="books.html">Books</a>
       </nav>
     </div>
   </header>
+
   <main class="container">
-    <h2>📅 Your Study Timeline</h2>
-    <div id="summary"></div>
-    <div id="study-plan">Loading timeline...</div>
-    <div class="calendar-export">
-      <button id="download-ics">Download iCal</button>
-      <button id="google-calendar">Add to Google Calendar</button>
+    <h2>🗓️ Your Study Timeline</h2>
+    <p class="hint" id="planSummary"></p>
+
+    <div class="card toolbar">
+      <div>
+        <label><b>Minutes/day</b> <input id="mPerDay" type="number" min="15" step="5" style="width:100px"></label>
+      </div>
+      <div>
+        <label><b>Test date</b> <input id="testDate" type="date"></label>
+      </div>
+      <button id="rebuildBtn" class="secondary">Rebuild plan</button>
+      <button id="downloadIcs">Download .ics</button>
+      <button class="secondary" onclick="window.print()">Print</button>
+      <span class="hint">Tip: weaknesses come first; final days emphasize timed sets & full mocks.</span>
     </div>
+
+    <div class="legend">
+      <span>📘 Reading (AoPS Vol 1/2)</span>
+      <span>🧩 Targeted drills</span>
+      <span>⏱️ Timed set</span>
+      <span>📝 Full mock + review</span>
+    </div>
+
+    <section id="calendar" class="cal-wrap"></section>
   </main>
+
   <footer>
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
+    © 2025 OlympiadPrep.
   </footer>
-  <script src="plan.js"></script>
-  <script src="timeline.js"></script>
-  <script>
-    loadStudyPlan('study-plan');
-  </script>
+
+<script>
+(function(){
+  const input = JSON.parse(localStorage.getItem('studyPlanInput')||'null');
+  if(!input){
+    document.getElementById('planSummary').innerHTML = 'No diagnostic found. Go back to <a href="planning.html">Planning</a> and take the diagnostic.';
+    return;
+  }
+
+  // --- Inputs + summary
+  const goalToTestName = {A:'AMC 10/12 (Test A)', B:'AIME bridge (Test B)', C:'US(A)JMO-leaning (Test C)'};
+  document.getElementById('mPerDay').value = input.minutesPerDay;
+  document.getElementById('testDate').value = input.testDate;
+
+  // Human summary
+  const start = new Date(); start.setHours(0,0,0,0);
+  const end = new Date(input.testDate); end.setHours(0,0,0,0);
+  const days = Math.max(1, Math.ceil((end - start)/86400000));
+  document.getElementById('planSummary').innerHTML =
+    `Goal: <b>${(input.goal||'').toUpperCase()}</b> • Track: <b>${goalToTestName[input.testId]||input.testId}</b> • Window: <b>${days}</b> day(s) • Minutes/day: <b>${input.minutesPerDay}</b>.`;
+
+  // --- Topic weights (weakness first)
+  const subs = input.subscores || {};
+  const cats = Object.keys(subs);
+  const weights = {};
+  cats.forEach(k=>{
+    const r = subs[k].right||0, t = subs[k].total||1;
+    const def = 1 - r/t; // 0..1
+    weights[k] = def + 0.05; // small floor weight
+  });
+
+  // --- AoPS reading map (chapters + page spans from official TOCs)
+  // Vol 1 refs use 2014 AoPS Vol 1 TOC; Vol 2 refs use 2013 AoPS Vol 2 TOC.
+  const READS = {
+    "Number Theory": [
+      {vol:1, ref:"Vol.1 §5.4 Modular Arithmetic (pp. 42–45)"},
+      {vol:1, ref:"Vol.1 §5.6–5.7 Primes & Factors (pp. 47–48)"},
+      {vol:2, ref:"Vol.2 §23 Divisibility & Congruences (pp. 252–262)"},
+      {vol:2, ref:"Vol.2 §24 Diophantine Equations (pp. 266–274)"},
+    ],
+    "Combinatorics": [
+      {vol:1, ref:"Vol.1 §25 Learning to Count (pp. 221–229)"},
+      {vol:2, ref:"Vol.2 §15 Combinatorics & Binomial (pp. 170–176)"},
+      {vol:2, ref:"Vol.2 §25.6 Colorings (p. 280)"},
+    ],
+    "Probability": [
+      {vol:1, ref:"Vol.1 §25 Counting (as probability foundation) (pp. 221–229)"},
+      {vol:2, ref:"Vol.2 §15.5 Binomial Theorem for distributions (p. 175)"},
+    ],
+    "Sequences & Series": [
+      {vol:1, ref:"Vol.1 §24 Sequences & Series (pp. 211–217)"},
+      {vol:2, ref:"Vol.2 §16 Sequences/Recurrences (pp. 180–191)"},
+    ],
+    "Functions": [
+      {vol:1, ref:"Vol.1 §21 Functions (pp. 187–190)"},
+      {vol:2, ref:"Vol.2 §7 Functional Equations (pp. 69–73)"},
+    ],
+    "Polynomials & Algebra": [
+      {vol:1, ref:"Vol.1 §6 Quadratic Equations (pp. 52–60)"},
+      {vol:2, ref:"Vol.2 §6 Polynomials (pp. 52–65)"},
+    ],
+    "Geometry": [
+      {vol:1, ref:"Vol.1 §11.8 Area of a Triangle (p. 109)"},
+      {vol:1, ref:"Vol.1 §14 Angle Chasing (p. 133) & §15 Area (pp. 136–138)"},
+      {vol:1, ref:"Vol.1 §18 3D Geometry (pp. 165–169)"},
+      {vol:2, ref:"Vol.2 §22 Geometry Tidbits: Inversion/Homothety (pp. 241–247)"},
+    ],
+  };
+
+  // --- Practice sources (AoPS archives)
+  const LINKS = {
+    AMC10: "https://artofproblemsolving.com/wiki/index.php/AMC_12_Problems_and_Solutions", // AMC 10/12 index page
+    AIME : "https://artofproblemsolving.com/wiki/index.php/AIME_Problems_and_Solutions"
+  };
+
+  // --- Build plan phases
+  const minutesPerDay = Number(input.minutesPerDay||60);
+  const totalDays = Math.max(1, days);
+  const phases = [
+    { name:"Foundation", start:0, end: Math.floor(totalDays*0.55), mix:{read:0.6, drill:0.3, timed:0.1}},
+    { name:"Mixed",     start:Math.floor(totalDays*0.55), end: Math.floor(totalDays*0.85), mix:{read:0.35, drill:0.4, timed:0.25}},
+    { name:"Final",     start:Math.floor(totalDays*0.85), end: totalDays, mix:{read:0.15, drill:0.35, timed:0.5}},
+  ];
+
+  // pick contest source based on track
+  const isAIMEheavy = (input.testId !== 'A');
+
+  // turns a category into a reading item
+  function nextReading(cat){
+    const arr = READS[cat]||[];
+    if(!arr.length) return null;
+    // rotate choices to provide variety
+    const idx = Math.floor(Math.random()*arr.length);
+    return arr[idx].ref;
+  }
+
+  function chooseWeightedTopic(){
+    const sum = Object.values(weights).reduce((a,b)=>a+b,0);
+    let r = Math.random()*sum;
+    for(const [k,w] of Object.entries(weights)){
+      r -= w; if(r<=0) return k;
+    }
+    return cats[0]||"Algebra";
+  }
+
+  // estimate count of problems in a block
+  function estCount(mins, aime=false){
+    return Math.max(2, Math.round(mins/(aime?10:6))); // AIME are slower
+  }
+
+  // Build daily tasks
+  const tasksByDay = [];
+  for(let d=0; d<totalDays; d++){
+    const phase = phases.find(p=>d>=p.start && d<p.end) || phases[phases.length-1];
+    const mRead  = Math.round(minutesPerDay*phase.mix.read);
+    const mDrill = Math.round(minutesPerDay*phase.mix.drill);
+    const mTimed = Math.max(0, minutesPerDay - mRead - mDrill);
+
+    const today = [];
+    // Reading
+    if(mRead>=15){
+      const cat = chooseWeightedTopic();
+      const ref = nextReading(cat);
+      if(ref) today.push({kind:'read', text:`📘 ${cat}: ${ref} (${mRead}m)`});
+    }
+    // Targeted drills
+    if(mDrill>=15){
+      const cat = chooseWeightedTopic();
+      const count = estCount(mDrill, isAIMEheavy);
+      const link = isAIMEheavy ? LINKS.AIME : LINKS.AMC10;
+      today.push({kind:'drill', text:`🧩 ${cat}: ${count} targeted problems from past ${isAIMEheavy?'AIME':'AMC 10/12'} sets`, href:link});
+    }
+    // Timed set or full mock
+    if(d >= totalDays-3){
+      // final stretch: a full mock + review next day
+      const link = isAIMEheavy ? LINKS.AIME : LINKS.AMC10;
+      today.push({kind:'mock', text:`📝 Full mock ${isAIMEheavy?'AIME (15Q/90–120m)':'AMC 10/12 (75m)'} + error log`, href:link});
+    } else if(mTimed>=10){
+      const count = Math.max(3, estCount(mTimed, isAIMEheavy));
+      const link = isAIMEheavy ? LINKS.AIME : LINKS.AMC10;
+      today.push({kind:'timed', text:`⏱️ Timed set: ${count} ${isAIMEheavy?'AIME':'AMC'} problems (${mTimed}m)`, href:link});
+    }
+
+    tasksByDay.push(today);
+  }
+
+  // --- Render calendar months
+  renderCalendar(start, totalDays, tasksByDay);
+
+  // --- ICS download
+  document.getElementById('downloadIcs').onclick = ()=>{
+    const ics = buildICS(start, totalDays, tasksByDay, minutesPerDay, input);
+    const blob = new Blob([ics], {type:'text/calendar'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'OlympiadPrep-StudyPlan.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // --- Rebuild plan quickly
+  document.getElementById('rebuildBtn').onclick = ()=>{
+    const m = Number(document.getElementById('mPerDay').value||0);
+    const t = document.getElementById('testDate').value;
+    if(m<15 || !t){ alert('Enter minutes/day (≥15) and a test date.'); return; }
+    input.minutesPerDay = m; input.testDate = t;
+    localStorage.setItem('studyPlanInput', JSON.stringify(input));
+    location.reload();
+  };
+
+  // ---- helpers
+  function renderCalendar(startDate, spanDays, tasks){
+    const cal = document.getElementById('calendar');
+    cal.innerHTML = '';
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    // group by month
+    const groups = {};
+    for(let i=0;i<spanDays;i++){
+      const dt = new Date(startDate.getTime()+i*86400000);
+      const k = `${dt.getFullYear()}-${dt.getMonth()}`;
+      if(!groups[k]) groups[k] = [];
+      groups[k].push({date:dt, tasks:tasks[i]||[]});
+    }
+
+    Object.keys(groups).forEach(k=>{
+      const list = groups[k];
+      const month = list[0].date.toLocaleString(undefined,{month:'long',year:'numeric'});
+      const wrap = document.createElement('section'); wrap.className='month';
+      wrap.innerHTML = `<h3>${month}</h3><div class="cal"></div>`;
+      const grid = wrap.querySelector('.cal');
+
+      // weekday headers
+      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+        const head = document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
+        head.innerHTML = `<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
+      });
+
+      // leading blanks
+      const first = list[0].date;
+      const lead = first.getDay();
+      for(let i=0;i<lead;i++){
+        const e = document.createElement('div'); e.className='day'; e.style.visibility='hidden'; grid.appendChild(e);
+      }
+
+      // days
+      list.forEach(({date,tasks})=>{
+        const e = document.createElement('div'); e.className='day';
+        const classes = [];
+        if(date<today) classes.push('past');
+        if(date.getTime()===today.getTime()) classes.push('today');
+        e.className = `day ${classes.join(' ')}`;
+        const dd = date.getDate();
+        let html = `<div class="date">${dd}</div>`;
+        tasks.forEach(t=>{
+          const safe = t.text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          if(t.href) html += `<div class="task"><a href="${t.href}" target="_blank" rel="noopener">${safe}</a></div>`;
+          else html += `<div class="task">${safe}</div>`;
+        });
+        grid.appendChild(e); e.innerHTML = html;
+      });
+
+      cal.appendChild(wrap);
+    });
+  }
+
+  function buildICS(startDate, spanDays, tasks, minutes, meta){
+    function dt(dt){ // YYYYMMDDTHHMMSSZ (UTC naive)
+      const y=dt.getUTCFullYear();
+      const m=String(dt.getUTCMonth()+1).padStart(2,'0');
+      const d=String(dt.getUTCDate()).padStart(2,'0');
+      const H='00', M='00', S='00';
+      return `${y}${m}${d}T${H}${M}${S}Z`;
+    }
+    const lines = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'
+    ];
+    for(let i=0;i<spanDays;i++){
+      const day = new Date(startDate.getTime()+i*86400000);
+      const items = tasks[i]||[];
+      if(!items.length) continue;
+      const startUTC = new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(), 21,0,0)); // 9pm UTC-ish evening block
+      const endUTC = new Date(startUTC.getTime()+minutes*60000);
+      const desc = items.map(t=>t.text).join('\\n');
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:olympiadprep-${i}@studyplan`,
+        `DTSTAMP:${dt(new Date())}`,
+        `DTSTART:${dt(startUTC)}`,
+        `DTEND:${dt(endUTC)}`,
+        `SUMMARY:Study • ${meta.goal.toUpperCase()}`,
+        `DESCRIPTION:${desc}`,
+        'END:VEVENT'
+      );
+    }
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  }
+})();
+</script>
 </body>
 </html>
