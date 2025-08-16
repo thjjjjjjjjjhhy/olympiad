@@ -15,6 +15,7 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
+  <!-- Minimal UI for the diagnostic on-page -->
   <style>
     :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; }
     .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
@@ -41,7 +42,7 @@
       .card { box-shadow:none; border:1px solid #e5e7eb }
       .container { max-width:none }
     }
-    /* Safety net: hide any legacy answer UI */
+    /* Absolutely hide any legacy answer UI if leftover */
     [data-ans], .answer, .answers, #toggleAns { display:none !important; visibility:hidden !important; }
   </style>
 </head>
@@ -125,6 +126,7 @@
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
 
+  <!-- ALL JS lives inside this single script tag -->
   <script>
   // ---------- Test bank (A, B, C) ----------
   const tests = {
@@ -234,7 +236,7 @@
     formEl.id = 'quizForm';
     t.questions.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
 
-    // Actions + result (no answers)
+    // Actions + result (no answers shown)
     const actions = document.createElement('div');
     actions.className = 'actions';
     actions.innerHTML = `
@@ -290,16 +292,39 @@
     return wrap;
   }
 
+  // Robust canonical topic mapper (fixes "Linear" ≠ "Lines")
   function canonicalTopic(name){
-    const s = name.toLowerCase();
-    if(s.includes('number')) return 'Number Theory';
-    if(s.includes('diophantine') || s.includes('crt') || s.includes('mod') ) return 'Number Theory';
-    if(s.includes('probab')) return 'Probability';
-    if(s.includes('count') || s.includes('parity') || s.includes('burnside')) return 'Combinatorics';
-    if(s.includes('sequence')) return 'Sequences & Series';
-    if(s.includes('function')) return 'Functions';
-    if(s.includes('polynomial') || s.includes('quadratic')) return 'Polynomials & Algebra';
-    if(s.includes('line') || s.includes('triangle') || s.includes('inradius') || s.includes('heron') || s.includes('geometry')) return 'Geometry';
+    const s = (name||'').toLowerCase().trim();
+
+    // Number Theory
+    if (s.includes('number') || s.includes('mod') || s.includes('diophantine') ||
+        s.includes('crt') || s.includes('gcd') || s.includes('divisor') ||
+        s.includes('valuation') || s.includes('factorial')) return 'Number Theory';
+
+    // Probability
+    if (s.includes('probab')) return 'Probability';
+
+    // Combinatorics
+    if (s.includes('count') || s.includes('parity') || s.includes('burnside') ||
+        s.includes('color') || s.includes('pigeon') || s.includes('inclusion')) return 'Combinatorics';
+
+    // Sequences / Series
+    if (s.includes('sequence') || s.includes('recurrence') || s.includes('series')) return 'Sequences & Series';
+
+    // Functions
+    if (s.includes('function')) return 'Functions';
+
+    // Algebra (polynomials, quadratics)
+    if (s.includes('polynomial') || s.includes('quadratic')) return 'Polynomials & Algebra';
+
+    // Geometry (be careful not to match "linear")
+    const isLinesTopic = /^lines?$/.test(s); // exact "line" or "lines"
+    const geoHints = ['triangle','inradius','heron','geometry','circle','polygon','angle','area','perimeter',
+                      'radius','diameter','similar','congruent','3d','cube','sphere','altitude','coordinate','slope'];
+    const looksGeo = isLinesTopic || geoHints.some(h => s.includes(h));
+    if (looksGeo && !s.includes('linear')) return 'Geometry';
+
+    // Default
     return 'Algebra';
   }
 
@@ -359,7 +384,7 @@
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('studyPlanInput', JSON.stringify(payload));
-      location.href = 'timeline.html';
+      location.href = 'timeline.html?v=6';
     };
 
     MathJax.typesetPromise?.();
