@@ -87,6 +87,9 @@
     return;
   }
 
+  // -------- Config: practice volume knob (0.5 = half) --------
+  const PRACTICE_LOAD = 0.5;
+
   // -------- Toolbar defaults --------
   const today = new Date(); today.setHours(0,0,0,0);
   const todayStr = today.toISOString().slice(0,10);
@@ -203,31 +206,41 @@
   function makeDrillLinks(phaseName){
     if(onAIMETrack){
       const y=rnd(YEARS_AIME), v=rnd(VAI);
-      const nums=chooseAIMEProblems(Math.max(2,Math.round(minutesPerDay/12)), phaseName);
+      const base = Math.max(2, Math.round(minutesPerDay/12));
+      const count = Math.max(1, Math.round(base * PRACTICE_LOAD)); // halved
+      const nums=chooseAIMEProblems(count, phaseName);
       return nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} #${n}</a>`);
     } else {
       const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
-      const nums=chooseAMCProblems(amcLevel, Math.max(3,Math.round(minutesPerDay/10)), phaseName);
+      const base = Math.max(3, Math.round(minutesPerDay/10));
+      const count = Math.max(2, Math.round(base * PRACTICE_LOAD)); // halved
+      const nums=chooseAMCProblems(amcLevel, count, phaseName);
       return nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} #${n}</a>`);
     }
   }
+
   function makeTimedSet(phaseName){
     if(onAIMETrack){
       const y=rnd(YEARS_AIME), v=rnd(VAI);
-      const nums=chooseAIMEProblems(Math.max(3,Math.round(minutesPerDay/15)), phaseName);
+      const base = Math.max(3, Math.round(minutesPerDay/15));
+      const count = Math.max(2, Math.round(base * PRACTICE_LOAD)); // halved
+      const nums=chooseAIMEProblems(count, phaseName);
       return `⏱️ Timed: ${nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} #${n}</a>`).join(', ')}`;
     } else {
       const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
-      const nums=chooseAMCProblems(amcLevel, Math.max(4,Math.round(minutesPerDay/12)), phaseName);
+      const base = Math.max(4, Math.round(minutesPerDay/12));
+      const count = Math.max(2, Math.round(base * PRACTICE_LOAD)); // halved
+      const nums=chooseAMCProblems(amcLevel, count, phaseName);
       return `⏱️ Timed: ${nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} #${n}</a>`).join(', ')}`;
     }
   }
+
   function makeMock(){
     if(onAIMETrack){ const y=rnd(YEARS_AIME), v=rnd(VAI); return {text:`📝 Full mock: ${y} AIME ${v} (15Q). Review & error log.`, href:aimeSetURL(y,v)}; }
     const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review & error log.`, href:amcSetURL(amcLevel,y,v)};
   }
 
-  // -------- Build tasks by day + map by date --------
+  // -------- Build tasks by day --------
   const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
     const phase = phases.find(p=>d>=p.start && d<p.end) || phases[2];
@@ -257,12 +270,13 @@
     }
     if(!todayTasks.length){
       const cat=pickTopic(), links=makeDrillLinks(phase.name);
-      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.slice(0,2).join(', ')} (${minutesPerDay}m)`});
+      const keep = Math.max(1, Math.round(2 * PRACTICE_LOAD)); // usually 1 when halved
+      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.slice(0, keep).join(', ')} (${minutesPerDay}m)`});
     }
     tasksByDay.push(todayTasks);
   }
 
-  // Map date -> tasks (ISO yyyy-mm-dd)
+  // Map date -> tasks
   const taskMap = new Map();
   for(let i=0;i<totalDays;i++){
     const d = new Date(start.getTime()+i*86400000);
@@ -270,7 +284,7 @@
     taskMap.set(key, tasksByDay[i]);
   }
 
-  // -------- Render calendar month-by-month (robust multi-month) --------
+  // -------- Render calendar month-by-month --------
   renderCalendarByMonth(start, end, taskMap, today);
 
   // -------- ICS download --------
@@ -289,7 +303,7 @@
     if(m<15 || !t){ alert('Enter minutes/day (≥15) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=6';
+    location.href = 'timeline.html?v=7';
   };
 
   // -------- Helpers --------
@@ -297,7 +311,6 @@
     const cal = document.getElementById('calendar');
     cal.innerHTML = '';
 
-    // Start at the first of the start month; end at the first of the end month
     let current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
@@ -309,7 +322,6 @@
       wrap.innerHTML = `<h3>${monthName}</h3><div class="cal"></div>`;
       const grid = wrap.querySelector('.cal');
 
-      // Weekday headers
       ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
         const head = document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
         head.innerHTML = `<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
@@ -318,13 +330,8 @@
       const firstDay = new Date(year, monthIdx, 1);
       const daysInMonth = new Date(year, monthIdx+1, 0).getDate();
       const lead = firstDay.getDay();
+      for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e); }
 
-      // leading blanks
-      for(let i=0;i<lead;i++){
-        const e = document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e);
-      }
-
-      // month days
       for(let day=1; day<=daysInMonth; day++){
         const dateObj = new Date(year, monthIdx, day); dateObj.setHours(0,0,0,0);
         const key = dateObj.toISOString().slice(0,10);
@@ -344,12 +351,10 @@
             html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`;
           });
         }
-        box.innerHTML = html;
-        grid.appendChild(box);
+        box.innerHTML = html; grid.appendChild(box);
       }
 
       cal.appendChild(wrap);
-      // advance to next month
       current = new Date(year, monthIdx+1, 1);
     }
   }
