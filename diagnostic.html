@@ -27,5 +27,15 @@
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
   <script src="plan.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const goal = params.get('goal');
+    const quiz = document.getElementById('quiz');
+    if (goal === 'amc10') {
+      quiz.innerHTML = '<p>The AMC 10 diagnostic test has been removed.</p>';
+    } else {
+      quiz.innerHTML = '<p>No diagnostic test is currently available for this goal.</p>';
+    }
+  </script>
 </body>
 </html>
