@@ -62,7 +62,7 @@
       <button id="rebuildBtn" class="secondary">Rebuild plan</button>
       <button id="downloadIcs">Download .ics</button>
       <button class="secondary" onclick="window.print()">Print</button>
-      <span class="hint">Weak topics first; final days emphasize timed sets & full mocks.</span>
+      <span class="hint">Low time/day → more AoPS reading; final days still include full mocks.</span>
     </div>
 
     <div class="legend">
@@ -87,8 +87,9 @@
     return;
   }
 
-  // -------- Config: practice volume knob (0.5 = half) --------
-  const PRACTICE_LOAD = 0.5;
+  // -------- Config switches --------
+  const PRACTICE_LOAD = 0.5;                // half practice volume
+  const THRESH = {read:10, drill:10, timed:8}; // minimum minutes to schedule each block
 
   // -------- Toolbar defaults --------
   const today = new Date(); today.setHours(0,0,0,0);
@@ -172,17 +173,42 @@
   const VAI        = ['I','II'];
   const rnd = arr => arr[Math.floor(Math.random()*arr.length)];
 
-  // -------- Minutes, phases, thresholds --------
+  // -------- Phase logic with reading priority when time is low --------
   const minutesPerDay = Number(input.minutesPerDay||60);
   const totalDays = days;
-  const phases = [
-    {name:"Foundation", start:0, end:Math.floor(totalDays*0.55), mix:{read:0.6, drill:0.3, timed:0.1}},
-    {name:"Mixed",      start:Math.floor(totalDays*0.55), end:Math.floor(totalDays*0.85), mix:{read:0.35, drill:0.4, timed:0.25}},
-    {name:"Final",      start:Math.floor(totalDays*0.85), end:totalDays, mix:{read:0.15, drill:0.35, timed:0.5}},
-  ];
-  const THRESH = {read:10, drill:10, timed:8};
   const onAIMETrack = (input.testId!=='A');
   const amcLevel = (input.goal==='amc10')?'10':'12';
+
+  function baseMixForPhase(phaseName){
+    // Baseline (before adjusting for minutes/day)
+    if(phaseName==='Foundation') return {read:0.65, drill:0.25, timed:0.10};
+    if(phaseName==='Mixed')      return {read:0.50, drill:0.35, timed:0.15};
+    return                         {read:0.35, drill:0.35, timed:0.30}; // Final
+  }
+
+  function adjustedMix(base, m){
+    // Boost reading if minutes/day are small
+    let boostRead = 0, takeFromTimed = 0, takeFromDrill = 0;
+    if(m <= 30){ boostRead = 0.20; takeFromTimed = 0.15; takeFromDrill = 0.05; }
+    else if(m <= 60){ boostRead = 0.10; takeFromTimed = 0.06; takeFromDrill = 0.04; }
+
+    let read = base.read + boostRead;
+    let drill = Math.max(0, base.drill - takeFromDrill);
+    let timed = Math.max(0, base.timed - takeFromTimed);
+
+    // Renormalize to 1.0
+    const s = read+drill+timed || 1;
+    read/=s; drill/=s; timed/=s;
+    return {read,drill,timed};
+  }
+
+  function phaseNameForDay(d){
+    const fEnd = Math.floor(totalDays*0.55);
+    const mEnd = Math.floor(totalDays*0.85);
+    if(d < fEnd) return 'Foundation';
+    if(d < mEnd) return 'Mixed';
+    return 'Final';
+  }
 
   function chooseAIMEProblems(count, phaseName){
     let low=1, high=15;
@@ -240,39 +266,81 @@
     const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review & error log.`, href:amcSetURL(amcLevel,y,v)};
   }
 
-  // -------- Build tasks by day --------
+  // -------- Build tasks by day (reading-first if time is tight) --------
   const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
-    const phase = phases.find(p=>d>=p.start && d<p.end) || phases[2];
-    let mRead=Math.round(minutesPerDay*phase.mix.read);
-    let mDrill=Math.round(minutesPerDay*phase.mix.drill);
-    let mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
+    const pName = phaseNameForDay(d);
+    const base = baseMixForPhase(pName);
+    const mix  = adjustedMix(base, minutesPerDay);
 
+    // Proportional allocation
+    let mRead = Math.round(minutesPerDay*mix.read);
+    let mDrill= Math.round(minutesPerDay*mix.drill);
+    let mTimed= Math.max(0, minutesPerDay - mRead - mDrill); // remainder
+
+    // Reading-first rebalance for small days:
+    // Ensure reading gets a floor if minutes allow, then drills, then timed.
+    function borrow(fromA, fromB, need){
+      // borrow 'need' minutes from A then B (mutates outer scope vars)
+      let take = Math.min(need, fromA.value); fromA.value -= take; need -= take;
+      if(need>0){ const t2 = Math.min(need, fromB.value); fromB.value -= t2; need -= t2; }
+    }
+    // If minutes allow, try to bring reading up to THRESH.read
+    if(minutesPerDay >= THRESH.read && mRead < THRESH.read){
+      const need = THRESH.read - mRead;
+      const objA = {get value(){return mTimed}, set value(v){mTimed=v;}};
+      const objB = {get value(){return mDrill}, set value(v){mDrill=v;}};
+      borrow(objA, objB, need); mRead = Math.min(minutesPerDay, mRead + (THRESH.read - Math.max(0, THRESH.read - need)));
+      // recompute exact after borrowing
+      mRead = Math.min(minutesPerDay, Math.max(mRead, THRESH.read));
+      if(mRead + mDrill + mTimed > minutesPerDay){
+        const diff = mRead + mDrill + mTimed - minutesPerDay;
+        // reduce timed first
+        const takeT = Math.min(diff, mTimed); mTimed -= takeT;
+        const rem = diff - takeT; if(rem>0) mDrill = Math.max(0, mDrill - rem);
+      }
+    }
+
+    // Guarantee at least one useful block when everything is tiny:
     if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){
-      if(onAIMETrack){ mDrill=minutesPerDay; mRead=0; mTimed=0; }
-      else{ mRead=minutesPerDay; mDrill=0; mTimed=0; }
+      // Collapse into reading-first, else drills
+      if(minutesPerDay >= THRESH.read){ mRead = minutesPerDay; mDrill = 0; mTimed = 0; }
+      else { mRead = minutesPerDay; mDrill = 0; mTimed = 0; }
     }
 
     const todayTasks=[];
-    if(mRead>=THRESH.read){
+    // Reading (always try to include if any minutes)
+    if(mRead >= Math.min(THRESH.read, minutesPerDay/2) || (minutesPerDay < THRESH.read && mRead>0)){
       const cat=pickTopic(), ref=nextReading(cat);
       if(ref) todayTasks.push({html:`📘 <b>${cat}</b>: ${ref} (${mRead}m)`});
     }
-    if(mDrill>=THRESH.drill){
-      const cat=pickTopic(), links=makeDrillLinks(phase.name);
+
+    // Drills
+    if(mDrill >= THRESH.drill){
+      const cat=pickTopic(), links=makeDrillLinks(pName);
       todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.join(', ')} (${mDrill}m)`});
     }
+
+    // Timed or Final mock
     if(d>=totalDays-3){
       const mk=makeMock();
       todayTasks.push({html:`<a href="${mk.href}" target="_blank" rel="noopener">${mk.text}</a>`});
-    } else if(mTimed>=THRESH.timed){
-      todayTasks.push({html: makeTimedSet(phase.name)+` (${mTimed}m)`});
+    } else if(mTimed >= THRESH.timed){
+      todayTasks.push({html: makeTimedSet(pName)+` (${mTimed}m)`});
     }
+
+    // Absolute fallback: ensure at least one actionable item exists
     if(!todayTasks.length){
-      const cat=pickTopic(), links=makeDrillLinks(phase.name);
-      const keep = Math.max(1, Math.round(2 * PRACTICE_LOAD)); // usually 1 when halved
-      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.slice(0, keep).join(', ')} (${minutesPerDay}m)`});
+      const cat=pickTopic();
+      const ref=nextReading(cat);
+      if(ref) todayTasks.push({html:`📘 <b>${cat}</b>: ${ref} (${minutesPerDay}m)`});
+      else {
+        const links=makeDrillLinks(pName);
+        const keep = Math.max(1, Math.round(2 * PRACTICE_LOAD));
+        todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.slice(0, keep).join(', ')} (${minutesPerDay}m)`});
+      }
     }
+
     tasksByDay.push(todayTasks);
   }
 
@@ -303,7 +371,7 @@
     if(m<15 || !t){ alert('Enter minutes/day (≥15) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=7';
+    location.href = 'timeline.html?v=8';
   };
 
   // -------- Helpers --------
