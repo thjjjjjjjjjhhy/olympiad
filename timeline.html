@@ -22,6 +22,7 @@
     .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
     .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:110px;background:#fff}
     .day .date{font-weight:700;font-size:.9rem;margin-bottom:2px}
+    .out-of-range{opacity:.35}
     .past{opacity:.55}
     .today{outline:2px solid var(--accent)}
     .task{font-size:.86rem;margin:2px 0;line-height:1.25}
@@ -78,69 +79,66 @@
 
 <script>
 (function(){
-  // -------- Load input from planning page --------
+  // -------- Load input --------
   const input = JSON.parse(localStorage.getItem('studyPlanInput')||'null');
   const planSummary = document.getElementById('planSummary');
   if(!input){
-    planSummary.innerHTML = 'No diagnostic found. Go back to <a href="planning.html">Planning</a> and take the diagnostic.';
+    planSummary.innerHTML='No diagnostic found. Go back to <a href="planning.html">Planning</a>.';
     return;
   }
 
   // -------- Toolbar defaults --------
-  const todayStr = new Date().toISOString().slice(0,10);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
   document.getElementById('testDate').min = todayStr;
   document.getElementById('mPerDay').value = input.minutesPerDay;
   document.getElementById('testDate').value = input.testDate || todayStr;
 
   // -------- Window (fallback to 14 days if date ≤ today) --------
-  const start = new Date(); start.setHours(0,0,0,0);
-  const end = new Date(document.getElementById('testDate').value); end.setHours(0,0,0,0);
+  const start = new Date(today); // start today
+  const end   = new Date(document.getElementById('testDate').value); end.setHours(0,0,0,0);
   const rawDays = Math.ceil((end - start)/86400000);
-  const days = (Number.isFinite(rawDays) && rawDays > 0) ? rawDays : 14;
+  const days = (Number.isFinite(rawDays) && rawDays>0) ? rawDays : 14;
 
   const goalToTestName = {A:'AMC 10/12 (Test A)', B:'AIME bridge (Test B)', C:'US(A)JMO-leaning (Test C)'};
-  planSummary.innerHTML = `Goal: <b>${(input.goal||'').toUpperCase()}</b> • Track: <b>${goalToTestName[input.testId]||input.testId}</b> • Window: <b>${days}</b> day(s) • Minutes/day: <b>${input.minutesPerDay}</b>.`;
+  planSummary.innerHTML = `Start: <b>${start.toLocaleDateString()}</b> → Test: <b>${end.toLocaleDateString()}</b> • Window: <b>${days}</b> day(s) • Goal: <b>${(input.goal||'').toUpperCase()}</b> • Track: <b>${goalToTestName[input.testId]||input.testId}</b> • Minutes/day: <b>${input.minutesPerDay}</b>.`;
 
-  // -------- Weights from subscores (weakness first) --------
-  const subs = input.subscores || {};
+  // -------- Weights (weakness first) --------
+  const subs = input.subscores||{};
   const cats = Object.keys(subs);
   if(!cats.length) cats.push('Polynomials & Algebra','Number Theory','Geometry','Combinatorics','Sequences & Series','Functions','Probability');
-  const weights = {};
-  cats.forEach(k=>{
-    const r = subs[k]?.right || 0, t = subs[k]?.total || 1;
-    weights[k] = 1 - r/t + 0.05;
-  });
+  const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // -------- Reading refs (Ch. instead of §) --------
+  // -------- Reading refs (Ch. – no §) --------
   const READS = {
-    "Number Theory": [
+    "Number Theory":[
       {ref:"Vol.1 Ch.5.4 Modular Arithmetic (pp. 42–45)"},
       {ref:"Vol.1 Ch.5.6–5.7 Primes & Factors (pp. 47–48)"},
       {ref:"Vol.2 Ch.23 Divisibility & Congruences (pp. 252–262)"},
       {ref:"Vol.2 Ch.24 Diophantine Equations (pp. 266–274)"},
     ],
-    "Combinatorics": [
+    "Combinatorics":[
       {ref:"Vol.1 Ch.25 Learning to Count (pp. 221–229)"},
       {ref:"Vol.2 Ch.15 Combinatorics & Binomial (pp. 170–176)"},
       {ref:"Vol.2 Ch.25.6 Colorings (p. 280)"},
     ],
-    "Probability": [
+    "Probability":[
       {ref:"Vol.1 Ch.25 Counting (probability foundation) (pp. 221–229)"},
       {ref:"Vol.2 Ch.15.5 Binomial Theorem for distributions (p. 175)"},
     ],
-    "Sequences & Series": [
+    "Sequences & Series":[
       {ref:"Vol.1 Ch.24 Sequences & Series (pp. 211–217)"},
       {ref:"Vol.2 Ch.16 Sequences/Recurrences (pp. 180–191)"},
     ],
-    "Functions": [
+    "Functions":[
       {ref:"Vol.1 Ch.21 Functions (pp. 187–190)"},
       {ref:"Vol.2 Ch.7 Functional Equations (pp. 69–73)"},
     ],
-    "Polynomials & Algebra": [
+    "Polynomials & Algebra":[
       {ref:"Vol.1 Ch.6 Quadratic Equations (pp. 52–60)"},
       {ref:"Vol.2 Ch.6 Polynomials (pp. 52–65)"},
     ],
-    "Geometry": [
+    "Geometry":[
       {ref:"Vol.1 Ch.11.8 Area of a Triangle (p. 109)"},
       {ref:"Vol.1 Ch.14 Angle Chasing (p. 133) & Ch.15 Area (pp. 136–138)"},
       {ref:"Vol.1 Ch.18 3D Geometry (pp. 165–169)"},
@@ -148,19 +146,18 @@
     ],
   };
 
-  // -------- Weighted topic pick --------
+  // -------- Topic pick --------
   function pickTopic(){
-    const sum = Object.values(weights).reduce((a,b)=>a+b,0);
-    let r = Math.random()*sum;
-    for(const [k,w] of Object.entries(weights)){ r -= w; if(r<=0) return k; }
+    const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
+    for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
     return cats[0];
   }
   function nextReading(cat){
-    const arr = READS[cat] || []; if(!arr.length) return null;
+    const arr=READS[cat]||[]; if(!arr.length) return null;
     return arr[Math.floor(Math.random()*arr.length)].ref;
   }
 
-  // -------- AoPS URL builders (exact problem pages) --------
+  // -------- AoPS URL builders (exact problems) --------
   function aimeProblemURL(y,v,n){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems/Problem_${n}`; }
   function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
   function amcProblemURL(level,y,v,n){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems/Problem_${n}`; }
@@ -172,24 +169,24 @@
   const VAI        = ['I','II'];
   const rnd = arr => arr[Math.floor(Math.random()*arr.length)];
 
-  // -------- Minutes allocation + thresholds (guarantee tasks) --------
-  const minutesPerDay = Number(input.minutesPerDay || 60);
+  // -------- Minutes, phases, thresholds --------
+  const minutesPerDay = Number(input.minutesPerDay||60);
   const totalDays = days;
   const phases = [
     {name:"Foundation", start:0, end:Math.floor(totalDays*0.55), mix:{read:0.6, drill:0.3, timed:0.1}},
     {name:"Mixed",      start:Math.floor(totalDays*0.55), end:Math.floor(totalDays*0.85), mix:{read:0.35, drill:0.4, timed:0.25}},
     {name:"Final",      start:Math.floor(totalDays*0.85), end:totalDays, mix:{read:0.15, drill:0.35, timed:0.5}},
   ];
-  const THRESH = {read:10, drill:10, timed:8}; // lower so short sessions still schedule
-  const onAIMETrack = (input.testId !== 'A');
-  const amcLevel = (input.goal === 'amc10') ? '10' : '12';
+  const THRESH = {read:10, drill:10, timed:8};
+  const onAIMETrack = (input.testId!=='A');
+  const amcLevel = (input.goal==='amc10')?'10':'12';
 
   function chooseAIMEProblems(count, phaseName){
     let low=1, high=15;
     if(phaseName==='Foundation'){ low=1;  high=7; }
     else if(phaseName==='Mixed'){ low=4;  high=12; }
     else { low=6; high=15; }
-    const set = new Set();
+    const set=new Set();
     while(set.size<count) set.add(Math.floor(Math.random()*(high-low+1))+low);
     return [...set].sort((a,b)=>a-b);
   }
@@ -197,8 +194,8 @@
     const ranges = level==='10'
       ? {Foundation:[8,18], Mixed:[12,22], Final:[15,25]}
       : {Foundation:[10,18], Mixed:[12,22], Final:[15,25]};
-    const [low,high] = ranges[phaseName] || [10,22];
-    const set = new Set();
+    const [low,high]=ranges[phaseName]||[10,22];
+    const set=new Set();
     while(set.size<count) set.add(Math.floor(Math.random()*(high-low+1))+low);
     return [...set].sort((a,b)=>a-b);
   }
@@ -214,7 +211,6 @@
       return nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} #${n}</a>`);
     }
   }
-
   function makeTimedSet(phaseName){
     if(onAIMETrack){
       const y=rnd(YEARS_AIME), v=rnd(VAI);
@@ -226,126 +222,136 @@
       return `⏱️ Timed: ${nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} #${n}</a>`).join(', ')}`;
     }
   }
-
   function makeMock(){
     if(onAIMETrack){ const y=rnd(YEARS_AIME), v=rnd(VAI); return {text:`📝 Full mock: ${y} AIME ${v} (15Q). Review & error log.`, href:aimeSetURL(y,v)}; }
     const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review & error log.`, href:amcSetURL(amcLevel,y,v)};
   }
 
-  // -------- Build daily tasks --------
-  const tasksByDay = [];
+  // -------- Build tasks by day + map by date --------
+  const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
     const phase = phases.find(p=>d>=p.start && d<p.end) || phases[2];
+    let mRead=Math.round(minutesPerDay*phase.mix.read);
+    let mDrill=Math.round(minutesPerDay*phase.mix.drill);
+    let mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
 
-    let mRead  = Math.round(minutesPerDay*phase.mix.read);
-    let mDrill = Math.round(minutesPerDay*phase.mix.drill);
-    let mTimed = Math.max(0, minutesPerDay - mRead - mDrill);
-
-    // Guarantee at least one useful block when time is tiny
     if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){
       if(onAIMETrack){ mDrill=minutesPerDay; mRead=0; mTimed=0; }
-      else { mRead=minutesPerDay; mDrill=0; mTimed=0; }
+      else{ mRead=minutesPerDay; mDrill=0; mTimed=0; }
     }
 
-    const today = [];
-
-    if(mRead >= THRESH.read){
-      const cat = pickTopic(), ref = nextReading(cat);
-      if(ref) today.push({html:`📘 <b>${cat}</b>: ${ref} (${mRead}m)`});
+    const todayTasks=[];
+    if(mRead>=THRESH.read){
+      const cat=pickTopic(), ref=nextReading(cat);
+      if(ref) todayTasks.push({html:`📘 <b>${cat}</b>: ${ref} (${mRead}m)`});
     }
-    if(mDrill >= THRESH.drill){
-      const cat = pickTopic(), links = makeDrillLinks(phase.name);
-      today.push({html:`🧩 <b>${cat}</b>: ${links.join(', ')} (${mDrill}m)`});
+    if(mDrill>=THRESH.drill){
+      const cat=pickTopic(), links=makeDrillLinks(phase.name);
+      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.join(', ')} (${mDrill}m)`});
     }
-    if(d >= totalDays-3){
-      const mk = makeMock();
-      today.push({html:`<a href="${mk.href}" target="_blank" rel="noopener">${mk.text}</a>`});
-    } else if(mTimed >= THRESH.timed){
-      today.push({html: makeTimedSet(phase.name) + ` (${mTimed}m)`});
+    if(d>=totalDays-3){
+      const mk=makeMock();
+      todayTasks.push({html:`<a href="${mk.href}" target="_blank" rel="noopener">${mk.text}</a>`});
+    } else if(mTimed>=THRESH.timed){
+      todayTasks.push({html: makeTimedSet(phase.name)+` (${mTimed}m)`});
     }
-
-    // Absolute fallback if still empty
-    if(!today.length){
-      const cat = pickTopic(), links = makeDrillLinks(phase.name);
-      today.push({html:`🧩 <b>${cat}</b>: ${links.slice(0,2).join(', ')} (${minutesPerDay}m)`});
+    if(!todayTasks.length){
+      const cat=pickTopic(), links=makeDrillLinks(phase.name);
+      todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.slice(0,2).join(', ')} (${minutesPerDay}m)`});
     }
-
-    tasksByDay.push(today);
+    tasksByDay.push(todayTasks);
   }
 
-  // -------- Render calendar --------
-  renderCalendar(start, totalDays, tasksByDay);
+  // Map date -> tasks (ISO yyyy-mm-dd)
+  const taskMap = new Map();
+  for(let i=0;i<totalDays;i++){
+    const d = new Date(start.getTime()+i*86400000);
+    const key = d.toISOString().slice(0,10);
+    taskMap.set(key, tasksByDay[i]);
+  }
+
+  // -------- Render calendar month-by-month (robust multi-month) --------
+  renderCalendarByMonth(start, end, taskMap, today);
 
   // -------- ICS download --------
   document.getElementById('downloadIcs').onclick = ()=>{
     const ics = buildICS(start, totalDays, tasksByDay, minutesPerDay, input);
     const blob = new Blob([ics], {type:'text/calendar'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'OlympiadPrep-StudyPlan.ics';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    const a = document.createElement('a'); a.href = url; a.download = 'OlympiadPrep-StudyPlan.ics';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   };
 
-  // -------- Rebuild plan --------
+  // -------- Rebuild --------
   document.getElementById('rebuildBtn').onclick = ()=>{
     const m = Number(document.getElementById('mPerDay').value||0);
     const t = document.getElementById('testDate').value;
     if(m<15 || !t){ alert('Enter minutes/day (≥15) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.reload();
+    location.href = 'timeline.html?v=6';
   };
 
   // -------- Helpers --------
-  function renderCalendar(startDate, spanDays, tasks){
+  function renderCalendarByMonth(startDate, endDate, taskMap, today){
     const cal = document.getElementById('calendar');
     cal.innerHTML = '';
-    const today = new Date(); today.setHours(0,0,0,0);
 
-    // group by month
-    const groups = {};
-    for(let i=0;i<spanDays;i++){
-      const dt = new Date(startDate.getTime()+i*86400000);
-      const k = `${dt.getFullYear()}-${dt.getMonth()}`;
-      (groups[k] ??= []).push({date:dt, tasks:tasks[i]||[]});
-    }
+    // Start at the first of the start month; end at the first of the end month
+    let current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
-    Object.values(groups).forEach(list=>{
-      const month = list[0].date.toLocaleString(undefined,{month:'long',year:'numeric'});
+    while(current <= lastMonth){
+      const year = current.getFullYear(), monthIdx = current.getMonth();
+      const monthName = current.toLocaleString(undefined,{month:'long', year:'numeric'});
+
       const wrap = document.createElement('section'); wrap.className='month';
-      wrap.innerHTML = `<h3>${month}</h3><div class="cal"></div>`;
+      wrap.innerHTML = `<h3>${monthName}</h3><div class="cal"></div>`;
       const grid = wrap.querySelector('.cal');
 
-      // weekday headers
+      // Weekday headers
       ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
         const head = document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
         head.innerHTML = `<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
       });
 
+      const firstDay = new Date(year, monthIdx, 1);
+      const daysInMonth = new Date(year, monthIdx+1, 0).getDate();
+      const lead = firstDay.getDay();
+
       // leading blanks
-      const first = list[0].date;
-      const lead = first.getDay();
       for(let i=0;i<lead;i++){
-        const e = document.createElement('div'); e.className='day'; e.style.visibility='hidden'; grid.appendChild(e);
+        const e = document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e);
       }
 
-      // days
-      list.forEach(({date,tasks})=>{
-        const e = document.createElement('div');
-        const isToday = (date.getTime()===today.getTime());
-        e.className = `day${date<today?' past':''}${isToday?' today':''}`;
-        let html = `<div class="date">${date.getDate()}</div>`;
-        tasks.forEach(t=>{
-          if (t.html) html += `<div class="task">${t.html}</div>`;
-          else if (t.href) html += `<div class="task"><a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a></div>`;
-          else html += `<div class="task">${t.text||''}</div>`;
-        });
-        e.innerHTML = html; grid.appendChild(e);
-      });
+      // month days
+      for(let day=1; day<=daysInMonth; day++){
+        const dateObj = new Date(year, monthIdx, day); dateObj.setHours(0,0,0,0);
+        const key = dateObj.toISOString().slice(0,10);
+        const tasks = taskMap.get(key) || [];
+        const inRange = (dateObj >= startDate && dateObj <= endDate);
+
+        const box = document.createElement('div');
+        let cls = 'day';
+        if(!inRange) cls += ' out-of-range';
+        else if(dateObj < today) cls += ' past';
+        else if(dateObj.getTime() === today.getTime()) cls += ' today';
+        box.className = cls;
+
+        let html = `<div class="date">${day}</div>`;
+        if(inRange){
+          tasks.forEach(t=>{
+            html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`;
+          });
+        }
+        box.innerHTML = html;
+        grid.appendChild(box);
+      }
 
       cal.appendChild(wrap);
-    });
+      // advance to next month
+      current = new Date(year, monthIdx+1, 1);
+    }
   }
 
   function buildICS(startDate, spanDays, tasks, minutes, meta){
@@ -358,8 +364,8 @@
     for(let i=0;i<spanDays;i++){
       const day = new Date(startDate.getTime()+i*86400000);
       const items = tasks[i]||[]; if(!items.length) continue;
-      const startUTC = new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(), 21,0,0)); // evening block
-      const endUTC = new Date(startUTC.getTime() + minutes*60000);
+      const startUTC = new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(), 21,0,0));
+      const endUTC = new Date(startUTC.getTime()+minutes*60000);
       const desc = items.map(t=> (t.html||'').replace(/<[^>]+>/g,'') ).join('\\n');
       lines.push(
         'BEGIN:VEVENT',
