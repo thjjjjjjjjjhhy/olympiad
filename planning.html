@@ -15,7 +15,6 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Minimal UI for the diagnostic on-page -->
   <style>
     :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; }
     .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
@@ -37,13 +36,12 @@
     .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:.8rem;color:#334155}
     .hint{color:var(--muted);font-size:.9rem}
     @media print {
-      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; }
+      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint, #timelineBuilder { display:none !important; }
       body { background:#fff; }
       .card { box-shadow:none; border:1px solid #e5e7eb }
       .container { max-width:none }
     }
-
-    /* Safety net: hide any old-answer UI if it somehow exists */
+    /* Safety net: hide any legacy answer UI */
     [data-ans], .answer, .answers, #toggleAns { display:none !important; visibility:hidden !important; }
   </style>
 </head>
@@ -100,6 +98,26 @@
       <h3 style="margin:.2rem 0 0.6rem">Topic Breakdown</h3>
       <div id="topicTableWrap"></div>
       <p class="hint">Use this to target AoPS Vol.1/2 chapters after grading. Print for a clean handout.</p>
+    </section>
+
+    <!-- Build timeline inputs (appears after grading) -->
+    <section id="timelineBuilder" class="card" style="display:none; margin-top:16px">
+      <h3 style="margin:.2rem 0">Generate your study timeline</h3>
+      <div class="hint">Enter your target test date and how many minutes you can study per day.</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <div>
+          <label for="minutesPerDay"><strong>Minutes per day</strong></label><br>
+          <input id="minutesPerDay" type="number" min="15" step="5" value="60" style="width:120px">
+        </div>
+        <div>
+          <label for="testDate"><strong>Test date</strong></label><br>
+          <input id="testDate" type="date" style="width:180px">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="makePlanBtn" type="button">Generate timeline →</button>
+        <span class="hint">We’ll prioritize weak areas now, then ramp timed practice as the date approaches.</span>
+      </div>
     </section>
   </main>
 
@@ -163,7 +181,7 @@
     }
   };
 
-  // Map goals to tests
+  // Goal→test map
   const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
   // Elements
@@ -174,6 +192,9 @@
   const quiz = document.getElementById('quiz');
   const brk = document.getElementById('breakdown');
   const brkWrap = document.getElementById('topicTableWrap');
+  const builder = document.getElementById('timelineBuilder');
+  const minutesPerDayEl = document.getElementById('minutesPerDay');
+  const testDateEl = document.getElementById('testDate');
 
   // Handle submit (stay on page, render test)
   form.addEventListener('submit', (e) => {
@@ -198,6 +219,7 @@
     const t = tests[testId];
     diagSection.style.display = 'block';
     brk.style.display = 'none';
+    builder.style.display = 'none';
     brkWrap.innerHTML = '';
 
     // Meta
@@ -212,7 +234,7 @@
     formEl.id = 'quizForm';
     t.questions.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
 
-    // Actions + result (NO "Toggle answers" button)
+    // Actions + result (no answers)
     const actions = document.createElement('div');
     actions.className = 'actions';
     actions.innerHTML = `
@@ -227,7 +249,7 @@
     quiz.appendChild(actions);
     quiz.appendChild(result);
 
-    document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result));
+    document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result, testId));
 
     MathJax.typesetPromise?.();
     window.scrollTo({ top: diagSection.offsetTop - 8, behavior: 'smooth' });
@@ -265,11 +287,23 @@
       input.pattern = '\\d{1,3}';
       wrap.appendChild(input);
     }
-    // NOTE: no Answer element added here
     return wrap;
   }
 
-  function grade(t, resultBox){
+  function canonicalTopic(name){
+    const s = name.toLowerCase();
+    if(s.includes('number')) return 'Number Theory';
+    if(s.includes('diophantine') || s.includes('crt') || s.includes('mod') ) return 'Number Theory';
+    if(s.includes('probab')) return 'Probability';
+    if(s.includes('count') || s.includes('parity') || s.includes('burnside')) return 'Combinatorics';
+    if(s.includes('sequence')) return 'Sequences & Series';
+    if(s.includes('function')) return 'Functions';
+    if(s.includes('polynomial') || s.includes('quadratic')) return 'Polynomials & Algebra';
+    if(s.includes('line') || s.includes('triangle') || s.includes('inradius') || s.includes('heron') || s.includes('geometry')) return 'Geometry';
+    return 'Algebra';
+  }
+
+  function grade(t, resultBox, testId){
     const byTopic = new Map(); // topic -> {right,total}
     let correct = 0, total = t.questions.length;
 
@@ -293,11 +327,44 @@
     });
 
     resultBox.innerHTML = `<strong>Score:</strong> ${correct} / ${total} &nbsp; (${Math.round(100*correct/total)}%)`;
-    renderTopicTable(byTopic);
+
+    // Aggregate to canonical topics for the plan
+    const agg = {};
+    [...byTopic.entries()].forEach(([topic, rec])=>{
+      const cat = canonicalTopic(topic);
+      if(!agg[cat]) agg[cat] = { right:0, total:0 };
+      agg[cat].right += rec.right; agg[cat].total += rec.total;
+    });
+
+    // Topic table
+    renderTopicTable(new Map(Object.entries(agg)));
     document.getElementById('breakdown').style.display = 'block';
+
+    // Reveal "Generate timeline" inputs
+    builder.style.display = 'block';
+
+    // Hook up button
+    document.getElementById('makePlanBtn').onclick = ()=>{
+      const minutes = Number(minutesPerDayEl.value || 0);
+      const dateStr = testDateEl.value;
+      if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
+      if(!dateStr){ alert('Please choose your test date.'); return; }
+
+      const payload = {
+        goal: goalSel.value,
+        testId,
+        minutesPerDay: minutes,
+        testDate: dateStr,
+        subscores: agg,    // canonical-topic -> {right,total}
+        generatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('studyPlanInput', JSON.stringify(payload));
+      location.href = 'timeline.html';
+    };
+
     MathJax.typesetPromise?.();
-    window.scrollTo({ top: document.getElementById('breakdown').offsetTop - 8, behavior: 'smooth' });
-  }
+    window.scrollTo({ top: document.getElementById('timelineBuilder').offsetTop - 8, behavior: 'smooth' });
+  };
 
   function renderTopicTable(map){
     if(!map || !map.size){ brkWrap.innerHTML = '<p class="hint">No answers yet.</p>'; return; }
