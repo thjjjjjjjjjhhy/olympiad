@@ -71,8 +71,8 @@
     <div class="legend">
       <span>📘 Reading (Art of Problem Solving Volume 1 or Volume 2)</span>
       <span>🧠 Book exercises (specific problem numbers)</span>
-      <span>🧩 Targeted drills (links to exact AMC/AIME problems)</span>
-      <span>⏱️ Timed set (links to specific problems)</span>
+      <span>🧩 Topic-matched drills (exact AMC/AIME problems)</span>
+      <span>⏱️ Topic-matched timed set</span>
       <span>📝 Full mock and review</span>
     </div>
 
@@ -95,9 +95,12 @@
     return;
   }
 
+  // ---------- Constants ----------
   const THRESH = {read:10, drill:10, timed:8};
   const QUOTA_SLACK = 2;
+  const V1=1, V2=2;
 
+  // ---------- Dates / toolbar ----------
   const today = new Date(); today.setHours(0,0,0,0);
   const todayStr = today.toISOString().slice(0,10);
   document.getElementById('testDate').min = todayStr;
@@ -112,12 +115,13 @@
   const goalToTestName = {A:'AMC 10/12 (Test A)', B:'AIME bridge (Test B)', C:'US(A)JMO-leaning (Test C)'};
   planSummary.innerHTML = `Start date: <b>${start.toLocaleDateString()}</b> → Test date: <b>${end.toLocaleDateString()}</b> • Study window: <b>${days}</b> days • Goal: <b>${(input.goal||'').toUpperCase()}</b> • Track: <b>${goalToTestName[input.testId]||input.testId}</b> • Minutes per day: <b>${input.minutesPerDay}</b>.`;
 
+  // ---------- Subscores → weights ----------
   const subs = input.subscores||{};
   const cats = Object.keys(subs);
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  const V1 = 1, V2 = 2;
+  // ---------- Reading references (with problem counts for exercises) ----------
   const READS_VOL1 = {
     "Number Theory":[
       {id:"V1-NT-5.4", vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45, exCount:30},
@@ -170,151 +174,165 @@
     ],
   };
 
-  const exerciseCursor = {};
+  // ---------- Map each reading ref to fine-grained subtopics ----------
+  const SUBTOPIC_MAP = {
+    "V1-NT-5.4": ["modular"],
+    "V1-NT-5.6-5.7": ["primes-factors"],
+    "V1-C-25": ["basic-counting"],
+    "V1-P-25": ["basic-prob"],
+    "V1-S-24": ["sequences"],
+    "V1-F-21": ["functions"],
+    "V1-A-6": ["quadratics"],
+    "V1-G-11.8": ["triangle-area"],
+    "V1-G-14-15": ["angle-area"],
+    "V1-G-18": ["3d-geometry"],
 
-  function minutesPerPage(vol, isUSAMO){
-    if(vol === V1) return 2.0;
-    return isUSAMO ? 3.2 : 2.7;
-  }
-  function minutesPerBookExercise(vol, phaseName){
-    if(vol === V1){
-      if(phaseName==='Foundation') return 5.5;
-      if(phaseName==='Mixed')      return 6.0;
-      return                         6.5;
-    } else {
-      if(phaseName==='Foundation') return 7.0;
-      if(phaseName==='Mixed')      return 8.0;
-      return                         9.0;
-    }
-  }
+    "V2-NT-23": ["modular-adv"],
+    "V2-NT-24": ["diophantine"],
+    "V2-C-15": ["binomial"],
+    "V2-C-25.6": ["colorings"],
+    "V2-P-15.5": ["prob-binomial"],
+    "V2-S-16": ["recurrences"],
+    "V2-F-7": ["functional-eq"],
+    "V2-A-6": ["polynomials"],
+    "V2-G-22": ["geo-advanced"]
+  };
 
+  // ---------- Curated topic→problems bank (starter set; expand anytime) ----------
+  // Each item: {title, url, level: 'AMC10'|'AMC12'|'AIME', diff:1|2|3}
+  // diff ~ Foundation(1), Mixed(2), Final(3)
+  const PROBLEM_BANK = {
+    "quadratics": [
+      {title:"2012 AMC 10A Problem 16", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_10A_Problems/Problem_16", level:"AMC10", diff:2},
+      {title:"2015 AMC 10B Problem 17", url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_10B_Problems/Problem_17", level:"AMC10", diff:2},
+      {title:"2018 AMC 12A Problem 13", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems/Problem_13", level:"AMC12", diff:1},
+      {title:"2006 AIME I Problem 2", url:"https://artofproblemsolving.com/wiki/index.php/2006_AIME_I_Problems/Problem_2", level:"AIME", diff:1},
+      {title:"2011 AIME II Problem 3", url:"https://artofproblemsolving.com/wiki/index.php/2011_AIME_II_Problems/Problem_3", level:"AIME", diff:1}
+    ],
+    "modular": [
+      {title:"2011 AMC 10A Problem 21", url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10A_Problems/Problem_21", level:"AMC10", diff:3},
+      {title:"2014 AMC 12B Problem 12", url:"https://artofproblemsolving.com/wiki/index.php/2014_AMC_12B_Problems/Problem_12", level:"AMC12", diff:2},
+      {title:"2015 AIME I Problem 1", url:"https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_1", level:"AIME", diff:1},
+      {title:"2010 AIME II Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2010_AIME_II_Problems/Problem_4", level:"AIME", diff:1}
+    ],
+    "primes-factors": [
+      {title:"2013 AMC 10B Problem 22", url:"https://artofproblemsolving.com/wiki/index.php/2013_AMC_10B_Problems/Problem_22", level:"AMC10", diff:3},
+      {title:"2012 AMC 12A Problem 14", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_12A_Problems/Problem_14", level:"AMC12", diff:2},
+      {title:"2008 AIME I Problem 5", url:"https://artofproblemsolving.com/wiki/index.php/2008_AIME_I_Problems/Problem_5", level:"AIME", diff:1}
+    ],
+    "basic-counting": [
+      {title:"2016 AMC 10A Problem 17", url:"https://artofproblemsolving.com/wiki/index.php/2016_AMC_10A_Problems/Problem_17", level:"AMC10", diff:2},
+      {title:"2012 AMC 12B Problem 12", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_12B_Problems/Problem_12", level:"AMC12", diff:2},
+      {title:"2007 AIME I Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2007_AIME_I_Problems/Problem_4", level:"AIME", diff:1}
+    ],
+    "basic-prob": [
+      {title:"2010 AMC 10A Problem 18", url:"https://artofproblemsolving.com/wiki/index.php/2010_AMC_10A_Problems/Problem_18", level:"AMC10", diff:2},
+      {title:"2017 AMC 12A Problem 9", url:"https://artofproblemsolving.com/wiki/index.php/2017_AMC_12A_Problems/Problem_9", level:"AMC12", diff:1},
+      {title:"2011 AIME I Problem 2", url:"https://artofproblemsolving.com/wiki/index.php/2011_AIME_I_Problems/Problem_2", level:"AIME", diff:1}
+    ],
+    "sequences": [
+      {title:"2013 AMC 10A Problem 19", url:"https://artofproblemsolving.com/wiki/index.php/2013_AMC_10A_Problems/Problem_19", level:"AMC10", diff:2},
+      {title:"2018 AMC 12B Problem 12", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_12", level:"AMC12", diff:2},
+      {title:"2014 AIME I Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2014_AIME_I_Problems/Problem_4", level:"AIME", diff:1}
+    ],
+    "functions": [
+      {title:"2016 AMC 10B Problem 18", url:"https://artofproblemsolving.com/wiki/index.php/2016_AMC_10B_Problems/Problem_18", level:"AMC10", diff:2},
+      {title:"2012 AMC 12A Problem 10", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_12A_Problems/Problem_10", level:"AMC12", diff:1},
+      {title:"2017 AIME II Problem 3", url:"https://artofproblemsolving.com/wiki/index.php/2017_AIME_II_Problems/Problem_3", level:"AIME", diff:1}
+    ],
+    "triangle-area": [
+      {title:"2015 AMC 10A Problem 16", url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_10A_Problems/Problem_16", level:"AMC10", diff:2},
+      {title:"2010 AMC 12A Problem 10", url:"https://artofproblemsolving.com/wiki/index.php/2010_AMC_12A_Problems/Problem_10", level:"AMC12", diff:1},
+      {title:"2013 AIME I Problem 5", url:"https://artofproblemsolving.com/wiki/index.php/2013_AIME_I_Problems/Problem_5", level:"AIME", diff:1}
+    ],
+    "angle-area": [
+      {title:"2017 AMC 10B Problem 22", url:"https://artofproblemsolving.com/wiki/index.php/2017_AMC_10B_Problems/Problem_22", level:"AMC10", diff:3},
+      {title:"2014 AMC 12A Problem 16", url:"https://artofproblemsolving.com/wiki/index.php/2014_AMC_12A_Problems/Problem_16", level:"AMC12", diff:2},
+      {title:"2012 AIME II Problem 6", url:"https://artofproblemsolving.com/wiki/index.php/2012_AIME_II_Problems/Problem_6", level:"AIME", diff:2}
+    ],
+    "3d-geometry": [
+      {title:"2011 AMC 10B Problem 21", url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10B_Problems/Problem_21", level:"AMC10", diff:3},
+      {title:"2019 AMC 12A Problem 15", url:"https://artofproblemsolving.com/wiki/index.php/2019_AMC_12A_Problems/Problem_15", level:"AMC12", diff:2},
+      {title:"2009 AIME I Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2009_AIME_I_Problems/Problem_7", level:"AIME", diff:2}
+    ],
+    "modular-adv": [
+      {title:"2013 AIME II Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2013_AIME_II_Problems/Problem_4", level:"AIME", diff:1},
+      {title:"2018 AIME I Problem 6", url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_I_Problems/Problem_6", level:"AIME", diff:2}
+    ],
+    "diophantine": [
+      {title:"2012 AIME I Problem 5", url:"https://artofproblemsolving.com/wiki/index.php/2012_AIME_I_Problems/Problem_5", level:"AIME", diff:2},
+      {title:"2016 AIME II Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2016_AIME_II_Problems/Problem_4", level:"AIME", diff:1}
+    ],
+    "binomial": [
+      {title:"2011 AIME I Problem 6", url:"https://artofproblemsolving.com/wiki/index.php/2011_AIME_I_Problems/Problem_6", level:"AIME", diff:2},
+      {title:"2018 AIME II Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_II_Problems/Problem_4", level:"AIME", diff:1}
+    ],
+    "colorings": [
+      {title:"2014 AIME II Problem 5", url:"https://artofproblemsolving.com/wiki/index.php/2014_AIME_II_Problems/Problem_5", level:"AIME", diff:1}
+    ],
+    "prob-binomial": [
+      {title:"2015 AIME II Problem 5", url:"https://artofproblemsolving.com/wiki/index.php/2015_AIME_II_Problems/Problem_5", level:"AIME", diff:2}
+    ],
+    "recurrences": [
+      {title:"2012 AIME II Problem 4", url:"https://artofproblemsolving.com/wiki/index.php/2012_AIME_II_Problems/Problem_4", level:"AIME", diff:1},
+      {title:"2017 AIME I Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2017_AIME_I_Problems/Problem_7", level:"AIME", diff:2}
+    ],
+    "functional-eq": [
+      {title:"2011 AIME I Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2011_AIME_I_Problems/Problem_7", level:"AIME", diff:2},
+      {title:"2018 AIME I Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_I_Problems/Problem_7", level:"AIME", diff:2}
+    ],
+    "polynomials": [
+      {title:"2014 AIME I Problem 6", url:"https://artofproblemsolving.com/wiki/index.php/2014_AIME_I_Problems/Problem_6", level:"AIME", diff:2},
+      {title:"2016 AIME I Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2016_AIME_I_Problems/Problem_7", level:"AIME", diff:2}
+    ],
+    "geo-advanced": [
+      {title:"2013 AIME II Problem 7", url:"https://artofproblemsolving.com/wiki/index.php/2013_AIME_II_Problems/Problem_7", level:"AIME", diff:2}
+    ]
+  };
+
+  // ---------- Utility: choose topic-weighted random category ----------
   function pickTopic(){
     const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
     for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
     return cats[0];
   }
-  function pickReadingObj(cat, onAIMETrack){
-    const bank = onAIMETrack ? READS_VOL2 : READS_VOL1;
-    const arr=bank[cat]||[];
-    if(!arr.length) return null;
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-  function formatReading(ref, from, to){
-    return `Volume ${ref.vol}, ${ref.chapter} (pages ${from}–${to})`;
+
+  function minutesPerPage(vol, isUSAMO){ return (vol===V1)?2.0:(isUSAMO?3.2:2.7); }
+  function minutesPerBookExercise(vol, phase){
+    if(vol===V1) return (phase==='Final')?6.5:(phase==='Mixed')?6.0:5.5;
+    return (phase==='Final')?9.0:(phase==='Mixed')?8.0:7.0;
   }
 
+  // ---------- AoPS URL builders (fallback generic) ----------
   function aimeProblemURL(y,v,n){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems/Problem_${n}`; }
   function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
   function amcProblemURL(level,y,v,n){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems/Problem_${n}`; }
   function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
+  const YEARS_AIME = Array.from({length:20},(_,i)=>2004+i), YEARS_AMC  = Array.from({length:18},(_,i)=>2006+i);
+  const VARIANTS = ['A','B'], VAI = ['I','II']; const rnd = a=>a[Math.floor(Math.random()*a.length)];
 
-  const YEARS_AIME = Array.from({length:20},(_,i)=>2004+i);
-  const YEARS_AMC  = Array.from({length:18},(_,i)=>2006+i);
-  const VARIANTS   = ['A','B'];
-  const VAI        = ['I','II'];
-  const rnd = arr => arr[Math.floor(Math.random()*arr.length)];
-
+  // ---------- Track / phase ----------
   const minutesPerDay = Number(input.minutesPerDay||60);
   const totalDays = days;
-  const testId = input.testId;
+  const testId = input.testId; // 'A','B','C'
   const onAIMETrack = (testId!=='A');
   const isUSAMOTrack = (testId==='C');
   const amcLevel = (input.goal==='amc10')?'10':'12';
 
-  function baseMixForPhase(phaseName){
-    if(phaseName==='Foundation') return {read:0.65, drill:0.25, timed:0.10};
-    if(phaseName==='Mixed')      return {read:0.50, drill:0.35, timed:0.15};
-    return                         {read:0.35, drill:0.35, timed:0.30};
+  function baseMixForPhase(ph){ return (ph==='Foundation')?{read:0.65,drill:0.25,timed:0.10}:(ph==='Mixed')?{read:0.50,drill:0.35,timed:0.15}:{read:0.35,drill:0.35,timed:0.30}; }
+  function adjustedMix(base,m){
+    let br=0, tt=0, td=0; if(m<=30){br=0.20;tt=0.15;td=0.05}else if(m<=60){br=0.10;tt=0.06;td=0.04}
+    let r=base.read+br, d=Math.max(0,base.drill-td), t=Math.max(0,base.timed-tt); const s=r+d+t||1; return {read:r/s, drill:d/s, timed:t/s};
   }
-  function adjustedMix(base, m){
-    let boostRead = 0, takeFromTimed = 0, takeFromDrill = 0;
-    if(m <= 30){ boostRead = 0.20; takeFromTimed = 0.15; takeFromDrill = 0.05; }
-    else if(m <= 60){ boostRead = 0.10; takeFromTimed = 0.06; takeFromDrill = 0.04; }
-    let read = base.read + boostRead;
-    let drill = Math.max(0, base.drill - takeFromDrill);
-    let timed = Math.max(0, base.timed - takeFromTimed);
-    const s = read+drill+timed || 1; read/=s; drill/=s; timed/=s; return {read,drill,timed};
-  }
-  function phaseNameForDay(d){
-    const fEnd = Math.floor(totalDays*0.55);
-    const mEnd = Math.floor(totalDays*0.85);
-    if(d < fEnd) return 'Foundation';
-    if(d < mEnd) return 'Mixed';
-    return 'Final';
-  }
+  function phaseNameForDay(d){ const f=Math.floor(totalDays*0.55), m=Math.floor(totalDays*0.85); return d<f?'Foundation':(d<m?'Mixed':'Final'); }
 
-  function perProblemMinutes(phaseName){
-    if(onAIMETrack){
-      if(phaseName==='Foundation') return isUSAMOTrack ? 16 : 14;
-      if(phaseName==='Mixed')      return isUSAMOTrack ? 18 : 16;
-      return                         isUSAMOTrack ? 20 : 18;
-    } else {
-      if(phaseName==='Foundation') return 9;
-      if(phaseName==='Mixed')      return 10;
-      return                         12;
-    }
-  }
+  // ---------- Reading scheduler (returns reading+bookex tasks, tagged with subtopics) ----------
+  const exerciseCursor = {}; // ref.id -> next problem #
 
-  function countFromMinutes(blockMinutes, phaseName, isTimed=false){
-    const per = perProblemMinutes(phaseName) * (isTimed ? 1.15 : 1.0);
-    const target = Math.max(1, Math.floor((blockMinutes + per*0.25) / per));
-    const maxCnt = onAIMETrack ? 8 : 10;
-    return Math.min(target, maxCnt);
+  function pickReadingObj(cat){
+    const bank = onAIMETrack ? READS_VOL2 : READS_VOL1; const arr = bank[cat]||[]; return arr.length? arr[Math.floor(Math.random()*arr.length)]: null;
   }
-
-  function chooseAIMEProblems(count, phaseName){
-    let low=1, high=15;
-    if(phaseName==='Foundation'){ low=1; high=isUSAMOTrack?8:7; }
-    else if(phaseName==='Mixed'){ low=isUSAMOTrack?5:4; high=isUSAMOTrack?13:12; }
-    else { low=isUSAMOTrack?10:6; high=15; }
-    const set=new Set(); while(set.size<count) set.add(Math.floor(Math.random()*(high-low+1))+low);
-    return [...set].sort((a,b)=>a-b);
-  }
-  function chooseAMCProblems(level,count,phaseName){
-    const ranges = level==='10'
-      ? {Foundation:[8,18], Mixed:[12,22], Final:[15,25]}
-      : {Foundation:[10,18], Mixed:[12,22], Final:[15,25]};
-    const [low,high]=ranges[phaseName]||[10,22];
-    const set=new Set(); while(set.size<count) set.add(Math.floor(Math.random()*(high-low+1))+low);
-    return [...set].sort((a,b)=>a-b);
-  }
-  function aimeVariant(){
-    if(isUSAMOTrack) return Math.random()<0.7 ? 'II' : 'I';
-    return rnd(VAI);
-  }
-
-  function makeDrillLinks(phaseName, blockMinutes){
-    const count = countFromMinutes(blockMinutes, phaseName, false);
-    if(onAIMETrack){
-      const y=rnd(YEARS_AIME), v=aimeVariant();
-      const nums=chooseAIMEProblems(count, phaseName);
-      const html = nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`).join(', ');
-      return {html, mins:blockMinutes, type:'drill'};
-    } else {
-      const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
-      const nums=chooseAMCProblems(amcLevel, count, phaseName);
-      const html = nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`).join(', ');
-      return {html, mins:blockMinutes, type:'drill'};
-    }
-  }
-  function makeTimedSet(phaseName, blockMinutes){
-    const count = countFromMinutes(blockMinutes, phaseName, true);
-    if(onAIMETrack){
-      const y=rnd(YEARS_AIME), v=aimeVariant();
-      const nums=chooseAIMEProblems(count, phaseName);
-      const html = `⏱️ Timed: ${nums.map(n=>`<a href="${aimeProblemURL(y,v,n)}" target="_blank" rel="noopener">${y} AIME ${v} Problem ${n}</a>`).join(', ')}`;
-      return {html, mins:blockMinutes, type:'timed'};
-    } else {
-      const y=rnd(YEARS_AMC), v=rnd(VARIANTS);
-      const nums=chooseAMCProblems(amcLevel, count, phaseName);
-      const html = `⏱️ Timed: ${nums.map(n=>`<a href="${amcProblemURL(amcLevel,y,v,n)}" target="_blank" rel="noopener">${y} AMC ${amcLevel}${v} Problem ${n}</a>`).join(', ')}`;
-      return {html, mins:blockMinutes, type:'timed'};
-    }
-  }
-  function makeMock(totalMinutes){
-    if(onAIMETrack){ const y=rnd(YEARS_AIME), v=aimeVariant(); return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (15 problems). Review and update your error log.</a>`, mins:totalMinutes, type:'mock'}; }
-    const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {html:`<a href="${amcSetURL(amcLevel,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.</a>`, mins:totalMinutes, type:'mock'};
-  }
+  function formatReading(ref, from, to){ return `Volume ${ref.vol}, ${ref.chapter} (pages ${from}–${to})`; }
 
   function scheduleReading(phaseName, blockMinutes){
     const phaseBias = (phaseName==='Foundation') ? 0.65 : (phaseName==='Mixed' ? 0.55 : 0.45);
@@ -322,88 +340,125 @@
     let minutesForExercises = Math.max(0, blockMinutes - minutesForReading);
 
     const tasks = [];
-    let remainRead = minutesForReading;
-    let remainEx   = minutesForExercises;
+    let remainRead = minutesForReading, remainEx=minutesForExercises, chunks=0;
 
-    let chunks = 0;
     while(remainRead >= 4 && chunks < 3){
       const cat = pickTopic();
-      const ref = pickReadingObj(cat, onAIMETrack);
-      if(!ref) break;
+      const ref = pickReadingObj(cat); if(!ref) break;
       const rate = minutesPerPage(ref.vol, isUSAMOTrack);
-      const availablePages = ref.pEnd - ref.pStart + 1;
-
-      const pagesTarget = Math.max(2, Math.min(availablePages, Math.floor((remainRead + 0.3*rate) / rate)));
-      const from = ref.pStart;
-      const to   = ref.pStart + pagesTarget - 1;
-      const readMins = Math.round(pagesTarget * rate);
-
-      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref});
-
-      remainRead -= readMins;
-      chunks++;
+      const pagesTarget = Math.max(2, Math.min(ref.pEnd-ref.pStart+1, Math.floor((remainRead + 0.3*rate)/rate)));
+      const from=ref.pStart, to=ref.pStart+pagesTarget-1, readMins=Math.round(pagesTarget*rate);
+      const subkeys = SUBTOPIC_MAP[ref.id] || [];
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
+      remainRead -= readMins; chunks++;
       if(remainRead < Math.min(THRESH.read/2, rate)) break;
     }
 
     function addExercisesFor(ref, wantMins){
       if(!ref || wantMins < 4) return null;
       const per = minutesPerBookExercise(ref.vol, phaseName);
-      const count = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
-      const key = ref.id;
-      if(!(key in exerciseCursor)) exerciseCursor[key] = 1;
-      const start = exerciseCursor[key];
-      const end   = Math.min(ref.exCount, start + count - 1);
-      exerciseCursor[key] = (end >= ref.exCount) ? 1 : (end + 1);
-      const used = (end - start + 1) * per;
-      const minsUsed = Math.round(used);
-      return {html:`🧠 <b>Book exercises</b> (Volume ${ref.vol}, ${ref.chapter}): Problems ${start}–${end} (${end-start+1} problems)`, mins:minsUsed, type:'bookex', _ref:ref, _start:start, _end:end, _per:per};
+      const cnt = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
+      const key = ref.id; if(!(key in exerciseCursor)) exerciseCursor[key]=1;
+      const start = exerciseCursor[key], end = Math.min(ref.exCount, start+cnt-1);
+      exerciseCursor[key] = (end >= ref.exCount) ? 1 : (end+1);
+      const used = Math.round((end-start+1)*per);
+      const subkeys = SUBTOPIC_MAP[ref.id] || [];
+      return {html:`🧠 <b>Book exercises</b> (Volume ${ref.vol}, ${ref.chapter}): Problems ${start}–${end} (${end-start+1} problems)`, mins:used, type:'bookex', _ref:ref, _sub:subkeys};
     }
 
-    let exAdded = 0;
-    for(let i=tasks.length-1; i>=0 && remainEx >= 4; i--){
-      const t = tasks[i];
-      if(t.type==='reading'){
-        const ex = addExercisesFor(t._ref, Math.min(remainEx, Math.max(6, Math.round(blockMinutes*0.4))));
+    let exAdded=0;
+    for(let i=tasks.length-1; i>=0 && remainEx>=4; i--){
+      if(tasks[i].type==='reading'){
+        const ex = addExercisesFor(tasks[i]._ref, Math.min(remainEx, Math.max(6, Math.round(blockMinutes*0.4))));
         if(ex){ tasks.push(ex); remainEx -= ex.mins; exAdded++; }
       }
     }
-
-    while(remainEx >= 4 && exAdded < 3){
-      const cat = pickTopic();
-      const ref = pickReadingObj(cat, onAIMETrack);
-      const ex = addExercisesFor(ref, remainEx);
-      if(!ex) break;
-      tasks.push(ex);
-      remainEx -= ex.mins;
-      exAdded++;
+    while(remainEx>=4 && exAdded<3){
+      const cat = pickTopic(); const ref = pickReadingObj(cat);
+      const ex = addExercisesFor(ref, remainEx); if(!ex) break;
+      tasks.push(ex); remainEx -= ex.mins; exAdded++;
     }
 
-    if(!tasks.length && blockMinutes >= 4){
-      const cat = pickTopic();
-      const ref = pickReadingObj(cat, onAIMETrack);
+    if(!tasks.length && blockMinutes>=4){
+      const cat = pickTopic(); const ref = pickReadingObj(cat);
       if(ref){
-        const rate = minutesPerPage(ref.vol, isUSAMOTrack);
-        const pagesTarget = Math.max(1, Math.min(ref.pEnd - ref.pStart + 1, Math.floor((blockMinutes + 0.3*rate)/rate)));
-        const from = ref.pStart, to = ref.pStart + pagesTarget - 1;
-        const readMins = Math.round(pagesTarget * rate);
-        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref});
+        const rate=minutesPerPage(ref.vol, isUSAMOTrack), pagesTarget=Math.max(1, Math.min(ref.pEnd-ref.pStart+1, Math.floor((blockMinutes+0.3*rate)/rate)));
+        const from=ref.pStart, to=ref.pStart+pagesTarget-1, readMins=Math.round(pagesTarget*rate);
+        const subkeys = SUBTOPIC_MAP[ref.id] || [];
+        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
       }
     }
     return tasks;
   }
 
-  const tasksByDay=[];
-  for(let d=0; d<totalDays; d++){
-    const pName = phaseNameForDay(d);
-    if(d >= totalDays-3){
-      tasksByDay.push([ makeMock(minutesPerDay) ]);
-      continue;
+  // ---------- Topic-aligned AMC/AIME problem picker ----------
+  function filterBankBy(subtopics, wantLevel, phaseName, count){
+    const phaseDiff = (phaseName==='Foundation')?1:(phaseName==='Mixed')?2:3;
+    const pool=[];
+    subtopics.forEach(sk=>{
+      (PROBLEM_BANK[sk]||[]).forEach(p=>{
+        if(wantLevel==='AIME'){
+          if(p.level!=='AIME') return;
+        } else if(wantLevel==='AMC10' || wantLevel==='AMC12'){
+          if(p.level==='AIME') return;
+          if(wantLevel==='AMC10' && p.level==='AMC12') return; // stay <= level
+        }
+        // soft difficulty filter around phase
+        const score = 3 - Math.abs((p.diff||2) - phaseDiff); // higher better
+        pool.push([score + Math.random()*0.3, p]);
+      });
+    });
+    pool.sort((a,b)=>b[0]-a[0]);
+    return pool.slice(0, count).map(x=>x[1]);
+  }
+
+  function makeTopicMatchedLinks(phaseName, blockMinutes, preferredSubtopics, timed=false){
+    // how many problems to fit
+    const per = (onAIMETrack ? ((phaseName==='Final')? (isUSAMOTrack?20:18) : (phaseName==='Mixed'?(isUSAMOTrack?18:16):(isUSAMOTrack?16:14))) :
+                               ((phaseName==='Final')?12:(phaseName==='Mixed'?10:9)));
+    const target = Math.max(1, Math.floor((blockMinutes + per*0.25)/ per));
+    const levelPref = onAIMETrack ? 'AIME' : (amcLevel==='10' ? 'AMC10' : 'AMC12');
+
+    // pull from curated bank
+    let picked = filterBankBy(preferredSubtopics, levelPref, phaseName, target);
+
+    // If not enough, top up with generic picker to match count
+    if(picked.length < target){
+      const need = target - picked.length;
+      if(onAIMETrack){
+        const y=rnd(YEARS_AIME), v=rnd(VAI);
+        // choose AIME numbers aligned by phase roughly
+        let [low,high] = (phaseName==='Foundation')?[1,7] : (phaseName==='Mixed')?[4,12]:[10,15];
+        const set=new Set(); while(set.size<need) set.add(Math.floor(Math.random()*(high-low+1))+low);
+        const add = [...set].sort((a,b)=>a-b).map(n=>({title:`${y} AIME ${v} Problem ${n}`, url: `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems/Problem_${n}`}));
+        picked = picked.concat(add);
+      } else {
+        const y=rnd(YEARS_AMC), v=rnd(VARIANTS), L = (amcLevel==='10')?'AMC_10':'AMC_12';
+        let [low,high] = (phaseName==='Foundation')?[8,18] : (phaseName==='Mixed')?[12,22]:[15,25];
+        const set=new Set(); while(set.size<need) set.add(Math.floor(Math.random()*(high-low+1))+low);
+        const add=[...set].sort((a,b)=>a-b).map(n=>({title:`${y} AMC ${amcLevel}${v} Problem ${n}`, url:`https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems/Problem_${n}`}));
+        picked = picked.concat(add);
+      }
     }
 
-    const mix  = adjustedMix(baseMixForPhase(pName), minutesPerDay);
-    let mRead=Math.round(minutesPerDay*mix.read);
-    let mDrill=Math.round(minutesPerDay*mix.drill);
-    let mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
+    const html = (timed? '⏱️ Timed: ' : '🧩 ') + picked.map(p=>`<a href="${p.url}" target="_blank" rel="noopener">${p.title}</a>`).join(', ');
+    return {html, mins:blockMinutes, type: timed?'timed':'drill'};
+  }
+
+  function makeMock(totalMinutes){
+    if(onAIMETrack){ const y=rnd(YEARS_AIME), v=rnd(VAI); return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (15 problems). Review and update your error log.</a>`, mins:totalMinutes, type:'mock'}; }
+    const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {html:`<a href="${amcSetURL(amcLevel,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.</a>`, mins:totalMinutes, type:'mock'};
+  }
+
+  // ---------- Build tasks by day (reading → topic-matched drills/timed) ----------
+  const tasksByDay=[];
+  for(let d=0; d<totalDays; d++){
+    const phase = phaseNameForDay(d);
+
+    if(d >= totalDays-3){ tasksByDay.push([ makeMock(minutesPerDay) ]); continue; }
+
+    const mix = adjustedMix(baseMixForPhase(phase), minutesPerDay);
+    let mRead=Math.round(minutesPerDay*mix.read), mDrill=Math.round(minutesPerDay*mix.drill), mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
 
     if(minutesPerDay >= THRESH.read && mRead < THRESH.read){
       let need = THRESH.read - mRead;
@@ -416,104 +471,105 @@
         const rem = diff - t2; if(rem>0) mDrill = Math.max(0, mDrill - rem);
       }
     }
-    if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){
-      mRead = minutesPerDay; mDrill = 0; mTimed = 0;
-    }
+    if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){ mRead = minutesPerDay; mDrill = 0; mTimed = 0; }
 
     const dayTasks=[];
-    if(mRead > 0){
-      const r = scheduleReading(pName, mRead);
-      r.forEach(t=>dayTasks.push(t));
-    }
+    const readingTasks = (mRead>0) ? scheduleReading(phase, mRead) : [];
+
+    // Collect subtopics covered today from reading/exercises
+    const todaysSubtopics = new Set();
+    readingTasks.forEach(t=> (t._sub||[]).forEach(sk=>todaysSubtopics.add(sk)));
+
+    // Add reading & book exercises to day
+    readingTasks.forEach(t=>dayTasks.push(t));
+
+    // Topic-matched drills
     if(mDrill>=THRESH.drill){
-      const dTask = makeDrillLinks(pName, mDrill);
-      dayTasks.push({html:`🧩 ${dTask.html}`, mins:mDrill, type:'drill'});
+      const pref = [...todaysSubtopics];
+      const dTask = makeTopicMatchedLinks(phase, mDrill, pref, false);
+      dayTasks.push(dTask);
     }
+
+    // Topic-matched timed set
     if(mTimed>=THRESH.timed){
-      const tTask = makeTimedSet(pName, mTimed);
-      dayTasks.push({html: tTask.html, mins:mTimed, type:'timed'});
+      const pref = [...todaysSubtopics];
+      const tTask = makeTopicMatchedLinks(phase, mTimed, pref, true);
+      dayTasks.push(tTask);
     }
 
+    // Fallback if somehow empty
     if(!dayTasks.length){
-      const r = scheduleReading(pName, minutesPerDay);
+      const r = scheduleReading(phase, minutesPerDay);
       if(r.length){ r.forEach(t=>dayTasks.push(t)); }
-      else {
-        const dTask = makeDrillLinks(pName, minutesPerDay);
-        dayTasks.push({html:`🧩 ${dTask.html}`, mins:minutesPerDay, type:'drill'});
-      }
+      else { dayTasks.push(makeTopicMatchedLinks(phase, minutesPerDay, [], false)); }
     }
 
-    balanceToQuota(dayTasks, minutesPerDay, pName);
+    // Balance to daily quota
+    balanceToQuota(dayTasks, minutesPerDay, phase, [...todaysSubtopics]);
+
     tasksByDay.push(dayTasks);
   }
 
+  // ---------- Quota balancer (keeps minutes exact; prefers trimming generic first) ----------
   function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
 
-  function balanceToQuota(arr, target, phaseName){
+  function balanceToQuota(arr, target, phaseName, prefSubs){
     let cur = totalMins(arr);
     if(Math.abs(cur - target) <= QUOTA_SLACK) return;
 
     if(cur < target){
       const gap = target - cur;
-      const extra = makeDrillLinks(phaseName, gap);
-      arr.push({html:`🧩 Extra practice: ${extra.html}`, mins:gap, type:'drill'});
+      // top off with topic-matched practice using today's subtopics
+      arr.push(makeTopicMatchedLinks(phaseName, gap, prefSubs, false));
       return;
     }
 
     let over = cur - target;
-
+    // Try trimming non-topic items first (none now), else drills/timed
     function shrinkPractice(idx, delta){
       const t = arr[idx];
       if(!t || (t.type!=='drill' && t.type!=='timed')) return 0;
       const newBlock = Math.max(THRESH[t.type]||6, t.mins - delta);
       if(newBlock >= t.mins) return 0;
-      let rebuilt;
-      if(t.type==='drill') rebuilt = makeDrillLinks(phaseName, newBlock);
-      else                 rebuilt = makeTimedSet(phaseName, newBlock);
-      t.html = (t.type==='timed' ? rebuilt.html : `🧩 ${rebuilt.html}`);
-      const saved = t.mins - newBlock;
-      t.mins = newBlock;
-      return saved;
+      // rebuild the links at smaller minutes but same topics
+      const rebuilt = makeTopicMatchedLinks(phaseName, newBlock, prefSubs, t.type==='timed');
+      t.html = rebuilt.html; const saved = t.mins - newBlock; t.mins = newBlock; return saved;
     }
+    for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){ over -= shrinkPractice(i, over) || 0; }
+    if(over<=QUOTA_SLACK) return;
 
-    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
-      over -= shrinkPractice(i, over) || 0;
-    }
-    if(over <= QUOTA_SLACK) return;
-
-    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
-      const t = arr[i];
+    // Then trim book exercises
+    for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){
+      const t=arr[i];
       if(t && t.type==='bookex'){
-        const per = t._per || 7;
-        const newBlock = Math.max(4, t.mins - over);
+        const per = t._per || 7, newBlock=Math.max(4, t.mins - over);
         if(newBlock < t.mins){
           const newCount = Math.max(1, Math.floor((newBlock + 0.25*per)/per));
           const newEnd = t._start + newCount - 1;
           t.html = `🧠 <b>Book exercises</b> (Volume ${t._ref.vol}, ${t._ref.chapter}): Problems ${t._start}–${newEnd} (${newCount} problems)`;
-          over -= (t.mins - newBlock);
-          t.mins = newBlock;
+          over -= (t.mins - newBlock); t.mins=newBlock;
         }
       }
     }
-    if(over <= QUOTA_SLACK) return;
+    if(over<=QUOTA_SLACK) return;
 
-    for(let i=arr.length-1; i>=0 && over>QUOTA_SLACK; i--){
-      const t = arr[i];
+    // Finally trim reading pages
+    for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){
+      const t=arr[i];
       if(t && t.type==='reading' && t._ref){
         const rate = minutesPerPage(t._ref.vol, isUSAMOTrack);
         const newBlock = Math.max(4, t.mins - over);
         if(newBlock < t.mins){
           const pages = Math.max(1, Math.floor((newBlock + 0.3*rate)/rate));
-          const from = t._ref.pStart;
-          const to   = from + pages - 1;
+          const from = t._ref.pStart, to = from + pages - 1;
           t.html = `📘 Reading: ${formatReading(t._ref, from, to)} (${pages} pages)`;
-          over -= (t.mins - newBlock);
-          t.mins = newBlock;
+          over -= (t.mins - newBlock); t.mins=newBlock;
         }
       }
     }
   }
 
+  // ---------- Date → tasks map ----------
   const taskMap = new Map();
   for(let i=0;i<totalDays;i++){
     const d = new Date(start.getTime()+i*86400000);
@@ -521,118 +577,72 @@
     taskMap.set(key, tasksByDay[i]);
   }
 
-  const months = buildMonthList(start, end);
-  let monthIdx = 0;
-  renderOneMonth(months[monthIdx]);
+  // ---------- Month pager ----------
+  const months = buildMonthList(start, end); let monthIdx=0; renderOneMonth(months[monthIdx]);
+  document.getElementById('prevMonth').onclick = ()=>{ if(monthIdx>0){monthIdx--;renderOneMonth(months[monthIdx]);}};
+  document.getElementById('nextMonth').onclick = ()=>{ if(monthIdx<months.length-1){monthIdx++;renderOneMonth(months[monthIdx]);}};
 
-  document.getElementById('prevMonth').onclick = ()=>{
-    if(monthIdx>0){ monthIdx--; renderOneMonth(months[monthIdx]); }
-  };
-  document.getElementById('nextMonth').onclick = ()=>{
-    if(monthIdx<months.length-1){ monthIdx++; renderOneMonth(months[monthIdx]); }
-  };
-
+  // ---------- ICS / Rebuild ----------
   document.getElementById('downloadIcs').onclick = ()=>{
     const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
-    const blob = new Blob([ics], {type:'text/calendar'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'OlympiadPrep-StudyPlan.ics';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    const blob = new Blob([ics], {type:'text/calendar'}); const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='OlympiadPrep-StudyPlan.ics'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   };
-
   document.getElementById('rebuildBtn').onclick = ()=>{
-    const m = Number(document.getElementById('mPerDay').value||0);
-    const t = document.getElementById('testDate').value;
+    const m = Number(document.getElementById('mPerDay').value||0), t = document.getElementById('testDate').value;
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
-    input.minutesPerDay = m; input.testDate = t;
-    localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=14';
+    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href='timeline.html?v=15';
   };
 
+  // ---------- Rendering helpers ----------
   function buildMonthList(startDate, endDate){
-    const out=[];
-    let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const out=[]; let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-    while(cur <= last){
-      out.push({year:cur.getFullYear(), month:cur.getMonth()});
-      cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
-    }
+    while(cur<=last){ out.push({year:cur.getFullYear(), month:cur.getMonth()}); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
     return out;
   }
-
   function renderOneMonth({year, month}){
-    const cal = document.getElementById('calendar');
-    cal.innerHTML = '';
-    const wrap = document.createElement('section'); wrap.className='month';
+    const cal = document.getElementById('calendar'); cal.innerHTML='';
+    const wrap=document.createElement('section'); wrap.className='month';
     const header = new Date(year, month, 1).toLocaleString(undefined,{month:'long',year:'numeric'});
-    wrap.innerHTML = `<h3>${header}</h3><div class="cal"></div>`;
-    const grid = wrap.querySelector('.cal');
+    wrap.innerHTML=`<h3>${header}</h3><div class="cal"></div>`; const grid=wrap.querySelector('.cal');
 
     ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d=>{
-      const head = document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
-      head.innerHTML = `<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
+      const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
+      head.innerHTML=`<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
     });
 
-    const firstDay = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month+1, 0).getDate();
-    const lead = firstDay.getDay();
+    const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
     for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e); }
 
     for(let day=1; day<=daysInMonth; day++){
-      const dateObj = new Date(year, month, day); dateObj.setHours(0,0,0,0);
-      const key = dateObj.toISOString().slice(0,10);
-      const tasks = taskMap.get(key) || [];
-      const inRange = (dateObj >= start && dateObj <= end);
+      const dateObj=new Date(year,month,day); dateObj.setHours(0,0,0,0);
+      const key=dateObj.toISOString().slice(0,10); const tasks=taskMap.get(key)||[];
+      const inRange=(dateObj>=start && dateObj<=end);
+      const box=document.createElement('div'); let cls='day';
+      if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(dateObj.getTime()===today.getTime()) cls+=' today';
+      box.className=cls;
 
-      const box = document.createElement('div');
-      let cls = 'day';
-      if(!inRange) cls += ' out-of-range';
-      else if(dateObj < today) cls += ' past';
-      else if(dateObj.getTime() === today.getTime()) cls += ' today';
-      box.className = cls;
-
-      let html = `<div class="date">${day}</div>`;
-      if(inRange){
-        tasks.forEach(t=>{
-          html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`;
-        });
-      }
-      box.innerHTML = html; grid.appendChild(box);
+      let html=`<div class="date">${day}</div>`;
+      if(inRange){ tasks.forEach(t=>{ html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`; }); }
+      box.innerHTML=html; grid.appendChild(box);
     }
-
     cal.appendChild(wrap);
-
     document.getElementById('monthLabel').innerText = `Month ${monthIdx+1} of ${months.length} • ${header}`;
-    document.getElementById('prevMonth').disabled = (monthIdx===0);
-    document.getElementById('nextMonth').disabled = (monthIdx===months.length-1);
+    document.getElementById('prevMonth').disabled=(monthIdx===0);
+    document.getElementById('nextMonth').disabled=(monthIdx===months.length-1);
   }
 
   function buildICS(startDate, spanDays, tasks, minutes, meta){
-    function fmtUTC(x){
-      const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'),
-            H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'), S='00';
-      return `${y}${m}${d}T${H}${M}${S}Z`;
-    }
-    const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
+    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
     for(let i=0;i<spanDays;i++){
-      const day = new Date(startDate.getTime()+i*86400000);
-      const items = tasks[i]||[]; if(!items.length) continue;
-      const startUTC = new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(), 21,0,0));
-      const endUTC = new Date(startUTC.getTime()+minutes*60000);
-      const desc = items.map(t=> (t.html||'').replace(/<[^>]+>/g,'') ).join('\\n');
-      lines.push(
-        'BEGIN:VEVENT',
-        `UID:olympiadprep-${i}@studyplan`,
-        `DTSTAMP:${fmtUTC(new Date())}`,
-        `DTSTART:${fmtUTC(startUTC)}`,
-        `DTEND:${fmtUTC(endUTC)}`,
-        `SUMMARY:Study • ${meta.goal.toUpperCase()}`,
-        `DESCRIPTION:${desc}`,
-        'END:VEVENT'
-      );
+      const day=new Date(startDate.getTime()+i*86400000); const items=tasks[i]||[]; if(!items.length) continue;
+      const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0)); const endUTC=new Date(startUTC.getTime()+minutes*60000);
+      const desc=items.map(t=>(t.html||'').replace(/<[^>]+>/g,'')).join('\\n');
+      lines.push('BEGIN:VEVENT',`UID:olympiadprep-${i}@studyplan`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${meta.goal.toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
     }
-    lines.push('END:VCALENDAR');
-    return lines.join('\r\n');
+    lines.push('END:VCALENDAR'); return lines.join('\r\n');
   }
 })();
 </script>
