@@ -118,72 +118,82 @@
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // Reading references (AMC → Volume 1; AIME/USAMO → Volume 2)
+  // ---------- Reading references as structured ranges (so we can size by minutes) ----------
+  const V1 = 1, V2 = 2;
   const READS_VOL1 = {
     "Number Theory":[
-      {ref:"Volume 1, Chapter 5.4: Modular Arithmetic (pages 42–45)"},
-      {ref:"Volume 1, Chapter 5.6–5.7: Primes and Factors (pages 47–48)"},
+      {vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45},
+      {vol:V1, chapter:"Chapter 5.6–5.7: Primes and Factors", pStart:47, pEnd:48},
     ],
     "Combinatorics":[
-      {ref:"Volume 1, Chapter 25: Learning to Count (pages 221–229)"},
+      {vol:V1, chapter:"Chapter 25: Learning to Count", pStart:221, pEnd:229},
     ],
     "Probability":[
-      {ref:"Volume 1, Chapter 25: Counting as a foundation for Probability (pages 221–229)"},
+      {vol:V1, chapter:"Chapter 25: Counting as a foundation for Probability", pStart:221, pEnd:229},
     ],
     "Sequences and Series":[
-      {ref:"Volume 1, Chapter 24: Sequences and Series (pages 211–217)"},
+      {vol:V1, chapter:"Chapter 24: Sequences and Series", pStart:211, pEnd:217},
     ],
     "Functions":[
-      {ref:"Volume 1, Chapter 21: Functions (pages 187–190)"},
+      {vol:V1, chapter:"Chapter 21: Functions", pStart:187, pEnd:190},
     ],
     "Polynomials and Algebra":[
-      {ref:"Volume 1, Chapter 6: Quadratic Equations (pages 52–60)"},
+      {vol:V1, chapter:"Chapter 6: Quadratic Equations", pStart:52, pEnd:60},
     ],
     "Geometry":[
-      {ref:"Volume 1, Chapter 11.8: Area of a Triangle (page 109)"},
-      {ref:"Volume 1, Chapter 14: Angle Chasing (page 133) and Chapter 15: Area (pages 136–138)"},
-      {ref:"Volume 1, Chapter 18: Three-Dimensional Geometry (pages 165–169)"},
+      {vol:V1, chapter:"Chapter 11.8: Area of a Triangle", pStart:109, pEnd:109},
+      {vol:V1, chapter:"Chapter 14: Angle Chasing and Chapter 15: Area", pStart:133, pEnd:138},
+      {vol:V1, chapter:"Chapter 18: Three-Dimensional Geometry", pStart:165, pEnd:169},
     ],
   };
   const READS_VOL2 = {
     "Number Theory":[
-      {ref:"Volume 2, Chapter 23: Divisibility and Congruences (pages 252–262)"},
-      {ref:"Volume 2, Chapter 24: Diophantine Equations (pages 266–274)"},
+      {vol:V2, chapter:"Chapter 23: Divisibility and Congruences", pStart:252, pEnd:262},
+      {vol:V2, chapter:"Chapter 24: Diophantine Equations", pStart:266, pEnd:274},
     ],
     "Combinatorics":[
-      {ref:"Volume 2, Chapter 15: Combinatorics and the Binomial Theorem (pages 170–176)"},
-      {ref:"Volume 2, Chapter 25.6: Colorings (page 280)"},
+      {vol:V2, chapter:"Chapter 15: Combinatorics and the Binomial Theorem", pStart:170, pEnd:176},
+      {vol:V2, chapter:"Chapter 25.6: Colorings", pStart:280, pEnd:280},
     ],
     "Probability":[
-      {ref:"Volume 2, Chapter 15.5: Binomial Theorem for distributions (page 175)"},
+      {vol:V2, chapter:"Chapter 15.5: Binomial Theorem for distributions", pStart:175, pEnd:175},
     ],
     "Sequences and Series":[
-      {ref:"Volume 2, Chapter 16: Sequences and Recurrences (pages 180–191)"},
+      {vol:V2, chapter:"Chapter 16: Sequences and Recurrences", pStart:180, pEnd:191},
     ],
     "Functions":[
-      {ref:"Volume 2, Chapter 7: Functional Equations (pages 69–73)"},
+      {vol:V2, chapter:"Chapter 7: Functional Equations", pStart:69, pEnd:73},
     ],
     "Polynomials and Algebra":[
-      {ref:"Volume 2, Chapter 6: Polynomials (pages 52–65)"},
+      {vol:V2, chapter:"Chapter 6: Polynomials", pStart:52, pEnd:65},
     ],
     "Geometry":[
-      {ref:"Volume 2, Chapter 22: Geometry Tidbits — Inversion and Homothety (pages 241–247)"},
+      {vol:V2, chapter:"Chapter 22: Geometry Tidbits — Inversion and Homothety", pStart:241, pEnd:247},
     ],
   };
 
-  // Topic pick
+  function minutesPerPage(vol, isUSAMOTrack){
+    // Reading is denser in Volume 2, especially for USAMO track
+    if(vol === V1) return 2.0;                 // ≈ 2 minutes per page
+    return isUSAMOTrack ? 3.2 : 2.7;           // Volume 2: ≈ 2.7–3.2 minutes per page
+  }
+
   function pickTopic(){
     const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
     for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
     return cats[0];
   }
-  function nextReading(cat, onAIMETrack){
+  function pickReadingObj(cat, onAIMETrack){
     const bank = onAIMETrack ? READS_VOL2 : READS_VOL1;
-    const arr=bank[cat]||[]; if(!arr.length) return null;
-    return arr[Math.floor(Math.random()*arr.length)].ref;
+    const arr=bank[cat]||[];
+    if(!arr.length) return null;
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+  function formatReading(ref, from, to){
+    return `Volume ${ref.vol}, ${ref.chapter} (pages ${from}–${to})`;
   }
 
-  // AoPS URL builders
+  // ---------- AoPS URL builders (for problems) ----------
   function aimeProblemURL(y,v,n){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems/Problem_${n}`; }
   function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
   function amcProblemURL(level,y,v,n){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems/Problem_${n}`; }
@@ -241,11 +251,9 @@
   // Count problems to approximately fill the allocated minutes for that block
   function countFromMinutes(blockMinutes, phaseName, isTimed=false){
     const per = perProblemMinutes(phaseName) * (isTimed ? 1.15 : 1.0);
-    // Slight “top-off” before flooring to avoid chronic underfilling
     const target = Math.max(1, Math.floor((blockMinutes + per*0.25) / per));
-    const minCnt = 1;
     const maxCnt = onAIMETrack ? 8 : 10;
-    return Math.min(Math.max(minCnt, target), maxCnt);
+    return Math.min(target, maxCnt);
   }
 
   // Problem pick tuned by goal
@@ -271,7 +279,6 @@
     return rnd(VAI);
   }
 
-  // Build link lists sized by blockMinutes
   function makeDrillLinks(phaseName, blockMinutes){
     const count = countFromMinutes(blockMinutes, phaseName, false);
     if(onAIMETrack){
@@ -303,7 +310,29 @@
     const y=rnd(YEARS_AMC), v=rnd(VARIANTS); return {text:`📝 Full mock: ${y} AMC ${amcLevel}${v}. Review and update your error log.`, href:amcSetURL(amcLevel,y,v)};
   }
 
-  // Build tasks by day (reading-first, then drills, then timed). Counts fill block minutes.
+  // ---------- NEW: Reading scheduler that fills minutes with pages ----------
+  function scheduleReading(blockMinutes){
+    const tasks=[]; let remain = blockMinutes; const maxBlocks = 3; let blocks=0;
+    while(remain >= 4 && blocks < maxBlocks){ // need at least ~2 pages of V1
+      const cat = pickTopic();
+      const ref = pickReadingObj(cat, onAIMETrack);
+      if(!ref){ break; }
+      const rate = minutesPerPage(ref.vol, isUSAMOTrack);
+      const available = ref.pEnd - ref.pStart + 1;
+      // pages we can fit from this reference
+      const pagesTarget = Math.max(2, Math.min(available, Math.floor((remain + 0.3*rate) / rate)));
+      const from = ref.pStart;
+      const to   = ref.pStart + pagesTarget - 1;
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages • ${Math.round(pagesTarget*rate)} minutes)`});
+      remain -= pagesTarget * rate;
+      blocks++;
+      // If we still have a lot of time, loop to add another reading segment (possibly a different topic)
+      if(remain < Math.min(THRESH.read/2, rate)) break; // too little time to add another meaningful chunk
+    }
+    return tasks;
+  }
+
+  // ---------- Build tasks by day (reading-first, then drills, then timed) ----------
   const tasksByDay=[];
   for(let d=0; d<totalDays; d++){
     const pName = phaseNameForDay(d);
@@ -332,8 +361,8 @@
 
     const todayTasks=[];
     if(mRead >= Math.min(THRESH.read, minutesPerDay/2) || (minutesPerDay < THRESH.read && mRead>0)){
-      const cat=pickTopic(), ref=nextReading(cat, onAIMETrack);
-      if(ref) todayTasks.push({html:`📘 <b>${cat}</b>: ${ref} (${mRead} minutes)`});
+      const rTasks = scheduleReading(mRead);
+      rTasks.forEach(t => todayTasks.push(t));
     }
     if(mDrill>=THRESH.drill){
       const cat=pickTopic(), links=makeDrillLinks(pName, mDrill);
@@ -346,15 +375,13 @@
       todayTasks.push({html: makeTimedSet(pName, mTimed)+` (${mTimed} minutes)`});
     }
 
-    // Fallback: fill with drills sized to the full available minutes if reading unavailable
+    // Fallback: if nothing scheduled (rare), fill with reading sized to full minutes
     if(!todayTasks.length){
-      const cat=pickTopic();
-      const ref=nextReading(cat, onAIMETrack);
-      if(ref) {
-        todayTasks.push({html:`📘 <b>${cat}</b>: ${ref} (${minutesPerDay} minutes)`});
-      } else {
+      const rTasks = scheduleReading(minutesPerDay);
+      if(rTasks.length){ rTasks.forEach(t=>todayTasks.push(t)); }
+      else {
         const links=makeDrillLinks(pName, minutesPerDay);
-        todayTasks.push({html:`🧩 <b>${cat}</b>: ${links.join(', ')} (${minutesPerDay} minutes)`});
+        todayTasks.push({html:`🧩 <b>${pickTopic()}</b>: ${links.join(', ')} (${minutesPerDay} minutes)`});
       }
     }
     tasksByDay.push(todayTasks);
@@ -397,7 +424,7 @@
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
     input.minutesPerDay = m; input.testDate = t;
     localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.href = 'timeline.html?v=11';
+    location.href = 'timeline.html?v=12';
   };
 
   // Helpers
