@@ -364,7 +364,7 @@
       const pagesTarget = Math.max(2, Math.min(ref.pEnd-ref.pStart+1, Math.floor((remainRead + 0.3*rate)/rate)));
       const from=ref.pStart, to=ref.pStart+pagesTarget-1, readMins=Math.round(pagesTarget*rate);
       const subkeys = SUBTOPIC_MAP[ref.id] || [];
-      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)}`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
       remainRead -= readMins; chunks++;
       if(remainRead < Math.min(THRESH.read/2, rate)) break;
     }
@@ -379,8 +379,7 @@
       const used = Math.round((end-start+1)*per);
       const subkeys = SUBTOPIC_MAP[ref.id] || [];
       const rangeText = (start===end) ? `Problem ${start}` : `Problems ${start}–${end}`;
-      const countText = (start===end) ? `1 problem` : `${end-start+1} problems`;
-      return {html:`🧠 <b>Book exercises</b> (Volume ${ref.vol}, ${ref.chapter}): ${rangeText} (${countText})`, mins:used, type:'bookex', _ref:ref, _sub:subkeys, _start:start, _end:end, _per:per};
+      return {html:`🧠 <b>Book exercises</b> (Volume ${ref.vol}, ${ref.chapter}): ${rangeText}`, mins:used, type:'bookex', _ref:ref, _sub:subkeys, _start:start, _end:end, _per:per};
     }
 
     let exAdded=0;
@@ -402,7 +401,7 @@
         const rate=minutesPerPage(ref.vol, isUSAMOTrack), pagesTarget=Math.max(1, Math.min(ref.pEnd-ref.pStart+1, Math.floor((blockMinutes+0.3*rate)/rate)));
         const from=ref.pStart, to=ref.pStart+pagesTarget-1, readMins=Math.round(pagesTarget*rate);
         const subkeys = SUBTOPIC_MAP[ref.id] || [];
-        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)} (${pagesTarget} pages)`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
+        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(ref, from, to)}`, mins:readMins, type:'reading', _ref:ref, _sub:subkeys});
       }
     }
     return tasks;
@@ -577,7 +576,7 @@
     for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){ over -= shrinkPractice(i, over) || 0; }
     if(over<=QUOTA_SLACK) return;
 
-    // Then book exercises
+    // Then book exercises (update label without count)
     for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){
       const t=arr[i];
       if(t && t.type==='bookex'){
@@ -586,8 +585,7 @@
           const newCount = Math.max(1, Math.floor((newBlock + 0.25*per)/per));
           const newEnd = t._start + newCount - 1;
           const rangeText = (t._start===newEnd) ? `Problem ${t._start}` : `Problems ${t._start}–${newEnd}`;
-          const countText = (t._start===newEnd) ? `1 problem` : `${newCount} problems`;
-          t.html = `🧠 <b>Book exercises</b> (Volume ${t._ref.vol}, ${t._ref.chapter}): ${rangeText} (${countText})`;
+          t.html = `🧠 <b>Book exercises</b> (Volume ${t._ref.vol}, ${t._ref.chapter}): ${rangeText}`;
           over -= (t.mins - newBlock); t.mins=newBlock;
         }
       }
@@ -628,7 +626,7 @@
   document.getElementById('rebuildBtn').onclick = ()=>{
     const m = Number(document.getElementById('mPerDay').value||0), t = document.getElementById('testDate').value;
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
-    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href='timeline.html?v=17';
+    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href='timeline.html?v=18';
   };
 
   // ---------- Rendering helpers ----------
