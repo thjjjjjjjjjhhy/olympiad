@@ -186,21 +186,39 @@
   };
   const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
-  // ---------- Book catalog (IDs persist into timeline) ----------
-  // Keep titles short; timeline has the detailed mapping per topic.
+  // ---------- Book catalog (expanded) ----------
   const BOOKS = [
+    // Core AoPS
     {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
     {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
+    {id:'prealg', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics'], priority:2, link:'https://artofproblemsolving.com/store/book/prealgebra'},
+    {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-algebra'},
+    {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-counting'},
     {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
     {id:'intro-geo', title:'AoPS Introduction to Geometry', level:['AMC'], topics:['Geometry'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-geometry'},
     {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
     {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
+    {id:'aops-precalc', title:'AoPS Precalculus', level:['AIME'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
+    {id:'cmms', title:'Competition Math for Middle School', level:['AMC'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-middle-school'},
+
+    // Geometry / Proof & Olympiad staples
     {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
+    {id:'geometry-rev', title:'Geometry Revisited (Coxeter & Greitzer)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://press.princeton.edu/books/paperback/9780883856192/geometry-revisited'},
+    {id:'prasolov', title:'Problems in Plane Geometry (Prasolov)', level:['USAMO'], topics:['Geometry'], priority:1, link:'https://www.mccme.ru/free-books/prasolov-geombook.pdf'},
+
+    // Proof / General PS
     {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
     {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
     {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
-    {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276'},
-    {id:'path-comb', title:'A Path to Combinatorics (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'}
+    {id:'larson', title:'Problem-Solving Through Problems (Larson)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://maa.org/press/maa-reviews/problem-solving-through-problems'},
+
+    // Topic problem collections
+    {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.springer.com/gp/book/9780817645273'},
+    {id:'102comb', title:'102 Combinatorial Problems (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.springer.com/gp/book/9780817642999'},
+    {id:'103trig', title:'103 Trigonometry Problems (Titu Andreescu)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817641978'},
+    {id:'mot', title:'Mathematical Olympiad Treasures (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817644498'},
+    {id:'moc', title:'Mathematical Olympiad Challenges (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817645280'},
+    {id:'otis', title:'OTIS Excerpts (Evan Chen)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://web.evanchen.cc/otis.html'}
   ];
 
   // ---------- Elements ----------
@@ -313,7 +331,6 @@
   }
 
   function canonicalTopic(s){
-    // Keep coarse buckets consistent with timeline
     const k = s.toLowerCase();
     if(k.includes('algebra') || k.includes('quadratic') || k.includes('polynomial')) return 'Polynomials and Algebra';
     if(k.includes('number')) return 'Number Theory';
@@ -326,8 +343,7 @@
   }
 
   function grade(t, resultBox, testId){
-    const byTopic = new Map(); // topic -> {right,total}
-    let correct = 0, total = t.questions.length;
+    const byTopic = new Map(); let correct = 0, total = t.questions.length;
 
     t.questions.forEach((q, i) => {
       const num = i+1;
@@ -350,7 +366,6 @@
 
     resultBox.innerHTML = `<strong>Score:</strong> ${correct} / ${total} &nbsp; (${Math.round(100*correct/total)}%)`;
 
-    // Aggregate to canonical topics
     const agg = {};
     [...byTopic.entries()].forEach(([topic, rec])=>{
       const cat = canonicalTopic(topic);
@@ -358,11 +373,9 @@
       agg[cat].right += rec.right; agg[cat].total += rec.total;
     });
 
-    // Topic table
     renderTopicTable(new Map(Object.entries(agg)));
     document.getElementById('breakdown').style.display = 'block';
 
-    // Level advice (up/down suggestion)
     const pct = Math.round(100*correct/total);
     let advice = '';
     if(testId==='A' && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
@@ -372,9 +385,7 @@
     levelAdvice.style.display = advice ? 'block' : 'none';
     levelAdvice.textContent = advice;
 
-    // Reveal builder and prefill date/minutes
     builder.style.display = 'block';
-    minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
     const today = new Date(); today.setHours(0,0,0,0);
     const minStr = today.toISOString().slice(0,10);
     testDateEl.min=minStr;
@@ -382,11 +393,10 @@
       const defaultDate = new Date(today.getTime()+35*86400000);
       testDateEl.value = defaultDate.toISOString().slice(0,10);
     }
+    minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
 
-    // Build book recommendations
     buildBookRecommendations(testId, agg);
 
-    // Hook up Generate
     document.getElementById('makePlanBtn').onclick = ()=>{
       const minutes = Number(minutesPerDayEl.value || 0);
       const dateStr = testDateEl.value;
@@ -401,8 +411,8 @@
         testId,
         minutesPerDay: minutes,
         testDate: dateStr,
-        subscores: agg,                // canonical-topic -> {right,total}
-        selectedBooks: selected,       // array of book IDs
+        subscores: agg,
+        selectedBooks: selected,
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('lastMinutes', String(minutes));
@@ -435,29 +445,29 @@
     const weakTopics = Object.entries(agg).map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
       .sort((a,b)=>a.score-b.score).slice(0,3).map(x=>x.k);
 
-    // Base set by goal
     let base = [];
     if(testId==='A'){ // AMC
-      base.push('aops-v1');
-      // add intro books for weak topics
+      base.push('aops-v1','intro-alg','intro-cp');
       if(weakTopics.includes('Number Theory')) base.push('intro-nt');
       if(weakTopics.includes('Geometry')) base.push('intro-geo');
+      if(weakTopics.includes('Combinatorics')) base.push('cmms');
+      if(weakTopics.includes('Polynomials and Algebra')) base.push('prealg');
     } else if(testId==='B'){ // AIME
-      base.push('aops-v2','int-alg','int-cp');
-      if(weakTopics.includes('Geometry')) base.push('egmo');
-    } else { // USAMO/USAJMO
-      base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel');
+      base.push('aops-v2','int-alg','int-cp','aops-precalc');
+      if(weakTopics.includes('Geometry')) base.push('egmo','geometry-rev');
       if(weakTopics.includes('Number Theory')) base.push('104nt');
-      if(weakTopics.includes('Combinatorics')) base.push('path-comb');
+      if(weakTopics.includes('Combinatorics')) base.push('102comb');
+    } else { // USAMO/USAJMO
+      base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel','geometry-rev','moc','mot');
+      if(weakTopics.includes('Number Theory')) base.push('104nt');
+      if(weakTopics.includes('Combinatorics')) base.push('path-comb','102comb');
+      if(weakTopics.includes('Geometry')) base.push('prasolov','103trig');
     }
 
-    // De-dupe + sort by priority
     const baseSet = new Set(base);
-    const recs = BOOKS.filter(b => baseSet.has(b.id))
-      .sort((a,b)=>b.priority-a.priority);
-    const others = BOOKS.filter(b => !baseSet.has(b.id));
+    const recs = BOOKS.filter(b => baseSet.has(b.id)).sort((a,b)=>b.priority-a.priority || a.title.localeCompare(b.title));
+    const others = BOOKS.filter(b => !baseSet.has(b.id)).sort((a,b)=>b.priority-a.priority || a.title.localeCompare(b.title));
 
-    // Render pills
     recBooksEl.innerHTML = recs.map(b=>pillHTML(b,true)).join('');
     otherBooksEl.innerHTML = others.map(b=>pillHTML(b,false)).join('');
   }
