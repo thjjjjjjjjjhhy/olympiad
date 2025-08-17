@@ -12,6 +12,7 @@
     .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
     header .logo{font-weight:800}
     .hint{color:var(--muted);font-size:.92rem}
+    .error{border-left:4px solid #ef4444;background:#fff1f2;color:#991b1b;padding:10px;border-radius:8px;margin:8px 0}
     .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     button{cursor:pointer;border:0;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
     button.secondary{background:#e5e7eb;color:#111}
@@ -53,6 +54,7 @@
 
   <main class="container">
     <h2>🗓️ Your Study Timeline</h2>
+    <div id="errBox" style="display:none" class="error"></div>
     <p class="hint" id="planSummary"></p>
 
     <div class="card toolbar">
@@ -89,6 +91,13 @@
 
 <script>
 (function(){
+  // Simple error banner
+  window.addEventListener('error', (e)=>{
+    const b=document.getElementById('errBox');
+    b.style.display='block';
+    b.textContent = 'Runtime error: ' + (e.message||'Unknown');
+  });
+
   const input = JSON.parse(localStorage.getItem('studyPlanInput')||'null');
   const planSummary = document.getElementById('planSummary');
   if(!input){
@@ -116,7 +125,6 @@
 
   // ---------- Selected books ----------
   const selectedBooks = new Set(input.selectedBooks || []); // IDs
-
   const useV1 = selectedBooks.has('aops-v1');
   const useV2 = selectedBooks.has('aops-v2');
   const useProof = ['velleman','zeitz','engel','egmo'].some(id=>selectedBooks.has(id));
@@ -124,14 +132,13 @@
   const onAIMETrack = (input.testId!=='A');
   const isUSAMOTrack = (input.testId==='C');
 
-  // ---------- Topic weights from subscores ----------
+  // ---------- Topic weights ----------
   const subs = input.subscores||{};
   const cats = Object.keys(subs);
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // ---------- Source banks ----------
-  // AoPS Volume 1/2 remain page-based for precise pacing.
+  // ---------- Sources (AoPS V1/V2) ----------
   const V1=1, V2=2;
   const READS_VOL1 = {
     "Number Theory":[
@@ -185,9 +192,8 @@
     ],
   };
 
-  // Extra books (section-based; show section names, not pages)
+  // Extras (section-based)
   const EXT_BANK = {
-    // AMC helpers
     'intro-nt': {
       title:'AoPS Intro to Number Theory', topic:'Number Theory',
       sections:[
@@ -202,7 +208,6 @@
         {name:'Area & Circles', subs:['triangle-area'], readMins:20, exPer:7, exCount:10}
       ]
     },
-    // AIME/USAMO helpers
     'int-alg': {
       title:'AoPS Intermediate Algebra', topic:'Polynomials and Algebra',
       sections:[
@@ -258,7 +263,7 @@
     }
   };
 
-  // ---------- Subtopics → problem links ----------
+  // Subtopic → past problems
   const PROBLEM_BANK = {
     "quadratics": [
       {title:"2012 AMC 10A Problem 16", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_10A_Problems/Problem_16", level:"AMC10", diff:2},
@@ -327,11 +332,7 @@
   };
 
   // ---------- Utility ----------
-  function minutesPerPage(vol){
-    // Volume 2 is denser/faster for strong students; we bias higher a bit for USAMO
-    if(vol===V1) return 2.0;
-    return isUSAMOTrack ? 3.2 : 2.7;
-  }
+  function minutesPerPage(vol){ return (vol===V1)?2.0:(isUSAMOTrack?3.2:2.7); }
   function pickTopic(){
     const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
     for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
@@ -343,7 +344,6 @@
     let units = [];
     if(useV1 && READS_VOL1[cat]) units = units.concat(READS_VOL1[cat].map(x=>({...x, type:'pages'})));
     if(useV2 && READS_VOL2[cat]) units = units.concat(READS_VOL2[cat].map(x=>({...x, type:'pages'})));
-    // extras
     for(const id of selectedBooks){
       const ext = EXT_BANK[id]; if(!ext) continue;
       if(ext.topic===cat){
@@ -353,14 +353,12 @@
         }));
       }
     }
-    // fallback defaults if none selected for that topic
     if(units.length===0){
       if(onAIMETrack && READS_VOL2[cat]) units = READS_VOL2[cat].map(x=>({...x, type:'pages'}));
       else if(READS_VOL1[cat]) units = READS_VOL1[cat].map(x=>({...x, type:'pages'}));
     }
     return units;
   }
-
   function formatReading(unit, from, to){
     if(unit.type==='pages') return `${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
     return `${unit.book} — ${unit.chapter}`;
@@ -370,12 +368,10 @@
     const tasks = [];
     if(blockMinutes < 4) return tasks;
 
-    // Split into reading + exercises (~60/40 in Foundation, 55/45 Mixed, 45/55 Final)
     const phaseBias = (phaseName==='Foundation') ? 0.60 : (phaseName==='Mixed' ? 0.55 : 0.45);
     let readBudget = Math.max(6, Math.round(blockMinutes * phaseBias));
     let exBudget = Math.max(0, blockMinutes - readBudget);
 
-    // up to 3 units
     let chunks=0;
     while(readBudget >= 4 && chunks < 3){
       const cat = pickTopic();
@@ -392,7 +388,6 @@
         tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit, from, to)}`, mins:readMins, type:'reading', _ref:unit, _from:from, _to:to, _sub:(unit.subs||[])});
         readBudget -= readMins;
       } else {
-        // ext section-based
         const used = Math.min(readBudget, unit.readMins);
         tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit)}`, mins:used, type:'reading', _ref:unit, _sub:(unit.subs||[])});
         readBudget -= used;
@@ -400,14 +395,12 @@
       chunks++;
       if(readBudget < 4) break;
 
-      // Pair exercises from same unit if possible
       if(exBudget >= 6){
         const ex = buildExercisesFromUnit(unit, Math.min(exBudget, Math.max(6, Math.round(blockMinutes*0.45))));
         if(ex){ tasks.push(ex); exBudget -= ex.mins; }
       }
     }
 
-    // Top off exercises from any unit if exBudget remains
     let guard=0;
     while(exBudget >= 6 && guard++<3){
       const cat = pickTopic();
@@ -420,7 +413,6 @@
     }
 
     if(!tasks.length){
-      // fallback single reading
       const cat = pickTopic(); const units = availableUnitsFor(cat); if(units.length){
         const u=units[0];
         if(u.type==='pages'){
@@ -439,7 +431,6 @@
 
   function buildExercisesFromUnit(unit, wantMins){
     if(unit.type==='pages'){
-      // estimate per-exercise time by volume
       const per = (unit.vol===V1) ? 6.0 : (isUSAMOTrack?9.0:8.0);
       const cnt = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
       const start = 1, end = Math.min(unit.exCount, start+cnt-1);
@@ -456,7 +447,7 @@
     }
   }
 
-  // ---------- Proof module appears only if selected ----------
+  // ---------- Proof module ----------
   const PROOF_BOOKS_SELECTED = ['velleman','zeitz','engel','egmo'].filter(id=>selectedBooks.has(id));
   const PROOF_MODULE = {
     'velleman': [
@@ -477,7 +468,6 @@
   };
   let proofCursor = 0;
   const proofLinearList = PROOF_BOOKS_SELECTED.flatMap(id=>PROOF_MODULE[id]||[]);
-
   function scheduleProofBlock(blockMinutes){
     if(!proofLinearList.length || blockMinutes<10) return [];
     const out=[]; let used=0;
@@ -493,7 +483,7 @@
     return out;
   }
 
-  // ---------- Practice pickers (topic-matched & mocks) ----------
+  // ---------- Practice pickers ----------
   const YEARS_AIME = Array.from({length:20},(_,i)=>2004+i), YEARS_AMC  = Array.from({length:18},(_,i)=>2006+i);
   const VARIANTS = ['A','B'], VAI = ['I','II']; const rnd = a=>a[Math.floor(Math.random()*a.length)];
   function filterBankBy(subtopics, wantLevel, phaseName, count){
@@ -582,26 +572,20 @@
     if(mRead<THRESH.read && mDrill<THRESH.drill && mTimed<THRESH.timed){ mRead = minutesPerDay; mDrill = 0; mTimed = 0; }
 
     const dayTasks=[];
-    // Reading (AoPS + selected extras)
     if(mRead > 0){
       const r = scheduleReadingUnified(phase, mRead);
       r.forEach(t=>dayTasks.push(t));
     }
-
-    // Optional proof module (only if selected)
     if(useProof){
-      // steer a fraction of reading time to proof by shaving some drills
       const proofShare = isUSAMOTrack ? 0.22 : (onAIMETrack ? 0.12 : 0.0);
       const proofBudget = Math.round(minutesPerDay * proofShare);
       if(proofBudget>0){
         const p = scheduleProofBlock(proofBudget);
         p.forEach(t=>dayTasks.push(t));
-        // reduce drills accordingly
         mDrill = Math.max(0, mDrill - proofBudget);
       }
     }
 
-    // Preferred subtopics come from today's readings
     const todaysSubtopics = new Set();
     dayTasks.forEach(t=> (t._sub||[]).forEach(sk=>todaysSubtopics.add(sk)));
     const pref = [...todaysSubtopics];
@@ -609,7 +593,6 @@
     if(mDrill>=THRESH.drill) dayTasks.push( makeTopicMatchedLinks(phase, mDrill, pref, false) );
     if(mTimed>=THRESH.timed) dayTasks.push( makeTopicMatchedLinks(phase, mTimed, pref, true) );
 
-    // Fallback
     if(!dayTasks.length){
       const r = scheduleReadingUnified(phase, minutesPerDay);
       if(r.length){ r.forEach(t=>dayTasks.push(t)); }
@@ -621,7 +604,6 @@
   }
 
   // ---------- Quota balancer ----------
-  const QUOTA_SLACK = 2;
   function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
   function balanceToQuota(arr, target, phaseName, prefSubs){
     let cur = totalMins(arr);
@@ -671,7 +653,7 @@
     }
   }
 
-  // ---------- Date → tasks map & calendar ----------
+  // ---------- Map → calendar ----------
   const taskMap = new Map();
   for(let i=0;i<days;i++){
     const d = new Date(start.getTime()+i*86400000);
