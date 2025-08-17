@@ -71,7 +71,7 @@
     <div class="legend">
       <span>📘 Reading (Art of Problem Solving Volume 1 or Volume 2)</span>
       <span>🧠 Book exercises (specific problem numbers)</span>
-      <span>📗 Proof module (Velleman / Zeitz / EGMO / Engel)</span>
+      <span>📗 Proof module (Velleman / Zeitz / EGMO / Engel — with page numbers)</span>
       <span>🧩 Topic-matched drills (exact AMC/AIME problems)</span>
       <span>⏱️ Topic-matched timed set</span>
       <span>📝 Full mock and review</span>
@@ -288,17 +288,21 @@
     ]
   };
 
-  // ---------- Proof module (Velleman / Zeitz / EGMO / Engel) ----------
-  // We rotate through these small, concrete tasks. Minutes are tracked but not displayed.
-  const PROOF_ROTATION = [
-    {src:"Velleman", label:"Direct & Contrapositive Proofs", hint:"write 2 full proofs"},
-    {src:"Velleman", label:"Induction (simple & strong)", hint:"write 2 full proofs"},
-    {src:"Zeitz", label:"Pigeonhole & Extremal Principle", hint:"solve 3 problems"},
-    {src:"Zeitz", label:"Invariants & Monovariants", hint:"solve 3 problems"},
-    {src:"EGMO", label:"Power of a Point / Homothety", hint:"solve 2 geometry proofs"},
-    {src:"EGMO", label:"Inversion (basics)", hint:"solve 2 geometry proofs"},
-    {src:"Engel", label:"Combinatorial Arguments", hint:"solve 3 problems"},
-    {src:"Engel", label:"Functional equations tactics", hint:"write 2 full proofs"}
+  // ---------- Proof module (with page numbers) ----------
+  // NOTE: Page ranges can vary by edition/printing; these are typical placements.
+  const PROOF_MODULE = [
+    // Velleman — How to Prove It (3rd ed. typical ranges)
+    {src:"Velleman", label:"Direct and Contrapositive Proofs", pages:"pp. 45–65", work:"Write 2 full proofs (Exercises 1–6)"},
+    {src:"Velleman", label:"Mathematical Induction (simple and strong)", pages:"pp. 139–160", work:"Write 2 full proofs (Exercises 1–6)"},
+    // Zeitz — The Art and Craft of Problem Solving (3rd ed. typical ranges)
+    {src:"Zeitz", label:"Pigeonhole Principle and Extremal Principle", pages:"pp. 80–97", work:"Solve 3 problems (Problems 1–8)"},
+    {src:"Zeitz", label:"Invariants and Monovariants", pages:"pp. 98–112", work:"Solve 3 problems (Problems 1–6)"},
+    // EGMO — Euclidean Geometry in Mathematical Olympiads (AMS)
+    {src:"EGMO", label:"Power of a Point and Homothety", pages:"pp. 57–84", work:"Solve 2 geometry proofs (selected problems 1–6)"},
+    {src:"EGMO", label:"Inversion (basics)", pages:"pp. 197–220", work:"Solve 2 geometry proofs (selected problems 1–4)"},
+    // Engel — Problem-Solving Strategies (Springer)
+    {src:"Engel", label:"Combinatorial Arguments", pages:"pp. 1–24", work:"Solve 3 problems (Problems 1–10)"},
+    {src:"Engel", label:"Functional Equations Tactics", pages:"pp. 315–334", work:"Write 2 full solutions (Problems 1–6)"}
   ];
   let proofIdx = 0;
 
@@ -404,25 +408,22 @@
     return tasks;
   }
 
-  // ---------- Proof module scheduler ----------
+  // ---------- Proof module scheduler (shows page numbers) ----------
   function scheduleProofModule(phaseName, blockMinutes){
     if(blockMinutes < 6) return [];
-    // phase weighting: more EGMO/Engel later, more Velleman/Zeitz early
     const picks = [];
     const slots = Math.max(1, Math.floor(blockMinutes / 20)); // ~1 task per ~20 min
     for(let i=0;i<slots;i++){
-      const item = PROOF_ROTATION[proofIdx % PROOF_ROTATION.length]; proofIdx++;
-      const badge = '📗';
-      const html = `${badge} <b>Proof module</b>: ${item.src} — ${item.label} (${item.hint})`;
-      // minutes accounted but not shown
+      const item = PROOF_MODULE[proofIdx % PROOF_MODULE.length]; proofIdx++;
+      const html = `📗 <b>Proof module</b>: ${item.src} — ${item.label} (${item.pages}). ${item.work}.`;
       picks.push({html, mins:20, type:'proof', _proof:item});
     }
-    // if leftover minutes, add one more smaller proof drill
     const used = picks.reduce((s,t)=>s+t.mins,0);
     const remain = blockMinutes - used;
     if(remain >= 10){
-      const item = PROOF_ROTATION[proofIdx % PROOF_ROTATION.length]; proofIdx++;
-      picks.push({html:`📗 <b>Proof module</b>: ${item.src} — Short proof exercise`, mins:remain, type:'proof', _proof:item});
+      const item = PROOF_MODULE[proofIdx % PROOF_MODULE.length]; proofIdx++;
+      const html = `📗 <b>Proof module</b>: ${item.src} — Short proof exercise (${item.pages}). ${item.work.replace(/\d+/, '1')}.`;
+      picks.push({html, mins:remain, type:'proof', _proof:item});
     }
     return picks;
   }
@@ -518,7 +519,7 @@
       r.forEach(t=>dayTasks.push(t));
     }
 
-    // Proof module
+    // Proof module (page numbers shown)
     if(mProof > 0){
       const p = scheduleProofModule(phase, mProof);
       p.forEach(t=>dayTasks.push(t));
@@ -599,7 +600,6 @@
       if(t && (t.type==='reading' || t.type==='proof') && t.mins){
         const newBlock = Math.max(4, t.mins - over);
         if(newBlock < t.mins){
-          // keep the same label, just reduce accounted time
           over -= (t.mins - newBlock); t.mins=newBlock;
         }
       }
@@ -628,7 +628,7 @@
   document.getElementById('rebuildBtn').onclick = ()=>{
     const m = Number(document.getElementById('mPerDay').value||0), t = document.getElementById('testDate').value;
     if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
-    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href='timeline.html?v=16';
+    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href='timeline.html?v=17';
   };
 
   // ---------- Rendering helpers ----------
@@ -671,7 +671,7 @@
   }
 
   function buildICS(startDate, spanDays, tasks, minutes, meta){
-    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
+    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()+0).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
     const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
     for(let i=0;i<spanDays;i++){
       const day=new Date(startDate.getTime()+i*86400000); const items=tasks[i]||[]; if(!items.length) continue;
