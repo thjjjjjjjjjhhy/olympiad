@@ -14,7 +14,7 @@
     .hint{color:var(--muted);font-size:.92rem}
     .error{border-left:4px solid #ef4444;background:#fff1f2;color:#991b1b;padding:10px;border-radius:8px;margin:8px 0}
     .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    button{cursor:pointer;border:0;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
+    button{cursor:pointer;border:0;background:#0ea5e9;color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
     button.secondary{background:#e5e7eb;color:#111}
     input{border:1px solid var(--grid);border-radius:10px;padding:8px 10px}
     .cal-wrap{display:grid;gap:12px;margin-top:12px}
@@ -91,7 +91,6 @@
 
 <script>
 (function(){
-  // Simple error banner
   window.addEventListener('error', (e)=>{
     const b=document.getElementById('errBox');
     b.style.display='block';
@@ -105,11 +104,9 @@
     return;
   }
 
-  // ---------- Constants ----------
   const THRESH = {read:10, drill:10, timed:8};
   const QUOTA_SLACK = 2;
 
-  // ---------- Dates / toolbar ----------
   const today = new Date(); today.setHours(0,0,0,0);
   const todayStr = today.toISOString().slice(0,10);
   document.getElementById('testDate').min = todayStr;
@@ -123,8 +120,7 @@
 
   planSummary.innerHTML = `Start: <b>${start.toLocaleDateString()}</b> → Test: <b>${end.toLocaleDateString()}</b> • Window: <b>${days}</b> days • Goal: <b>${(input.goal||'').toUpperCase()}</b> • Minutes/day: <b>${input.minutesPerDay}</b>.`;
 
-  // ---------- Selected books ----------
-  const selectedBooks = new Set(input.selectedBooks || []); // IDs
+  const selectedBooks = new Set(input.selectedBooks || []);
   const useV1 = selectedBooks.has('aops-v1');
   const useV2 = selectedBooks.has('aops-v2');
   const useProof = ['velleman','zeitz','engel','egmo'].some(id=>selectedBooks.has(id));
@@ -132,13 +128,11 @@
   const onAIMETrack = (input.testId!=='A');
   const isUSAMOTrack = (input.testId==='C');
 
-  // ---------- Topic weights ----------
   const subs = input.subscores||{};
   const cats = Object.keys(subs);
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // ---------- Sources (AoPS V1/V2) ----------
   const V1=1, V2=2;
   const READS_VOL1 = {
     "Number Theory":[
@@ -192,8 +186,31 @@
     ],
   };
 
-  // Extras (section-based)
+  // ---------- EXTRA BOOKS (expanded) ----------
+  // Each entry gives 1–2 sections with (approx) read minutes + exercise pacing.
   const EXT_BANK = {
+    // AMC helpers
+    'prealg': {
+      title:'AoPS Prealgebra', topic:'Polynomials and Algebra',
+      sections:[
+        {name:'Equations & Word Problems (basics)', subs:['quadratics'], readMins:20, exPer:7, exCount:10},
+        {name:'Number Sense & Factors (refresh)', subs:['primes-factors'], readMins:20, exPer:7, exCount:10}
+      ]
+    },
+    'intro-alg': {
+      title:'AoPS Intro to Algebra', topic:'Polynomials and Algebra',
+      sections:[
+        {name:'Linear & Quadratic Equations', subs:['quadratics','polynomials'], readMins:25, exPer:8, exCount:12},
+        {name:'Functions & Vieta Basics', subs:['functions','polynomials'], readMins:25, exPer:8, exCount:12}
+      ]
+    },
+    'intro-cp': {
+      title:'AoPS Intro to Counting & Probability', topic:'Combinatorics',
+      sections:[
+        {name:'Counting Strategies', subs:['basic-counting'], readMins:25, exPer:7, exCount:12},
+        {name:'Basic Probability', subs:['basic-prob'], readMins:25, exPer:7, exCount:12}
+      ]
+    },
     'intro-nt': {
       title:'AoPS Intro to Number Theory', topic:'Number Theory',
       sections:[
@@ -208,6 +225,8 @@
         {name:'Area & Circles', subs:['triangle-area'], readMins:20, exPer:7, exCount:10}
       ]
     },
+
+    // AIME / USAMO helpers
     'int-alg': {
       title:'AoPS Intermediate Algebra', topic:'Polynomials and Algebra',
       sections:[
@@ -222,11 +241,50 @@
         {name:'Binomial & Generating Functions', subs:['binomial'], readMins:25, exPer:8, exCount:12}
       ]
     },
+    'aops-precalc': {
+      title:'AoPS Precalculus', topic:'Functions',
+      sections:[
+        {name:'Functional Identities & Transformations', subs:['functions'], readMins:25, exPer:9, exCount:10},
+        {name:'Sequences & Series Essentials', subs:['sequences'], readMins:25, exPer:9, exCount:10}
+      ]
+    },
+    'cmms': {
+      title:'Competition Math for Middle School', topic:'Combinatorics',
+      sections:[
+        {name:'Counting & Casework', subs:['basic-counting'], readMins:20, exPer:7, exCount:12},
+        {name:'NT & Probability Mix', subs:['primes-factors','basic-prob'], readMins:20, exPer:7, exCount:12}
+      ]
+    },
+
+    // Geometry / Proof / Olympiad staples
     'egmo': {
       title:'EGMO (Chen)', topic:'Geometry',
       sections:[
         {name:'Power of a Point & Homothety', subs:['geo-advanced'], readMins:30, exPer:10, exCount:6},
         {name:'Inversion (basics)', subs:['geo-advanced'], readMins:30, exPer:10, exCount:6}
+      ]
+    },
+    'geometry-rev': {
+      title:'Geometry Revisited', topic:'Geometry',
+      sections:[
+        {name:'Circle Power & Radical Axis', subs:['geo-advanced'], readMins:30, exPer:10, exCount:6},
+        {name:'Homothety & Transformations', subs:['geo-advanced'], readMins:30, exPer:10, exCount:6}
+      ]
+    },
+    'prasolov': {
+      title:'Problems in Plane Geometry (Prasolov)', topic:'Geometry',
+      sections:[
+        {name:'Triangles & Circles (selected sets)', subs:['geo-advanced'], readMins:25, exPer:10, exCount:8},
+        {name:'Transformations & Constructions', subs:['geo-advanced'], readMins:25, exPer:10, exCount:8}
+      ]
+    },
+
+    // Proof / General problem-solving
+    'velleman': {
+      title:'Velleman — How to Prove It', topic:'Polynomials and Algebra',
+      sections:[
+        {name:'Direct & Contrapositive Proofs', subs:['polynomials','primes-factors'], readMins:25, exPer:10, exCount:6},
+        {name:'Induction', subs:['sequences'], readMins:25, exPer:10, exCount:6}
       ]
     },
     'zeitz': {
@@ -236,34 +294,60 @@
         {name:'Invariants & Monovariants', subs:['colorings'], readMins:25, exPer:10, exCount:6}
       ]
     },
-    'velleman': {
-      title:'Velleman — How to Prove It', topic:'Polynomials and Algebra',
-      sections:[
-        {name:'Direct & Contrapositive Proofs', subs:['polynomials','primes-factors'], readMins:25, exPer:10, exCount:6},
-        {name:'Induction', subs:['sequences'], readMins:25, exPer:10, exCount:6}
-      ]
-    },
     'engel': {
       title:'Engel — Problem-Solving Strategies', topic:'Combinatorics',
       sections:[
         {name:'Combinatorial Arguments', subs:['basic-counting','binomial'], readMins:25, exPer:10, exCount:6}
       ]
     },
+    'larson': {
+      title:'Larson — Problem-Solving Through Problems', topic:'Combinatorics',
+      sections:[
+        {name:'Heuristics & Strategies', subs:['basic-counting','polynomials'], readMins:25, exPer:10, exCount:6},
+        {name:'NT/Geo mixed drills', subs:['primes-factors','angle-area'], readMins:25, exPer:10, exCount:6}
+      ]
+    },
+
+    // Topic problem collections
     '104nt': {
       title:'104 Number Theory Problems', topic:'Number Theory',
       sections:[
         {name:'Divisibility & Congruences set', subs:['modular','primes-factors'], readMins:20, exPer:10, exCount:8}
       ]
     },
-    'path-comb': {
-      title:'A Path to Combinatorics', topic:'Combinatorics',
+    '102comb': {
+      title:'102 Combinatorial Problems', topic:'Combinatorics',
       sections:[
-        {name:'Counting Strategies', subs:['basic-counting','binomial'], readMins:25, exPer:10, exCount:8}
+        {name:'Counting & Graphy themes (set A)', subs:['basic-counting','colorings'], readMins:20, exPer:10, exCount:8}
+      ]
+    },
+    '103trig': {
+      title:'103 Trigonometry Problems', topic:'Geometry',
+      sections:[
+        {name:'Trig in Geometry (selected set)', subs:['geo-advanced','triangle-area'], readMins:25, exPer:10, exCount:8}
+      ]
+    },
+    'mot': {
+      title:'Mathematical Olympiad Treasures', topic:'Number Theory',
+      sections:[
+        {name:'Classical NT problems (set A)', subs:['primes-factors','modular-adv'], readMins:25, exPer:10, exCount:8}
+      ]
+    },
+    'moc': {
+      title:'Mathematical Olympiad Challenges', topic:'Combinatorics',
+      sections:[
+        {name:'Advanced combinatorics (set A)', subs:['binomial','colorings'], readMins:25, exPer:10, exCount:8}
+      ]
+    },
+    'otis': {
+      title:'OTIS Excerpts (Chen)', topic:'Combinatorics',
+      sections:[
+        {name:'Invariants & Bijections (notes + set)', subs:['colorings','basic-counting'], readMins:25, exPer:10, exCount:8}
       ]
     }
   };
 
-  // Subtopic → past problems
+  // Subtopic → past problems (unchanged)
   const PROBLEM_BANK = {
     "quadratics": [
       {title:"2012 AMC 10A Problem 16", url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_10A_Problems/Problem_16", level:"AMC10", diff:2},
@@ -331,7 +415,6 @@
     ]
   };
 
-  // ---------- Utility ----------
   function minutesPerPage(vol){ return (vol===V1)?2.0:(isUSAMOTrack?3.2:2.7); }
   function pickTopic(){
     const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
@@ -339,7 +422,6 @@
     return cats[0];
   }
 
-  // ---------- Reading selector across AoPS & extras ----------
   function availableUnitsFor(cat){
     let units = [];
     if(useV1 && READS_VOL1[cat]) units = units.concat(READS_VOL1[cat].map(x=>({...x, type:'pages'})));
@@ -447,7 +529,6 @@
     }
   }
 
-  // ---------- Proof module ----------
   const PROOF_BOOKS_SELECTED = ['velleman','zeitz','engel','egmo'].filter(id=>selectedBooks.has(id));
   const PROOF_MODULE = {
     'velleman': [
@@ -483,7 +564,6 @@
     return out;
   }
 
-  // ---------- Practice pickers ----------
   const YEARS_AIME = Array.from({length:20},(_,i)=>2004+i), YEARS_AMC  = Array.from({length:18},(_,i)=>2006+i);
   const VARIANTS = ['A','B'], VAI = ['I','II']; const rnd = a=>a[Math.floor(Math.random()*a.length)];
   function filterBankBy(subtopics, wantLevel, phaseName, count){
@@ -539,7 +619,6 @@
     return {html:`<a href="${amcSetURL(lv,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${lv}${v}. Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
   }
 
-  // ---------- Daily plan ----------
   function baseMixForPhase(ph){ return (ph==='Foundation')?{read:0.65,drill:0.25,timed:0.10}:(ph==='Mixed')?{read:0.50,drill:0.35,timed:0.15}:{read:0.35,drill:0.35,timed:0.30}; }
   function adjustedMix(base,m){
     let br=0, tt=0, td=0; if(m<=30){br=0.20;tt=0.15;td=0.05}else if(m<=60){br=0.10;tt=0.06;td=0.04}
@@ -603,7 +682,6 @@
     tasksByDay.push(dayTasks);
   }
 
-  // ---------- Quota balancer ----------
   function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
   function balanceToQuota(arr, target, phaseName, prefSubs){
     let cur = totalMins(arr);
@@ -653,7 +731,6 @@
     }
   }
 
-  // ---------- Map → calendar ----------
   const taskMap = new Map();
   for(let i=0;i<days;i++){
     const d = new Date(start.getTime()+i*86400000);
