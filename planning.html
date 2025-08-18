@@ -42,12 +42,7 @@
     .rec-h{margin:.6rem 0 .25rem}
     .notice{border-left:4px solid var(--accent);background:#f0f9ff;padding:10px;border-radius:8px}
     @media (max-width:700px){.row{grid-template-columns:1fr}}
-    @media print {
-      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; }
-      body { background:#fff; }
-      .card { box-shadow:none; border:1px solid #e5e7eb }
-      .container { max-width:none }
-    }
+    @media print { .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; } body { background:#fff; } .card { box-shadow:none; border:1px solid #e5e7eb } .container { max-width:none } }
   </style>
 </head>
 <body>
@@ -138,80 +133,20 @@
   // ---------- Test bank (A, B, C) ----------
   const tests = {
     A: {
-      title: "Diagnostic Test A (AMC Readiness — Harder)",
+      title: "Diagnostic Test A (AMC Readiness)",
       format: "10 multiple-choice (A–E)",
-      time: 35,
+      time: 30,
       questions: [
-        {
-          type:"mcq",
-          topic:"Polynomials and Algebra",
-          latex:"Let the roots of \\((x-3)(x+5)=14\\) be \\(r_1,r_2\\). Compute \\(r_1^2+r_2^2\\).",
-          choices:["58","60","62","64","66"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Number Theory",
-          latex:"Find the least positive integer \\(n\\) with \\(7n\\equiv 1\\pmod{30}\\).",
-          choices:["7","11","13","17","19"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Geometry",
-          latex:"A triangle has side lengths \\(13,14,15\\). Its circumradius \\(R\\) equals",
-          choices:["\\(\\tfrac{15}{4}\\)","\\(\\tfrac{13}{2}\\)","\\(\\tfrac{65}{8}\\)","\\(\\tfrac{17}{2}\\)","\\(\\tfrac{33}{4}\\)"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Combinatorics",
-          latex:"How many distinct arrangements of the letters of \\(\\text{BANANA}\\) have no two \\(\\text{N}\\) adjacent?",
-          choices:["30","36","40","42","48"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Sequences and Series",
-          latex:"Let \\(a_n=3\\cdot 2^n-5\\). Compute \\(\\sum_{n=1}^{6} a_n\\).",
-          choices:["336","342","348","356","360"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Functions",
-          latex:"For real \\(t\\), the lines \\(y=tx+1\\) and \\(y=(t+2)x-3\\) are perpendicular. Find \\(t\\).",
-          choices:["\\(-3\\)","\\(-2\\)","\\(-1\\)","0","1"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Polynomials and Algebra",
-          latex:"Solve \\((x-3)^2\\le 16\\). What is the length of the solution interval?",
-          choices:["6","7","8","9","10"],
-          answerIndex:2
-        },
-        {
-          type:"mcq",
-          topic:"Probability",
-          latex:"A two-digit integer is chosen uniformly at random. What is the probability it is divisible by 3 or 5 but not both?",
-          choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{2}{5}\\)","\\(\\tfrac{11}{30}\\)","\\(\\tfrac{7}{18}\\)","\\(\\tfrac{31}{90}\\)"],
-          answerIndex:1
-        },
-        {
-          type:"mcq",
-          topic:"Geometry",
-          latex:"In a cube, what is \\(\\cos\\theta\\) where \\(\\theta\\) is the angle between a space diagonal and any edge?",
-          choices:["\\(\\tfrac{1}{\\sqrt2}\\)","\\(\\tfrac{1}{\\sqrt3}\\)","\\(\\tfrac{1}{2}\\)","\\(\\tfrac{\\sqrt2}{3}\\)","\\(\\tfrac{\\sqrt3}{2}\\)"],
-          answerIndex:1
-        },
-        {
-          type:"mcq",
-          topic:"Functions",
-          latex:"Let \\(f(x)=|x-2|+|x-5|\\). What is the minimum value of \\(f(x)\\)?",
-          choices:["0","1","2","3","4"],
-          answerIndex:3
-        }
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"Solve \\(3(x-2)=2(x+5)\\).", choices:["8","10","12","14","16"], answerIndex:4 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"The average of four tests is 80. After a fifth equally-weighted test, the overall average is 82. What was the fifth score?", choices:["84","86","88","90","92"], answerIndex:3 },
+        { type:"mcq", topic:"Geometry", latex:"In a right triangle with legs 6 and 8, the inradius is", choices:["1","2","2.5","3","4"], answerIndex:1 },
+        { type:"mcq", topic:"Number Theory", latex:"Find the remainder when \\(2^{2019}\\) is divided by 7.", choices:["0","1","2","3","6"], answerIndex:1 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many 3-digit even numbers have all digits distinct?", choices:["300","308","320","328","336"], answerIndex:3 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"If the roots of \\(x^2-7x+k=0\\) are consecutive integers, then \\(k=\\)", choices:["10","11","12","13","14"], answerIndex:2 },
+        { type:"mcq", topic:"Probability", latex:"Two fair dice are rolled. The probability that the sum is prime equals", choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{3}{8}\\)","\\(\\tfrac{5}{12}\\)","\\(\\tfrac{7}{18}\\)","\\(\\tfrac{11}{36}\\)"], answerIndex:2 },
+        { type:"mcq", topic:"Geometry", latex:"A cube has volume \\(64\\). Its surface area is", choices:["64","80","96","112","128"], answerIndex:2 },
+        { type:"mcq", topic:"Functions", latex:"For how many integers \\(x\\in[0,10]\\) does \\(|x-3|<3\\)?", choices:["4","5","6","7","8"], answerIndex:1 },
+        { type:"mcq", topic:"Functions", latex:"Lines \\(y=2x+3\\) and \\(y=tx+1\\) intersect at \\(x=-2\\). Then \\(t=\\)", choices:["\\(-1\\)","0","1","2","3"], answerIndex:2 }
       ]
     },
     B: {
@@ -441,7 +376,6 @@
     renderTopicTable(new Map(Object.entries(agg)));
     document.getElementById('breakdown').style.display = 'block';
 
-    // Up/down suggestion around levels
     const pct = Math.round(100*correct/total);
     let advice = '';
     if(testId==='A' && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
@@ -451,7 +385,6 @@
     levelAdvice.style.display = advice ? 'block' : 'none';
     levelAdvice.textContent = advice;
 
-    // Reveal builder
     builder.style.display = 'block';
     const today = new Date(); today.setHours(0,0,0,0);
     const minStr = today.toISOString().slice(0,10);
@@ -470,7 +403,8 @@
       if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
       if(!dateStr){ alert('Please choose your test date.'); return; }
 
-      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
+      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')]
+        .map(ch => ch.value);
 
       const payload = {
         goal: goalSel.value,
@@ -526,7 +460,7 @@
     } else { // USAMO/USAJMO
       base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel','geometry-rev','moc','mot');
       if(weakTopics.includes('Number Theory')) base.push('104nt');
-      if(weakTopics.includes('Combinatorics')) base.push('102comb');
+      if(weakTopics.includes('Combinatorics')) base.push('path-comb','102comb');
       if(weakTopics.includes('Geometry')) base.push('prasolov','103trig');
     }
 
