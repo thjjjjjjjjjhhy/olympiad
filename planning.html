@@ -130,6 +130,37 @@
   </footer>
 
   <script>
+  // ---------- Timeline Generation - Full Mock Test Feature ----------
+  function buildTimeline() {
+    const testDate = new Date(document.getElementById('testDate').value);
+    const today = new Date();
+    const diffTime = testDate.getTime() - today.getTime();
+    const daysLeft = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+    if (daysLeft <= 30) {
+      // Add a mock test around 1 month before test date
+      renderMockTest();
+    }
+  }
+
+  function renderMockTest() {
+    // Render mock test for the user
+    const mockTestSection = document.createElement('div');
+    mockTestSection.classList.add('mock-test');
+    mockTestSection.innerHTML = `
+      <h3>Full Mock Test</h3>
+      <p>This mock test simulates the real exam. Complete the test to get a realistic experience.</p>
+      <button onclick="startMockTest()">Start Mock Test</button>
+    `;
+    document.getElementById('timelineBuilder').appendChild(mockTestSection);
+  }
+
+  function startMockTest() {
+    // Placeholder to trigger the full mock test
+    alert('Mock test starting...');
+    // Further logic can be added for testing
+  }
+
   // ---------- Test bank (A, B, C) ----------
   const tests = {
     A: {
@@ -184,303 +215,11 @@
       ]
     }
   };
+
   const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
-  // ---------- Book catalog (expanded) ----------
-  const BOOKS = [
-    // Core AoPS
-    {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
-    {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
-    {id:'prealg', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics'], priority:2, link:'https://artofproblemsolving.com/store/book/prealgebra'},
-    {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-algebra'},
-    {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-counting'},
-    {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
-    {id:'intro-geo', title:'AoPS Introduction to Geometry', level:['AMC'], topics:['Geometry'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-geometry'},
-    {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
-    {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
-    {id:'aops-precalc', title:'AoPS Precalculus', level:['AIME'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
-    {id:'cmms', title:'Competition Math for Middle School', level:['AMC'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-middle-school'},
-
-    // Geometry / Proof & Olympiad staples
-    {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
-    {id:'geometry-rev', title:'Geometry Revisited (Coxeter & Greitzer)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://press.princeton.edu/books/paperback/9780883856192/geometry-revisited'},
-    {id:'prasolov', title:'Problems in Plane Geometry (Prasolov)', level:['USAMO'], topics:['Geometry'], priority:1, link:'https://www.mccme.ru/free-books/prasolov-geombook.pdf'},
-
-    // Proof / General PS
-    {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
-    {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
-    {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
-    {id:'larson', title:'Problem-Solving Through Problems (Larson)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://maa.org/press/maa-reviews/problem-solving-through-problems'},
-
-    // Topic problem collections
-    {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.springer.com/gp/book/9780817645273'},
-    {id:'102comb', title:'102 Combinatorial Problems (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.springer.com/gp/book/9780817642999'},
-    {id:'103trig', title:'103 Trigonometry Problems (Titu Andreescu)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817641978'},
-    {id:'mot', title:'Mathematical Olympiad Treasures (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817644498'},
-    {id:'moc', title:'Mathematical Olympiad Challenges (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817645280'},
-    {id:'otis', title:'OTIS Excerpts (Evan Chen)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://web.evanchen.cc/otis.html'}
-  ];
-
-  // ---------- Elements ----------
-  const form = document.getElementById('diagForm');
-  const goalSel = document.getElementById('goal');
-  const diagSection = document.getElementById('diagSection');
-  const meta = document.getElementById('meta');
-  const quiz = document.getElementById('quiz');
-  const brk = document.getElementById('breakdown');
-  const brkWrap = document.getElementById('topicTableWrap');
-  const levelAdvice = document.getElementById('levelAdvice');
-  const builder = document.getElementById('timelineBuilder');
-  const minutesPerDayEl = document.getElementById('minutesPerDay');
-  const testDateEl = document.getElementById('testDate');
-  const recBooksEl = document.getElementById('recBooks');
-  const otherBooksEl = document.getElementById('otherBooks');
-
-  // ---------- Submit (render test in-place) ----------
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const goal = goalSel.value;
-    if(!goal){ alert('Please choose a goal.'); return; }
-    const testId = goalToTest[goal] || 'A';
-    renderTest(testId);
-  });
-
-  // Auto-load if URL has ?goal=...
-  (function autoFromURL(){
-    const params = new URLSearchParams(location.search);
-    const g = (params.get('goal')||'').toLowerCase();
-    if(g && goalToTest[g]){
-      goalSel.value = g;
-      renderTest(goalToTest[g]);
-    }
-  })();
-
-  function renderTest(testId){
-    const t = tests[testId];
-    diagSection.style.display = 'block';
-    brk.style.display = 'none';
-    brkWrap.innerHTML = '';
-    levelAdvice.style.display='none';
-    builder.style.display = 'none';
-    recBooksEl.innerHTML='';
-    otherBooksEl.innerHTML='';
-
-    meta.innerHTML = `
-      <h3 style="margin:.2rem 0">${t.title}</h3>
-      <div class="hint">${t.format} • Time: ${t.time} minutes • Calculator: No</div>
-    `;
-
-    quiz.innerHTML = '';
-    const formEl = document.createElement('form');
-    formEl.id = 'quizForm';
-    t.questions.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
-
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.innerHTML = `
-      <button type="button" id="gradeBtn">Grade</button>
-      <button type="button" class="secondary" onclick="window.print()">Print / PDF</button>
-      <span class="hint">MC: select A–E. AIME-style: enter an integer (0–999).</span>
-    `;
-    const result = document.createElement('div');
-    result.className = 'result';
-
-    quiz.appendChild(formEl);
-    quiz.appendChild(actions);
-    quiz.appendChild(result);
-
-    document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result, testId));
-
-    MathJax.typesetPromise?.();
-    window.scrollTo({ top: diagSection.offsetTop - 8, behavior: 'smooth' });
-  }
-
-  function renderQ(q, idx){
-    const wrap = document.createElement('section');
-    wrap.className = 'q';
-    const num = idx+1;
-    wrap.innerHTML = `
-      <h3>Q${num} <span class="tag">${q.topic}</span></h3>
-      <div class="latex">${q.latex}</div>
-    `;
-    if(q.type === 'mcq'){
-      const letters = ['A','B','C','D','E'];
-      const choices = document.createElement('div');
-      choices.className = 'choices';
-      q.choices.forEach((text, i) => {
-        const id = `q${num}_${i}`;
-        const row = document.createElement('label');
-        row.className = 'choice';
-        row.innerHTML = `
-          <input type="radio" name="q${num}" id="${id}" value="${i}">
-          <div><strong>${letters[i]}.</strong> <span>${text}</span></div>
-        `;
-        choices.appendChild(row);
-      });
-      wrap.appendChild(choices);
-    } else {
-      const input = document.createElement('input');
-      input.name = `q${num}`;
-      input.className = 'short';
-      input.inputMode = 'numeric';
-      input.placeholder = '0–999';
-      input.pattern = '\\d{1,3}';
-      wrap.appendChild(input);
-    }
-    return wrap;
-  }
-
-  function canonicalTopic(s){
-    const k = s.toLowerCase();
-    if(k.includes('algebra') || k.includes('quadratic') || k.includes('polynomial')) return 'Polynomials and Algebra';
-    if(k.includes('number')) return 'Number Theory';
-    if(k.includes('geom')) return 'Geometry';
-    if(k.includes('prob')) return 'Probability';
-    if(k.includes('count') || k.includes('combin')) return 'Combinatorics';
-    if(k.includes('sequence') || k.includes('series')) return 'Sequences and Series';
-    if(k.includes('function')) return 'Functions';
-    return s;
-  }
-
-  function grade(t, resultBox, testId){
-    const byTopic = new Map(); let correct = 0, total = t.questions.length;
-
-    t.questions.forEach((q, i) => {
-      const num = i+1;
-      let ok = false;
-      if(q.type === 'mcq'){
-        const sel = document.querySelector(`input[name="q${num}"]:checked`);
-        if(sel && Number(sel.value) === q.answerIndex) ok = true;
-      } else {
-        const val = document.querySelector(`input[name="q${num}"]`)?.value.trim();
-        if(val !== '' && Number(val) === Number(q.answer)) ok = true;
-      }
-      const sec = document.querySelectorAll('.q')[i];
-      sec.classList.remove('ok','bad');
-      sec.classList.add(ok ? 'ok' : 'bad');
-
-      const rec = byTopic.get(q.topic) || { right:0, total:0 };
-      rec.total += 1; if(ok) rec.right += 1; byTopic.set(q.topic, rec);
-      if(ok) correct++;
-    });
-
-    resultBox.innerHTML = `<strong>Score:</strong> ${correct} / ${total} &nbsp; (${Math.round(100*correct/total)}%)`;
-
-    const agg = {};
-    [...byTopic.entries()].forEach(([topic, rec])=>{
-      const cat = canonicalTopic(topic);
-      if(!agg[cat]) agg[cat] = { right:0, total:0 };
-      agg[cat].right += rec.right; agg[cat].total += rec.total;
-    });
-
-    renderTopicTable(new Map(Object.entries(agg)));
-    document.getElementById('breakdown').style.display = 'block';
-
-    const pct = Math.round(100*correct/total);
-    let advice = '';
-    if(testId==='A' && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
-    if(testId==='B' && pct>=75) advice = `You scored ${pct}%. Consider trying the higher diagnostic (US(A)JMO – Test C).`;
-    if(testId==='B' && pct<=35) advice = `You scored ${pct}%. Consider taking the AMC diagnostic (Test A) first to shore up fundamentals.`;
-    if(testId==='C' && pct<=35) advice = `You scored ${pct}%. Consider taking the AIME diagnostic (Test B) to build up before US(A)JMO.`;
-    levelAdvice.style.display = advice ? 'block' : 'none';
-    levelAdvice.textContent = advice;
-
-    builder.style.display = 'block';
-    const today = new Date(); today.setHours(0,0,0,0);
-    const minStr = today.toISOString().slice(0,10);
-    testDateEl.min=minStr;
-    if(!testDateEl.value){
-      const defaultDate = new Date(today.getTime()+35*86400000);
-      testDateEl.value = defaultDate.toISOString().slice(0,10);
-    }
-    minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
-
-    buildBookRecommendations(testId, agg);
-
-    document.getElementById('makePlanBtn').onclick = ()=>{
-      const minutes = Number(minutesPerDayEl.value || 0);
-      const dateStr = testDateEl.value;
-      if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
-      if(!dateStr){ alert('Please choose your test date.'); return; }
-
-      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')]
-        .map(ch => ch.value);
-
-      const payload = {
-        goal: goalSel.value,
-        testId,
-        minutesPerDay: minutes,
-        testDate: dateStr,
-        subscores: agg,
-        selectedBooks: selected,
-        generatedAt: new Date().toISOString()
-      };
-      localStorage.setItem('lastMinutes', String(minutes));
-      localStorage.setItem('studyPlanInput', JSON.stringify(payload));
-      location.href = 'timeline.html';
-    };
-
-    MathJax.typesetPromise?.();
-    window.scrollTo({ top: document.getElementById('timelineBuilder').offsetTop - 8, behavior: 'smooth' });
-  }
-
-  function renderTopicTable(map){
-    if(!map || !map.size){ brkWrap.innerHTML = '<p class="hint">No answers yet.</p>'; return; }
-    let rows = '';
-    [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([topic,rec])=>{
-      const pct = Math.round(100*rec.right/rec.total);
-      rows += `<tr><td>${topic}</td><td>${rec.right} / ${rec.total}</td><td>${pct}%</td></tr>`;
-    });
-    brkWrap.innerHTML = `
-      <table style="border-collapse:collapse;width:100%;margin-top:8px">
-        <thead><tr><th>Topic</th><th>Correct</th><th>Percent</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-  }
-
-  // ---------- Recommend books based on goal + weaknesses ----------
-  function buildBookRecommendations(testId, agg){
-    const goal = goalSel.value;
-    const weakTopics = Object.entries(agg).map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
-      .sort((a,b)=>a.score-b.score).slice(0,3).map(x=>x.k);
-
-    let base = [];
-    if(testId==='A'){ // AMC
-      base.push('aops-v1','intro-alg','intro-cp');
-      if(weakTopics.includes('Number Theory')) base.push('intro-nt');
-      if(weakTopics.includes('Geometry')) base.push('intro-geo');
-      if(weakTopics.includes('Combinatorics')) base.push('cmms');
-      if(weakTopics.includes('Polynomials and Algebra')) base.push('prealg');
-    } else if(testId==='B'){ // AIME
-      base.push('aops-v2','int-alg','int-cp','aops-precalc');
-      if(weakTopics.includes('Geometry')) base.push('egmo','geometry-rev');
-      if(weakTopics.includes('Number Theory')) base.push('104nt');
-      if(weakTopics.includes('Combinatorics')) base.push('102comb');
-    } else { // USAMO/USAJMO
-      base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel','geometry-rev','moc','mot');
-      if(weakTopics.includes('Number Theory')) base.push('104nt');
-      if(weakTopics.includes('Combinatorics')) base.push('path-comb','102comb');
-      if(weakTopics.includes('Geometry')) base.push('prasolov','103trig');
-    }
-
-    const baseSet = new Set(base);
-    const recs = BOOKS.filter(b => baseSet.has(b.id)).sort((a,b)=>b.priority-a.priority || a.title.localeCompare(b.title));
-    const others = BOOKS.filter(b => !baseSet.has(b.id)).sort((a,b)=>b.priority-a.priority || a.title.localeCompare(b.title));
-
-    recBooksEl.innerHTML = recs.map(b=>pillHTML(b,true)).join('');
-    otherBooksEl.innerHTML = others.map(b=>pillHTML(b,false)).join('');
-  }
-
-  function pillHTML(b, checked){
-    return `
-      <label class="pill book-choice" title="${b.title}">
-        <input type="checkbox" value="${b.id}" ${checked?'checked':''}>
-        <span><b>${b.title}</b></span>
-        <a href="${b.link}" target="_blank" rel="noopener" class="hint" style="text-decoration:underline">info</a>
-      </label>
-    `;
-  }
+  // Run the timeline builder after setting the test date
+  buildTimeline();
   </script>
 </body>
 </html>
