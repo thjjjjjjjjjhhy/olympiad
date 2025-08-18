@@ -15,17 +15,21 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Minimal UI -->
   <style>
-    :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; }
-    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
+    :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; --grid:#e5e7eb; --bg:#f6f7fb; }
+    body { background:var(--bg); color:var(--fg); }
+    .container{max-width:1000px;margin:0 auto;padding:0 16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:16px}
+    .site-header .logo{font-weight:800}
+    .hint{color:var(--muted);font-size:.92rem}
+    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:.8rem;color:#334155}
     .q{padding:14px 12px;border-bottom:1px solid #eee}
     .q:last-child{border-bottom:0}
     .q h3{margin:0 0 .25rem;font-size:1rem}
     .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:.4rem}
     .choice{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
     .short{width:140px}
-    .actions{display:flex;gap:8px;align-items:center;margin:16px 0 8px}
+    .actions{display:flex;gap:8px;align-items:center;margin:16px 0 8px;flex-wrap:wrap}
     button{cursor:pointer;border:0;background:var(--accent);color:white;padding:10px 14px;border-radius:12px;font-weight:600}
     button.secondary{background:#e5e7eb;color:#111}
     .result{margin-top:10px}
@@ -34,13 +38,18 @@
     th{background:#f8fafc}
     .ok{background:#e6ffed}
     .bad{background:#ffecec}
-    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:.8rem;color:#334155}
-    .hint{color:var(--muted);font-size:.9rem}
-    .banner{margin-top:10px;padding:10px;border-radius:10px;background:#f1f5f9;color:#0f172a}
-    .banner.good{background:#ecfdf5;color:#065f46}
-    .banner.warn{background:#fff7ed;color:#7c2d12}
+    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .pill{background:#fff;border:1px solid var(--grid);border-radius:999px;padding:6px 10px}
+    .books-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .book-list{border:1px solid var(--grid);border-radius:12px;padding:10px;background:#fff}
+    .book-item{display:flex;align-items:flex-start;gap:8px;margin:6px 0}
+    .book-item input{margin-top:3px}
+    .section-title{margin:.2rem 0 .6rem}
+    .divider{height:1px;background:#e5e7eb;margin:10px 0}
+    .warn{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;padding:10px;border-radius:12px}
+    .good{background:#eef6ff;border:1px solid #cfe3ff;color:#0b3b8a;padding:10px;border-radius:12px}
     @media print {
-      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint, #timelineBuilder { display:none !important; }
+      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint, #timelineBuilder, .books-wrap { display:none !important; }
       body { background:#fff; }
       .card { box-shadow:none; border:1px solid #e5e7eb }
       .container { max-width:none }
@@ -67,25 +76,27 @@
     <div class="card diagnostic-card">
       <p>Before we craft your personalized study schedule, take a quick diagnostic.</p>
       <form class="diagnostic-form" id="diagForm">
-        <div class="form-group">
-          <label for="subject">Subject</label>
-          <select id="subject" name="subject">
-            <option value="math" selected>Math</option>
-          </select>
+        <div class="grid-2">
+          <label><span class="hint">Subject</span><br>
+            <select id="subject" name="subject">
+              <option value="math" selected>Math</option>
+            </select>
+          </label>
+          <label><span class="hint">Goal</span><br>
+            <select id="goal" name="goal" required>
+              <option value="" disabled selected>Select your goal</option>
+              <option value="amc10">AMC 10</option>
+              <option value="amc12">AMC 12</option>
+              <option value="aime">AIME</option>
+              <option value="usamo">USAMO</option>
+              <option value="usajmo">USAJMO</option>
+            </select>
+          </label>
         </div>
-        <div class="form-group">
-          <label for="goal">Goal</label>
-          <select id="goal" name="goal" required>
-            <option value="" disabled selected>Select your goal</option>
-            <option value="amc10">AMC 10</option>
-            <option value="amc12">AMC 12</option>
-            <option value="aime">AIME</option>
-            <option value="usamo">USAMO</option>
-            <option value="usajmo">USAJMO</option>
-          </select>
+        <div class="actions">
+          <button type="submit">Start Diagnostic →</button>
+          <span class="hint">Mapping: AMC 10/12 → Test A, AIME → Test B, USAMO/USAJMO → Test C.</span>
         </div>
-        <button type="submit">Start Diagnostic →</button>
-        <p class="hint" style="margin:8px 0 0">Mapping: AMC 10/12 → Test A, AIME → Test B, USAMO/USAJMO → Test C.</p>
       </form>
     </div>
 
@@ -93,32 +104,43 @@
     <section id="diagSection" class="card" style="display:none; margin-top:16px">
       <div id="meta"></div>
       <div id="quiz"></div>
-      <div id="advice"></div>
     </section>
 
-    <!-- Topic breakdown appears after grading -->
+    <!-- Topic breakdown -->
     <section id="breakdown" class="card" style="display:none; margin-top:16px">
-      <h3 style="margin:.2rem 0 0.6rem">Topic Breakdown</h3>
+      <h3 class="section-title">Topic Breakdown</h3>
       <div id="topicTableWrap"></div>
-      <p class="hint">Use this to target AoPS Vol. 1/2 chapters after grading. Print for a clean handout.</p>
+      <div id="diagnosticNudges" style="margin-top:10px"></div>
+      <p class="hint">Use this to target AoPS Vol.1/2 chapters after grading. Print for a clean handout.</p>
     </section>
 
-    <!-- Generate timeline inputs -->
+    <!-- Book picker + timeline builder -->
     <section id="timelineBuilder" class="card" style="display:none; margin-top:16px">
-      <h3 style="margin:.2rem 0">Generate Your Study Plan</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <label>Minutes per day
-          <input id="minutesPerDay" type="number" min="15" step="5" placeholder="e.g., 45" />
+      <h3 class="section-title">Choose Your Books & Generate Timeline</h3>
+      <div class="books-wrap">
+        <div>
+          <h4 style="margin:.2rem 0 .4rem">Recommended for your goal</h4>
+          <div id="recBooks" class="book-list"></div>
+        </div>
+        <div>
+          <h4 style="margin:.2rem 0 .4rem">More books you can include</h4>
+          <div id="moreBooks" class="book-list"></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid-2">
+        <label><b>Minutes per day</b><br>
+          <input id="minutesPerDay" type="number" min="15" step="5" value="60" class="short">
         </label>
-        <label>Test date
-          <input id="testDate" type="date" />
+        <label><b>Test date</b><br>
+          <input id="testDate" type="date" class="short">
         </label>
       </div>
-      <div class="actions" style="margin-top:12px">
-        <button id="makePlanBtn" type="button">Generate timeline →</button>
-        <button type="button" class="secondary" onclick="window.print()">Print / PDF</button>
+      <div class="actions">
+        <button id="makePlanBtn">Generate Timeline →</button>
+        <button id="saveBookPrefs" type="button" class="secondary">Save book preferences</button>
+        <span class="hint">The timeline prioritizes AoPS Vol. 1 for AMC and Vol. 2 (plus proofs) for AIME/USAMO.</span>
       </div>
-      <p class="hint">We’ll front-load weak topics, taper into mixed practice, and hand off to <em>timeline.html</em>.</p>
     </section>
   </main>
 
@@ -128,60 +150,56 @@
 
   <script>
   // ---------- Test bank (A, B, C) ----------
+  // A is moderately harder AMC-style per your request; B is AMC→AIME bridge; C is AIME-leaning.
   const tests = {
-    /* Harder AMC diagnostic */
     A: {
-      title: "Diagnostic Test A (AMC Readiness — Harder)",
+      title: "Diagnostic Test A (AMC Readiness)",
       format: "12 multiple-choice (A–E)",
-      time: 40,
+      time: 35,
       questions: [
-        { type:"mcq", topic:"Algebra (Manipulation)", latex:"If $(x-3)(x-7)=10$, compute $x^2-10x$.", choices:["$-21$","$-11$","$-1$","$9$","$11$"], answerIndex:1 },
-        { type:"mcq", topic:"Quadratics", latex:"The quadratic $x^2-13x+k=0$ has real roots that differ by $5$. Find $k$.", choices:["$30$","$32$","$34$","$36$","$38$"], answerIndex:3 },
-        { type:"mcq", topic:"Number Theory (LCM/GCD)", latex:"Let $a,b$ be positive integers with $\\gcd(a,b)=6$ and $\\operatorname{lcm}(a,b)=180$. How many ordered pairs $(a,b)$ satisfy this?", choices:["$4$","$6$","$8$","$10$","$12$"], answerIndex:2 },
-        { type:"mcq", topic:"Combinatorics (Inclusion–Exclusion)", latex:"How many length-$7$ strings over $\\{A,B,C\\}$ contain each letter at least once?", choices:["$1750$","$1776$","$1806$","$1836$","$1875$"], answerIndex:2 },
-        { type:"mcq", topic:"Probability (Dice)", latex:"Three fair dice are rolled. What is the probability that the sum is $11$?", choices:["$\\tfrac{1}{6}$","$\\tfrac{7}{54}$","$\\tfrac{1}{8}$","$\\tfrac{5}{36}$","$\\tfrac{11}{108}$"], answerIndex:2 },
-        { type:"mcq", topic:"Geometry (Tangent Length)", latex:"The circle $(x-3)^2+(y+1)^2=25$ is given. Find the length of the tangent segment from $P=(3,-8)$ to the circle.", choices:["$4$","$2\\sqrt{5}$","$2\\sqrt{6}$","$3\\sqrt{5}$","$5$"], answerIndex:2 },
-        { type:"mcq", topic:"Sequences (Arithmetic)", latex:"An arithmetic sequence has $a_1=3$ and $a_5=23$. Find the sum of the first $10$ terms.", choices:["$230$","$240$","$245$","$250$","$255$"], answerIndex:4 },
-        { type:"mcq", topic:"Coordinate Geometry (Area/Optimization)", latex:"A right triangle has vertices $(0,0)$, $(a,0)$, $(0,b)$ with integer $a,b>0$ and area $30$. If $a+b$ is minimized, find $a+b$.", choices:["$14$","$15$","$16$","$17$","$18$"], answerIndex:2 },
-        { type:"mcq", topic:"Algebra (Absolute Value Equations)", latex:"Solve $\\lvert 2x-9\\rvert = \\lvert x+3\\rvert + 3$. What is the sum of all real solutions?", choices:["$12$","$14$","$16$","$18$","$20$"], answerIndex:2 },
-        { type:"mcq", topic:"Number Theory (Parity/Residues)", latex:"How many integers $n$ with $1\\le n\\le 100$ satisfy $n^2\\equiv 1\\pmod{8}$?", choices:["$25$","$50$","$75$","$100$","$0$"], answerIndex:1 },
-        { type:"mcq", topic:"Combinatorics (Increasing Digits)", latex:"How many $5$-digit positive integers have strictly increasing digits?", choices:["$120$","$126$","$130$","$210$","$252$"], answerIndex:1 },
-        { type:"mcq", topic:"Geometry (Heron)", latex:"A triangle has side lengths $13,14,15$. What is its area?", choices:["$70$","$72$","$78$","$84$","$90$"], answerIndex:3 }
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"Solve \\(\\frac{2x+3}{x-1}=3\\).", choices:["2","3","4","5","6"], answerIndex:0 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"If \\(x\\) and \\(y\\) satisfy \\(x+y=7\\) and \\(xy=10\\), compute \\(x^2+y^2\\).", choices:["29","39","49","59","69"], answerIndex:1 },
+        { type:"mcq", topic:"Number Theory", latex:"Remainder of \\(7^{2023}\\) mod 6?", choices:["0","1","2","3","5"], answerIndex:1 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many 5-letter strings from A,B,C,D with at least one A?", choices:["512","511","256","1024","780"], answerIndex:1 },
+        { type:"mcq", topic:"Geometry", latex:"A triangle has sides 7,8,9. The length of the shortest altitude is", choices:["\\(\\frac{14}{3}\\)","\\(\\frac{16}{3}\\)","\\(\\frac{18}{3}\\)","\\(\\frac{20}{3}\\)","\\(\\frac{22}{3}\\)"], answerIndex:0 },
+        { type:"mcq", topic:"Sequences and Series", latex:"An arithmetic sequence has \\(a_1=4\\), \\(a_8=25\\). Find \\(\\sum_{k=1}^{8} a_k\\).", choices:["104","112","116","120","144"], answerIndex:2 },
+        { type:"mcq", topic:"Functions", latex:"If \\(f(x)=|x-4|+|x+1|\\), the minimum value of \\(f\\) is", choices:["0","1","2","3","5"], answerIndex:3 },
+        { type:"mcq", topic:"Probability", latex:"Two fair dice rolled. P(sum is 7 or 11) =", choices:["\\(\\tfrac{1}{6}\\)","\\(\\tfrac{2}{9}\\)","\\(\\tfrac{2}{12}\\)","\\(\\tfrac{7}{36}\\)","\\(\\tfrac{2}{36}\\)"], answerIndex:3 },
+        { type:"mcq", topic:"Geometry", latex:"A circle of radius 5 has a chord of length 8. Distance from center to chord:", choices:["1","2","3","4","5"], answerIndex:2 },
+        { type:"mcq", topic:"Number Theory", latex:"How many integers in \\([1,500]\\) are divisible by 3 or 5 but not both?", choices:["200","233","266","300","333"], answerIndex:1 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many subsets of \\(\\{1,2,\\dots,12\\}\\) have sum divisible by 3?", choices:["\\(2^9\\)","\\(2^{10}\\)","\\(2^{11}\\)","\\(2^{12}\\)","\\(3\\cdot2^{9}\\)"], answerIndex:1 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"If \\(x\\) satisfies \\(x^2-7x+12=0\\), find \\(\\frac{1}{x_1} + \\frac{1}{x_2}\\).", choices:["\\(\\tfrac{7}{12}\\)","\\(\\tfrac{12}{7}\\)","\\(\\tfrac{1}{12}\\)","\\(\\tfrac{12}{1}\\)","\\(\\tfrac{1}{7}\\)"], answerIndex:0 }
       ]
     },
-
-    /* Existing AIME-bridge */
     B: {
       title: "Diagnostic Test B (AMC → AIME Bridge)",
       format: "Q1–Q6 multiple-choice, Q7–Q10 AIME-style (integer 0–999)",
       time: 45,
       questions: [
-        { type:"mcq", topic:"Absolute Value", latex:"Solve \\(|2x-5|=9\\). What is the sum of all solutions?", choices:["\\(-11\\)","\\(-5\\)","0","5","11"], answerIndex:3 },
-        { type:"mcq", topic:"Number Theory (Mod Inverse)", latex:"Smallest positive \\(n\\) with \\(7n\\equiv1\\pmod{20}\\) is", choices:["2","3","6","9","17"], answerIndex:1 },
-        { type:"mcq", topic:"Parity / Subsets", latex:"How many subsets of \\(\\{1,2,\\dots,10\\}\\) have an odd sum?", choices:["256","384","480","512","640"], answerIndex:3 },
-        { type:"mcq", topic:"Geometry (Heron)", latex:"A triangle has side lengths \\(13,14,15\\). Its area is", choices:["70","78","84","90","98"], answerIndex:2 },
-        { type:"mcq", topic:"Probability & NT", latex:"Pick a random integer from 1 to 100 inclusive. Probability it is divisible by 2 or 5 but not both:", choices:["\\(\\tfrac{2}{5}\\)","\\(\\tfrac{1}{2}\\)","\\(\\tfrac{11}{20}\\)","\\(\\tfrac{3}{5}\\)","\\(\\tfrac{31}{50}\\)"], answerIndex:1 },
-        { type:"mcq", topic:"Sequences (Arithmetic)", latex:"An arithmetic sequence has \\(a_1=5\\) and \\(a_7=23\\). The sum of the first 7 terms is", choices:["84","91","95","98","105"], answerIndex:3 },
-        { type:"int", topic:"Diophantine (Difference of Squares)", latex:"Number of integer pairs \\((x,y)\\) satisfying \\(x^2-y^2=2025\\).", answer:30 },
+        { type:"mcq", topic:"Absolute Value / Algebra", latex:"Solve \\(|2x-5|=11\\). Sum of solutions?", choices:["\\(-6\\)","\\(0\\)","\\(6\\)","\\(10\\)","\\(16\\)"], answerIndex:2 },
+        { type:"mcq", topic:"Number Theory", latex:"Smallest positive \\(n\\) with \\(11n\\equiv1\\pmod{20}\\).", choices:["1","11","19","21","29"], answerIndex:2 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many 6-digit numbers with digits 1–6 use each digit at most once?", choices:["120","360","540","720","1080"], answerIndex:3 },
+        { type:"mcq", topic:"Geometry", latex:"Right triangle with legs 8,15. Inradius?", choices:["1","2","3","4","5"], answerIndex:2 },
+        { type:"mcq", topic:"Sequences", latex:"If \\(a_{n+1}=2a_n+3\\) and \\(a_1=1\\), find \\(a_5\\).", choices:["31","35","43","45","63"], answerIndex:0 },
+        { type:"mcq", topic:"Probability", latex:"Pick a random integer 1–100. P(divisible by 2 or 5 but not both) =", choices:["\\(\\tfrac{2}{5}\\)","\\(\\tfrac{9}{25}\\)","\\(\\tfrac{11}{50}\\)","\\(\\tfrac{13}{50}\\)","\\(\\tfrac{3}{5}\\)"], answerIndex:3 },
+        { type:"int", topic:"Diophantine (Difference of Squares)", latex:"Number of integer pairs \\((x,y)\\) with \\(x^2-y^2=2025\\).", answer:30 },
         { type:"int", topic:"Number Theory (Euler / Mods)", latex:"Remainder when \\(3^{100}\\) is divided by 13.", answer:3 },
-        { type:"int", topic:"Geometry (Altitude to Hypotenuse)", latex:"Right triangle with legs 9 and 12. Let \\(h\\) be the altitude to the hypotenuse in lowest terms \\(m/n\\). Find \\(m+n\\).", answer:41 },
+        { type:"int", topic:"Geometry (Altitude to Hypotenuse)", latex:"Right triangle with legs 9 and 12. Let altitude to hypotenuse be \\(\\frac{m}{n}\\) in lowest terms. Compute \\(m+n\\).", answer:41 },
         { type:"int", topic:"Polynomials (Roots & Sums)", latex:"Let \\(S\\) be the set of real roots of \\((x^2-5x+6)(x^2-3x-10)=0\\). Compute \\(\\sum_{r\\in S} r^2\\).", answer:42 }
       ]
     },
-
-    /* Existing AIME-leaning */
     C: {
       title: "Diagnostic Test C (AIME-leaning)",
       format: "10 AIME-style (integer 0–999)",
       time: 60,
       questions: [
-        { type:"int", topic:"Number Theory (GCD classes)", latex:"How many integers \\(n\\) with \\(1\\le n\\le 1000\\) satisfy \\(\\gcd(n,1000)=5\\)?", answer:80 },
+        { type:"int", topic:"Number Theory", latex:"How many integers \\(n\\) with \\(1\\le n\\le 1000\\) satisfy \\(\\gcd(n,1000)=5\\)?", answer:80 },
         { type:"int", topic:"CRT", latex:"Smallest nonnegative \\(n\\) with \\(n\\equiv2\\pmod3\\), \\(n\\equiv3\\pmod4\\), \\(n\\equiv4\\pmod5\\).", answer:59 },
-        { type:"int", topic:"Lattice Points / Sums of Squares", latex:"Number of integer points \\((x,y)\\) satisfying \\(x^2+y^2=65\\).", answer:16 },
-        { type:"int", topic:"Combinatorics (Mod 3)", latex:"Number of 3-element subsets of \\(\\{1,2,\\dots,30\\}\\) whose sum is divisible by 3.", answer:1360 },
+        { type:"int", topic:"Lattice Points", latex:"Number of integer points \\((x,y)\\) satisfying \\(x^2+y^2=65\\).", answer:16 },
+        { type:"int", topic:"Combinatorics", latex:"Number of 3-element subsets of \\(\\{1,2,\\dots,30\\}\\) whose sum is divisible by 3.", answer:1360 },
         { type:"int", topic:"Divisors", latex:"How many positive divisors does \\(3600\\) have?", answer:45 },
         { type:"int", topic:"Egyptian Fractions", latex:"Number of positive integer solutions to \\(\\tfrac{1}{x}+\\tfrac{1}{y}=\\tfrac{1}{12}\\).", answer:15 },
-        { type:"int", topic:"Floor Sums", latex:"Compute \\(\\displaystyle \\sum_{k=1}^{9} \\left\\lfloor\\frac{50}{k}\\right\\rfloor\\).", answer:139 },
+        { type:"int", topic:"Floor Sums", latex:"Compute \\(\\sum_{k=1}^{9} \\left\\lfloor\\frac{50}{k}\\right\\rfloor\\).", answer:139 },
         { type:"int", topic:"Factorials / Valuation", latex:"Number of trailing zeros of \\(50!\\) in base 10.", answer:12 },
         { type:"int", topic:"Geometry (Inradius)", latex:"Inradius of a triangle with side lengths \\(13,14,15\\).", answer:4 },
         { type:"int", topic:"Burnside (Cube Colorings)", latex:"Each face of a cube is colored red or blue. How many distinct colorings up to rotation?", answer:10 }
@@ -198,14 +216,27 @@
   const diagSection = document.getElementById('diagSection');
   const meta = document.getElementById('meta');
   const quiz = document.getElementById('quiz');
-  const adviceBox = document.getElementById('advice');
   const brk = document.getElementById('breakdown');
   const brkWrap = document.getElementById('topicTableWrap');
+  const nudges = document.getElementById('diagnosticNudges');
+
+  // Builder elements
   const builder = document.getElementById('timelineBuilder');
+  const recBox = document.getElementById('recBooks');
+  const moreBox = document.getElementById('moreBooks');
   const minutesPerDayEl = document.getElementById('minutesPerDay');
   const testDateEl = document.getElementById('testDate');
 
-  // Handle submit (stay on page, render test)
+  // Auto-load if URL has ?goal=...
+  (function autoFromURL(){
+    const params = new URLSearchParams(location.search);
+    const g = (params.get('goal')||'').toLowerCase();
+    if(g && goalToTest[g]){
+      goalSel.value = g;
+    }
+  })();
+
+  // Handle submit (render test on-page)
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const goal = goalSel.value;
@@ -214,23 +245,13 @@
     renderTest(testId);
   });
 
-  // Auto-load if URL has ?goal=...
-  (function autoFromURL(){
-    const params = new URLSearchParams(location.search);
-    const g = (params.get('goal')||'').toLowerCase();
-    if(g && goalToTest[g]){
-      goalSel.value = g;
-      renderTest(goalToTest[g]);
-    }
-  })();
-
   function renderTest(testId){
     const t = tests[testId];
     diagSection.style.display = 'block';
     brk.style.display = 'none';
     builder.style.display = 'none';
-    adviceBox.innerHTML = '';
     brkWrap.innerHTML = '';
+    nudges.innerHTML = '';
 
     // Meta
     meta.innerHTML = `
@@ -244,7 +265,7 @@
     formEl.id = 'quizForm';
     t.questions.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
 
-    // Actions + result (answers toggle removed to prevent cheating)
+    // Actions + result
     const actions = document.createElement('div');
     actions.className = 'actions';
     actions.innerHTML = `
@@ -297,19 +318,13 @@
       input.pattern = '\\d{1,3}';
       wrap.appendChild(input);
     }
+    // No “Toggle answers” — hidden until grading
     return wrap;
   }
 
-  // Canonical topic mapping for the timeline
   function canonicalTopic(topic){
-    const t = topic.toLowerCase();
-    if(t.includes('number')) return 'Number Theory';
-    if(t.includes('geometry')) return 'Geometry';
-    if(t.includes('probab')) return 'Probability';
-    if(t.includes('combin')) return 'Combinatorics';
-    if(t.includes('sequence') || t.includes('series')) return 'Sequences and Series';
-    if(t.includes('function')) return 'Functions';
-    return 'Polynomials and Algebra';
+    // Already broad; keep as-is
+    return topic;
   }
 
   function grade(t, resultBox, testId){
@@ -337,7 +352,7 @@
 
     resultBox.innerHTML = `<strong>Score:</strong> ${correct} / ${total} &nbsp; (${Math.round(100*correct/total)}%)`;
 
-    // Aggregate to canonical topics for the plan
+    // Aggregate to canonical topics (already canonical here)
     const agg = {};
     [...byTopic.entries()].forEach(([topic, rec])=>{
       const cat = canonicalTopic(topic);
@@ -346,24 +361,13 @@
       agg[cat].total += rec.total;
     });
 
-    // Topic table
     renderTopicTable(new Map(Object.entries(agg)));
-    document.getElementById('breakdown').style.display = 'block';
+    renderNudges(testId, correct/total);
+    brk.style.display = 'block';
 
-    // Recommendation banner (try neighboring diagnostics)
-    const pct = Math.round(100*correct/total);
-    let banner = '';
-    if((testId==='A' && pct >= 85) || (testId==='B' && pct >= 80)){
-      const next = (testId==='A') ? 'AIME (Test B)' : 'USAMO/USAJMO (Test C)';
-      banner = `<div class="banner good">You scored very high. Consider trying the higher diagnostic: <strong>${next}</strong>.</div>`;
-    } else if((testId==='B' && pct < 45) || (testId==='C' && pct < 40)){
-      const prev = (testId==='C') ? 'AIME (Test B)' : 'AMC (Test A)';
-      banner = `<div class="banner warn">Score suggests reviewing foundations. Consider the previous diagnostic: <strong>${prev}</strong>.</div>`;
-    }
-    adviceBox.innerHTML = banner;
-
-    // Reveal "Generate timeline" inputs
+    // Reveal book picker + timeline inputs
     builder.style.display = 'block';
+    hydrateBookPicker(goalSel.value, agg);
 
     // Hook up button
     document.getElementById('makePlanBtn').onclick = ()=>{
@@ -371,16 +375,31 @@
       const dateStr = testDateEl.value;
       if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
       if(!dateStr){ alert('Please choose your test date.'); return; }
+      const selectedBooks = collectSelectedBooks();
+      // Persist both legacy and new fields
+      const bookPrefs = {};
+      selectedBooks.forEach(id=>bookPrefs[id] = true);
+      localStorage.setItem('bookPrefs', JSON.stringify(bookPrefs));
+
       const payload = {
         goal: goalSel.value,
         testId,
         minutesPerDay: minutes,
         testDate: dateStr,
         subscores: agg, // canonical-topic -> {right,total}
+        selectedBooks,
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('studyPlanInput', JSON.stringify(payload));
       location.href = 'timeline.html';
+    };
+
+    document.getElementById('saveBookPrefs').onclick = ()=>{
+      const selectedBooks = collectSelectedBooks();
+      const bookPrefs = {};
+      selectedBooks.forEach(id=>bookPrefs[id] = true);
+      localStorage.setItem('bookPrefs', JSON.stringify(bookPrefs));
+      alert('Book preferences saved.');
     };
 
     MathJax.typesetPromise?.();
@@ -400,6 +419,96 @@
         <tbody>${rows}</tbody>
       </table>
     `;
+  }
+
+  function renderNudges(testId, frac){
+    nudges.innerHTML = '';
+    const pct = Math.round(100*frac);
+    if((testId==='B' || testId==='C') && pct < 40){
+      nudges.innerHTML = `<div class="warn">Your diagnostic score (${pct}%) suggests stepping down a level first for a stronger foundation.</div>`;
+    } else if(testId==='A' && pct > 85){
+      nudges.innerHTML = `<div class="good">Great job (${pct}%)! Consider trying the AIME diagnostic to stretch yourself.</div>`;
+    } else if(testId==='B' && pct > 85){
+      nudges.innerHTML = `<div class="good">Excellent (${pct}%)! You might try the USAMO/USAJMO diagnostic (Test C) next.</div>`;
+    }
+  }
+
+  // ---------- Book picker ----------
+  // IDs recognized by timeline.html: 'aops-v1','aops-v2','velleman','egmo','engel','zeitz'
+  // We also show other common books; timeline will simply ignore unknown IDs (safe).
+  const BOOK_CATALOG = [
+    { id:'aops-v1',   name:'Art of Problem Solving Volume 1 (2nd ed.)', note:'AMC-focused foundations' },
+    { id:'aops-v2',   name:'Art of Problem Solving Volume 2', note:'AIME/USAMO techniques' },
+    { id:'velleman',  name:'How to Prove It (Velleman)', note:'Proof writing' },
+    { id:'egmo',      name:'EGMO (Euclidean Geometry in Mathematical Olympiads)', note:'Olympiad geometry' },
+    { id:'engel',     name:'Problem-Solving Strategies (Engel)', note:'Combinatorics & strategies' },
+    { id:'zeitz',     name:'The Art and Craft of Problem Solving (Zeitz)', note:'Heuristics & proofs' },
+
+    // Extras (not yet used by timeline, but selectable for future):
+    { id:'intro-alg', name:'AoPS Introduction to Algebra', note:'Intro/AMC' },
+    { id:'intro-cp',  name:'AoPS Introduction to Counting & Probability', note:'Intro/AMC' },
+    { id:'intro-nt',  name:'AoPS Introduction to Number Theory', note:'Intro/AMC' },
+    { id:'intro-geo', name:'AoPS Introduction to Geometry', note:'Intro/AMC' },
+    { id:'int-alg',   name:'AoPS Intermediate Algebra', note:'AIME level' },
+    { id:'int-cp',    name:'AoPS Intermediate Counting & Probability', note:'AIME level' },
+    { id:'int-nt',    name:'AoPS Intermediate Number Theory', note:'AIME level' },
+    { id:'int-geo',   name:'AoPS Intermediate Geometry', note:'AIME level' },
+    { id:'precalc',   name:'AoPS Precalculus', note:'Enrichment' },
+    { id:'coxeter',   name:'Geometry Revisited (Coxeter & Greitzer)', note:'Geo theory' }
+  ];
+
+  function hydrateBookPicker(goal, subscores){
+    const existing = JSON.parse(localStorage.getItem('bookPrefs')||'{}');
+    const selected = new Set(Object.keys(existing).filter(k=>existing[k]));
+
+    // Defaults by goal
+    const recIds = (goal==='amc10'||goal==='amc12')
+      ? ['aops-v1']                             // AMC: Vol 1
+      : (goal==='aime'
+          ? ['aops-v2','velleman']              // AIME: Vol 2 + Velleman
+          : ['aops-v2','velleman','egmo']);     // USAMO/USAJMO: Vol 2 + Velleman (+ EGMO)
+
+    // If user has saved prefs, overlay them
+    if(selected.size===0){
+      recIds.forEach(id=>selected.add(id));
+    }
+
+    // Build Recommended box
+    recBox.innerHTML = '';
+    BOOK_CATALOG.filter(b=>recIds.includes(b.id)).forEach(b=>{
+      recBox.appendChild(makeBookItem(b, selected.has(b.id)));
+    });
+
+    // Build More books box
+    moreBox.innerHTML = '';
+    BOOK_CATALOG.filter(b=>!recIds.includes(b.id)).forEach(b=>{
+      moreBox.appendChild(makeBookItem(b, selected.has(b.id)));
+    });
+
+    // Pre-fill minutes/test date sensibly
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().slice(0,10);
+    testDateEl.min = todayStr;
+    if(!testDateEl.value){ testDateEl.value = todayStr; }
+    if(!minutesPerDayEl.value){ minutesPerDayEl.value = 60; }
+  }
+
+  function makeBookItem(book, checked){
+    const wrap = document.createElement('label');
+    wrap.className = 'book-item';
+    wrap.innerHTML = `
+      <input type="checkbox" data-book-id="${book.id}" ${checked?'checked':''}>
+      <div><strong>${book.name}</strong><br><span class="hint">${book.note||''}</span></div>
+    `;
+    return wrap;
+  }
+
+  function collectSelectedBooks(){
+    const ids = [];
+    document.querySelectorAll('[data-book-id]').forEach(cb=>{
+      if(cb.checked) ids.push(cb.getAttribute('data-book-id'));
+    });
+    return ids;
   }
   </script>
 </body>
