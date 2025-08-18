@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="styles.css">
   <style>
-    :root{--fg:#111;--muted:#6b7280;--card:#fff;--accent:#0ea5e9;--grid:#e5e7eb;--bg:#f6f7fb}
-    body{color:var(--fg);background:var(--bg)}
+    :root{--fg:#111;--muted:#6b7280;--card:#fff;--accent:#0ea5e9;--grid:#e5e7eb}
+    body{color:var(--fg)}
     .container{max-width:1000px;margin:0 auto;padding:0 16px}
     .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
     header .logo{font-weight:800}
@@ -17,26 +17,26 @@
     button{cursor:pointer;border:0;background:#0ea5e9;color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
     button.secondary{background:#e5e7eb;color:#111}
     input{border:1px solid var(--grid);border-radius:10px;padding:8px 10px}
-    .calendar-wrap{background:#fff;border-radius:18px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:10px;margin-top:12px}
-    .cal-head{display:flex;justify-content:space-between;align-items:center;margin:4px 4px 10px}
-    .legend{font-size:.9rem;color:#475569;margin:6px 4px 0}
+    .cal-wrap{display:grid;gap:12px;margin-top:12px}
+    .month{border:1px solid var(--grid);border-radius:14px;padding:10px}
+    .month h3{margin:4px 6px 8px}
     .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .cell{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:120px;background:#fff}
-    .dow{background:#f8fafc}
-    .date{font-weight:700;font-size:.9rem;margin-bottom:2px;color:#334155}
+    .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:110px;background:#fff}
+    .day .date{font-weight:700;font-size:.9rem;margin-bottom:2px}
     .out-of-range{opacity:.35}
     .past{opacity:.55}
     .today{outline:2px solid var(--accent)}
-    .task{font-size:.95rem;line-height:1.35;margin:4px 0}
+    .task{font-size:.9rem;margin:4px 0;line-height:1.35}
     .task a{text-decoration:underline}
-    .pill{background:#fff;border:1px solid var(--grid);border-radius:999px;padding:6px 10px}
-    .nav{display:flex;gap:8px}
-    a{color:#0369a1}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .legend span{font-size:.86rem;background:#f8fafc;border:1px solid var(--grid);padding:4px 8px;border-radius:999px}
+    .pager{display:flex;gap:10px;justify-content:center;align-items:center;margin:10px 0 0}
+    .pager button:disabled{opacity:.5;cursor:not-allowed}
     @media print{
-      .site-header,.toolbar,.nav,.legend,.actions{display:none!important}
+      .site-header,.toolbar,.pager{display:none!important}
+      .month{break-inside:avoid}
       body{background:#fff}
-      .calendar-wrap{box-shadow:none;border:1px solid var(--grid)}
-      .cell{break-inside:avoid}
+      .card{box-shadow:none;border:1px solid var(--grid)}
     }
   </style>
 </head>
@@ -53,510 +53,458 @@
   </header>
 
   <main class="container">
-    <h2>📆 Your Study Timeline</h2>
+    <h2>🗓️ Your Study Timeline</h2>
     <div id="errBox" style="display:none" class="error"></div>
     <p class="hint" id="planSummary"></p>
 
     <div class="card toolbar">
-      <span class="pill" id="goalPill"></span>
-      <span class="pill" id="minutesPill"></span>
-      <span class="pill" id="daysLeftPill"></span>
-      <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
-        <label class="pill">Minutes/day <input id="mPerDay" type="number" min="15" step="5" style="width:110px;margin-left:6px"></label>
-        <label class="pill">Test date <input id="testDate" type="date" style="margin-left:6px"></label>
-        <button id="rebuildBtn" class="secondary">Rebuild plan</button>
-        <button id="downloadIcs">Download .ics</button>
-        <button class="secondary" onclick="window.print()">Print</button>
+      <div>
+        <label><b>Minutes per day</b> <input id="mPerDay" type="number" min="15" step="5" style="width:120px"></label>
       </div>
+      <div>
+        <label><b>Test date</b> <input id="testDate" type="date"></label>
+      </div>
+      <button id="rebuildBtn" class="secondary">Rebuild plan</button>
+      <button id="downloadIcs">Download calendar (.ics)</button>
+      <button class="secondary" onclick="window.print()">Print</button>
+      <span class="hint">Reading sources reflect the books you selected. Full-length practice tests appear closer to the exam (max 2 per week).</span>
     </div>
 
-    <div id="notices"></div>
+    <div class="legend">
+      <span>📘 Reading (selected books)</span>
+      <span>🧠 Book exercises (specific problem numbers)</span>
+      <span>📗 Proof module (if selected)</span>
+      <span>📝 Full mock and review</span>
+    </div>
 
-    <div class="calendar-wrap">
-      <div class="cal-head">
-        <div>
-          <h3 id="monthTitle" style="margin:0 0 2px">Month</h3>
-          <div class="legend">Early: book learning & exercises • About a month out: ≤2 full mocks/week (Wed/Sat), each followed by a review day.</div>
-        </div>
-        <div class="nav">
-          <button id="prevMonth" class="secondary">← Previous</button>
-          <button id="nextMonth" class="secondary">Next →</button>
-        </div>
-      </div>
-      <div class="cal" id="grid"></div>
+    <section id="calendar" class="cal-wrap"></section>
+    <div class="pager">
+      <button id="prevMonth">← Previous month</button>
+      <span id="monthLabel" class="hint"></span>
+      <button id="nextMonth">Next month →</button>
     </div>
   </main>
 
-  <footer class="container" style="margin:14px 0 24px">© 2025 OlympiadPrep.</footer>
+  <footer>© 2025 OlympiadPrep.</footer>
 
 <script>
-(function(){
+(async function init(){
   const errBox = document.getElementById('errBox');
   window.addEventListener('error', (e)=>{
     errBox.style.display='block';
     errBox.textContent = 'Runtime error: ' + (e.message||'Unknown');
   });
 
-  /* ---------- Inputs ---------- */
+  // ------------ Read input payload from planning.html ------------
   const input = JSON.parse(localStorage.getItem('studyPlanInput')||'null');
+  const planSummary = document.getElementById('planSummary');
   if(!input){
-    document.getElementById('planSummary').innerHTML='No diagnostic found. Go back to <a href="planning.html">Planning</a>.';
+    planSummary.innerHTML='No diagnostic found. Go back to <a href="planning.html">Planning</a>.';
     return;
   }
-  const bookPrefs = JSON.parse(localStorage.getItem('bookPrefs')||'{}'); // legacy
-  const selectedBooks = new Set(input.selectedBooks || Object.keys(bookPrefs).filter(k=>bookPrefs[k]));
+
+  // ------------ Calendar window & UI ------------
   const today = new Date(); today.setHours(0,0,0,0);
   const todayStr = today.toISOString().slice(0,10);
   document.getElementById('testDate').min = todayStr;
-  document.getElementById('mPerDay').value = input.minutesPerDay || 60;
+  document.getElementById('mPerDay').value = input.minutesPerDay;
   document.getElementById('testDate').value = input.testDate || todayStr;
 
-  const goal = (input.goal||'amc10').toLowerCase();
-  const minutesPerDay = Number(input.minutesPerDay||60);
-  const testDate = new Date((input.testDate||todayStr)+'T00:00:00');
-  const daysLeft = Math.max(1, Math.ceil((testDate - today)/86400000));
+  const start = new Date(today);
+  const end   = new Date(document.getElementById('testDate').value); end.setHours(0,0,0,0);
+  const rawDays = Math.ceil((end - start)/86400000);
+  const days = (Number.isFinite(rawDays) && rawDays>0) ? rawDays : 14;
 
-  document.getElementById('goalPill').textContent = `Goal: ${goal.toUpperCase()}`;
-  document.getElementById('minutesPill').textContent = `Daily time: ${minutesPerDay} minutes`;
-  document.getElementById('daysLeftPill').textContent = `Days until test: ${daysLeft}`;
-  document.getElementById('planSummary').innerHTML =
-    `Start: <b>${today.toLocaleDateString()}</b> → Test: <b>${testDate.toLocaleDateString()}</b> • Window: <b>${daysLeft}</b> days • Goal: <b>${goal.toUpperCase()}</b>.`;
+  planSummary.innerHTML = `Start: <b>${start.toLocaleDateString()}</b> → Test: <b>${end.toLocaleDateString()}</b> • Window: <b>${days}</b> days • Goal: <b>${(input.goal||'').toUpperCase()}</b> • Minutes/day: <b>${input.minutesPerDay}</b>.`;
 
-  document.getElementById('rebuildBtn').onclick = ()=>{
-    const m = Number(document.getElementById('mPerDay').value||0);
-    const t = document.getElementById('testDate').value;
-    if(m<15 || !t){ alert('Enter minutes/day (≥15) and choose a future test date.'); return; }
-    input.minutesPerDay = m; input.testDate = t;
-    localStorage.setItem('studyPlanInput', JSON.stringify(input));
-    location.reload();
-  };
+  // ------------ Selected books & tracks ------------
+  const selectedBooks = new Set(input.selectedBooks || []);
+  // Sensible fallback if user deselected all core books
+  if(!selectedBooks.has('aops-v1') && !selectedBooks.has('aops-v2')){
+    if(input.testId === 'A'){ selectedBooks.add('aops-v1'); }
+    else { selectedBooks.add('aops-v2'); }
+  }
+  const useV1   = selectedBooks.has('aops-v1');
+  const useV2   = selectedBooks.has('aops-v2');
+  const useProof = ['velleman','zeitz','engel','egmo'].some(id=>selectedBooks.has(id));
+  const onAIMETrack = (input.testId!=='A');
+  const isUSAMOTrack = (input.testId==='C');
 
-  /* ---------- Book catalogs ---------- */
+  // ------------ Topic weights from diagnostic ------------
+  const subs = input.subscores||{};
+  const defaultCats = ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'];
+  const cats = Object.keys(subs).length ? Object.keys(subs) : defaultCats;
+  const weights={};
+  cats.forEach(k=>{
+    const r=(subs[k]?.right||0), t=(subs[k]?.total||1);
+    weights[k]=1 - r/t + 0.05;
+  });
+  function pickTopic(){
+    const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
+    for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
+    return cats[0];
+  }
+
+  // ------------ Reading banks (AoPS Vol.1 & Vol.2 only) ------------
   const V1=1, V2=2;
-  function minutesPerPage(vol){ return (vol===V1) ? 2.2 : (isUSAMOTrack?3.2:2.7); }
-  function minutesPerExercise(vol){ return (vol===V1) ? 6.0 : (isUSAMOTrack?9.0:8.0); }
+  function minutesPerPage(vol){ return (vol===V1)?2.0:(isUSAMOTrack?3.2:2.7); }
 
   const READS_VOL1 = {
-    "Polynomials and Algebra":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 6: Quadratic Equations", pStart:52, pEnd:60, exCount:32},
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 21: Functions (basics)", pStart:187, pEnd:190, exCount:16}
-    ],
     "Number Theory":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45, exCount:30},
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 5.6–5.7: Primes and Factors", pStart:47, pEnd:48, exCount:18}
+      {id:"V1-NT-5.4", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 5.4: Modular Arithmetic", pStart:42, pEnd:45, exCount:30, subs:['modular']},
+      {id:"V1-NT-5.6-5.7", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 5.6–5.7: Primes and Factors", pStart:47, pEnd:48, exCount:18, subs:['primes-factors']},
     ],
     "Combinatorics":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 25: Learning to Count", pStart:221, pEnd:229, exCount:40}
+      {id:"V1-C-25", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 25: Learning to Count", pStart:221, pEnd:229, exCount:40, subs:['basic-counting']},
     ],
     "Probability":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 25: Counting as a foundation for Probability", pStart:221, pEnd:229, exCount:24}
+      {id:"V1-P-25", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 25: Counting as a foundation for Probability", pStart:221, pEnd:229, exCount:24, subs:['basic-prob']},
     ],
     "Sequences and Series":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 24: Sequences and Series", pStart:211, pEnd:217, exCount:28}
+      {id:"V1-S-24", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 24: Sequences and Series", pStart:211, pEnd:217, exCount:28, subs:['sequences']},
     ],
     "Functions":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 21: Functions", pStart:187, pEnd:190, exCount:16}
+      {id:"V1-F-21", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 21: Functions", pStart:187, pEnd:190, exCount:16, subs:['functions']},
+    ],
+    "Polynomials and Algebra":[
+      {id:"V1-A-6",  book:'AoPS Volume 1', vol:V1, chapter:"Chapter 6: Quadratic Equations", pStart:52, pEnd:60, exCount:32, subs:['quadratics']},
     ],
     "Geometry":[
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 11.8: Area of a Triangle", pStart:109, pEnd:109, exCount:12},
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Ch. 14: Angle Chasing & Ch. 15: Area", pStart:133, pEnd:138, exCount:36},
-      {book:'Art of Problem Solving Volume 1', vol:V1, chapter:"Chapter 18: Three-Dimensional Geometry", pStart:165, pEnd:169, exCount:20}
-    ]
-  };
-
-  const READS_VOL2 = {
-    "Polynomials and Algebra":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 6: Polynomials", pStart:52, pEnd:65, exCount:34},
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Functional Equations (intro)", pStart:69, pEnd:73, exCount:18}
+      {id:"V1-G-11.8", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 11.8: Area of a Triangle", pStart:109, pEnd:109, exCount:12, subs:['triangle-area']},
+      {id:"V1-G-14-15", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 14: Angle Chasing and Chapter 15: Area", pStart:133, pEnd:138, exCount:36, subs:['angle-area']},
+      {id:"V1-G-18", book:'AoPS Volume 1', vol:V1, chapter:"Chapter 18: Three-Dimensional Geometry", pStart:165, pEnd:169, exCount:20, subs:['3d-geometry']},
     ],
+  };
+  const READS_VOL2 = {
     "Number Theory":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 23: Divisibility and Congruences", pStart:252, pEnd:262, exCount:34},
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 24: Diophantine Equations", pStart:266, pEnd:274, exCount:26}
+      {id:"V2-NT-23", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 23: Divisibility and Congruences", pStart:252, pEnd:262, exCount:34, subs:['modular-adv']},
+      {id:"V2-NT-24", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 24: Diophantine Equations", pStart:266, pEnd:274, exCount:26, subs:['diophantine']},
     ],
     "Combinatorics":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 15: Combinatorics & Binomial Theorem", pStart:170, pEnd:176, exCount:30},
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 25.6: Colorings", pStart:280, pEnd:280, exCount:12}
+      {id:"V2-C-15", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 15: Combinatorics and the Binomial Theorem", pStart:170, pEnd:176, exCount:30, subs:['binomial']},
+      {id:"V2-C-25.6", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 25.6: Colorings", pStart:280, pEnd:280, exCount:12, subs:['colorings']},
     ],
     "Probability":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Expected Value & Conditioning", pStart:148, pEnd:159, exCount:18}
+      {id:"V2-P-15.5", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 15.5: Binomial Theorem for distributions", pStart:175, pEnd:175, exCount:10, subs:['prob-binomial']},
     ],
     "Sequences and Series":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 16: Sequences & Recurrences", pStart:180, pEnd:191, exCount:36}
+      {id:"V2-S-16", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 16: Sequences and Recurrences", pStart:180, pEnd:191, exCount:36, subs:['recurrences']},
+    ],
+    "Functions":[
+      {id:"V2-F-7",  book:'AoPS Volume 2', vol:V2, chapter:"Chapter 7: Functional Equations", pStart:69, pEnd:73, exCount:18, subs:['functional-eq']},
+    ],
+    "Polynomials and Algebra":[
+      {id:"V2-A-6",  book:'AoPS Volume 2', vol:V2, chapter:"Chapter 6: Polynomials", pStart:52, pEnd:65, exCount:34, subs:['polynomials']},
     ],
     "Geometry":[
-      {book:'Art of Problem Solving Volume 2', vol:V2, chapter:"Chapter 22: Inversion & Homothety", pStart:241, pEnd:247, exCount:16}
-    ]
+      {id:"V2-G-22", book:'AoPS Volume 2', vol:V2, chapter:"Chapter 22: Geometry Tidbits — Inversion and Homothety", pStart:241, pEnd:247, exCount:16, subs:['geo-advanced']},
+    ],
   };
 
-  const PROOF_MODULES = [
-    {title:'Velleman — Direct & Contrapositive Proofs', pages:[45,65]},
-    {title:'Velleman — Proof by Contradiction', pages:[85,98]},
-    {title:'Velleman — Induction', pages:[120,136]}
-  ];
-
-  /* ---------- Emphasis & selections ---------- */
-  const onAIMETrack = (goal==='aime' || goal==='usamo' || goal==='usajmo');
-  const isUSAMOTrack = (goal==='usamo' || goal==='usajmo');
-
-  // Default book choices if none specified
-  if(selectedBooks.size===0){
-    if(goal==='amc10' || goal==='amc12') selectedBooks.add('aops-v1');
-    else { selectedBooks.add('aops-v2'); selectedBooks.add('velleman'); }
+  function availableUnitsFor(cat){
+    let units = [];
+    if(useV1 && READS_VOL1[cat]) units = units.concat(READS_VOL1[cat].map(x=>({...x, type:'pages'})));
+    if(useV2 && READS_VOL2[cat]) units = units.concat(READS_VOL2[cat].map(x=>({...x, type:'pages'})));
+    return units;
+  }
+  function formatReading(unit, from, to){
+    return `${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
   }
 
-  function poolsForTopic(topic){
-    let pool = [];
-    if(selectedBooks.has('aops-v1')) pool = pool.concat(READS_VOL1[topic]||[]);
-    if(selectedBooks.has('aops-v2')) pool = pool.concat(READS_VOL2[topic]||[]);
-    return pool;
-  }
-
-  /* ---------- Topic weights from diagnostic ---------- */
-  const subs = input.subscores || {};
-  const allTopics = ["Polynomials and Algebra","Number Theory","Geometry","Combinatorics","Probability","Sequences and Series","Functions"];
-  const topicsPresent = Object.keys(subs).length ? Object.keys(subs) : allTopics;
-  const weights = {};
-  topicsPresent.forEach(k=>{
-    const r=(subs[k]?.right||0), t=(subs[k]?.total||1);
-    weights[k] = 1 - r/t + 0.05; // weaker → heavier
-  });
-  function pickTopicWeighted(){
-    const keys = Object.keys(weights); const sum = keys.reduce((s,k)=>s+weights[k],0) || 1;
-    let r = Math.random()*sum;
-    for(const k of keys){ r -= weights[k]; if(r<=0) return k; }
-    return keys[0];
-  }
-
-  /* ---------- Practice test pools (full sets) ---------- */
-  const PRACTICE = {
-    amc10: [
-      { name:"2020 AMC 10A", url:"https://artofproblemsolving.com/wiki/index.php/2020_AMC_10A_Problems" },
-      { name:"2020 AMC 10B", url:"https://artofproblemsolving.com/wiki/index.php/2020_AMC_10B_Problems" },
-      { name:"2019 AMC 10A", url:"https://artofproblemsolving.com/wiki/index.php/2019_AMC_10A_Problems" },
-      { name:"2019 AMC 10B", url:"https://artofproblemsolving.com/wiki/index.php/2019_AMC_10B_Problems" },
-      { name:"2018 AMC 10A", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_10A_Problems" },
-      { name:"2018 AMC 10B", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_10B_Problems" }
+  // ------------ Proof module ------------
+  const PROOF_BOOKS_SELECTED = ['velleman','zeitz','engel','egmo'].filter(id=>selectedBooks.has(id));
+  const PROOF_MODULE = {
+    'velleman': [
+      {label:'Direct and Contrapositive Proofs (Velleman, pp. 45–65)', mins:20},
+      {label:'Induction (Velleman, pp. 135–165)', mins:20}
     ],
-    amc12: [
-      { name:"2020 AMC 12A", url:"https://artofproblemsolving.com/wiki/index.php/2020_AMC_12A_Problems" },
-      { name:"2020 AMC 12B", url:"https://artofproblemsolving.com/wiki/index.php/2020_AMC_12B_Problems" },
-      { name:"2019 AMC 12A", url:"https://artofproblemsolving.com/wiki/index.php/2019_AMC_12A_Problems" },
-      { name:"2019 AMC 12B", url:"https://artofproblemsolving.com/wiki/index.php/2019_AMC_12B_Problems" },
-      { name:"2018 AMC 12A", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_12A_Problems" },
-      { name:"2018 AMC 12B", url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems" }
+    'zeitz': [
+      {label:'Pigeonhole / Extremal (Zeitz, Part I)', mins:20},
+      {label:'Invariants / Monovariants (Zeitz, Part II)', mins:20}
     ],
-    aime: [
-      { name:"AIME I 2020", url:"https://artofproblemsolving.com/wiki/index.php/2020_AIME_I_Problems" },
-      { name:"AIME II 2020", url:"https://artofproblemsolving.com/wiki/index.php/2020_AIME_II_Problems" },
-      { name:"AIME I 2019", url:"https://artofproblemsolving.com/wiki/index.php/2019_AIME_I_Problems" },
-      { name:"AIME II 2019", url:"https://artofproblemsolving.com/wiki/index.php/2019_AIME_II_Problems" },
-      { name:"AIME I 2018", url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_I_Problems" },
-      { name:"AIME II 2018", url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_II_Problems" }
+    'egmo': [
+      {label:'Power of a Point & Homothety (EGMO, Ch. 4–5)', mins:20},
+      {label:'Inversion basics (EGMO, Ch. 6)', mins:20}
     ],
-    usamo: [
-      { name:"USA(J)MO 2020", url:"https://artofproblemsolving.com/wiki/index.php/USAJMO_Problems_and_Solutions#2020_USAJMO" },
-      { name:"USA(J)MO 2019", url:"https://artofproblemsolving.com/wiki/index.php/USAJMO_Problems_and_Solutions#2019_USAJMO" },
-      { name:"USA(J)MO 2018", url:"https://artofproblemsolving.com/wiki/index.php/USAJMO_Problems_and_Solutions#2018_USAJMO" }
+    'engel': [
+      {label:'Combinatorial Arguments (Engel, early chapters)', mins:20}
     ]
   };
-
-  /* ---------- Helpers ---------- */
-  const fmt = (d)=>d.toISOString().slice(0,10);
-  const addDays = (d,n)=>{ const x=new Date(d); x.setDate(x.getDate()+n); return x; };
-  const diffDays = (a,b)=>Math.ceil((b-a)/86400000);
-  const startOfWeekSunday = (d)=>{ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return fmt(x); };
-
-  /* ---------- Day builders ---------- */
-  function buildStudyDay(minutesTarget){
-    // Choose topic by weakness
-    const topic = pickTopicWeighted();
-    // Pick a unit (favor Vol2 for AIME/USAMO, Vol1 for AMC via selectedBooks set)
-    const pool = poolsForTopic(topic);
-    if(pool.length===0){
-      return [{ html:`📘 ${topic}: Read AoPS on this topic and solve a small set of exercises.`, mins:minutesTarget }];
+  let proofCursor = 0;
+  const proofLinearList = PROOF_BOOKS_SELECTED.flatMap(id=>PROOF_MODULE[id]||[]);
+  function scheduleProofBlock(blockMinutes){
+    if(!proofLinearList.length || blockMinutes<10) return [];
+    const out=[]; let used=0;
+    while(used+15<=blockMinutes && proofCursor<proofLinearList.length){
+      const item = proofLinearList[proofCursor++ % proofLinearList.length];
+      out.push({html:`📗 <b>Proof module</b>: ${item.label}. Write at least one full proof.`, mins:item.mins, type:'proof'});
+      used += item.mins;
     }
-    const unit = pool[Math.floor(Math.random()*pool.length)];
-
-    // Split into reading + exercises (+ optional proof for high levels)
-    const baseReadShare = (goal==='amc10'||goal==='amc12') ? 0.55 : 0.45;
-    let readBudget = Math.max(8, Math.round(minutesTarget * baseReadShare));
-    let exBudget   = Math.max(6, minutesTarget - readBudget);
-
-    // Proof module share for high goals (steals from exercises)
-    const addProof = (isUSAMOTrack || goal==='aime') && selectedBooks.has('velleman');
-    let proofBudget = 0;
-    if(addProof){
-      proofBudget = Math.min( Math.round(minutesTarget * (isUSAMOTrack?0.20:0.10)), exBudget-6 );
-      if(proofBudget<0) proofBudget=0;
-      exBudget -= proofBudget;
+    if(blockMinutes - used >= 10){
+      const item = proofLinearList[proofCursor % proofLinearList.length];
+      out.push({html:`📗 <b>Proof module</b>: ${item.label} (short set).`, mins:blockMinutes-used, type:'proof'});
     }
-
-    // Reading: choose pages to fit budget
-    const rRate = minutesPerPage(unit.vol);
-    const pAvail = unit.pEnd - unit.pStart + 1;
-    let pages = Math.max(2, Math.min(pAvail, Math.floor((readBudget + 0.3*rRate)/rRate)));
-    let from = unit.pStart, to = unit.pStart + pages - 1;
-    let usedRead = Math.round(pages * rRate);
-
-    // Exercises: choose count to fit exBudget
-    const eRate = minutesPerExercise(unit.vol);
-    let exCnt = Math.max(1, Math.min(unit.exCount, Math.floor((exBudget + 0.25*eRate)/eRate)));
-    let usedEx = Math.round(exCnt * eRate);
-
-    // Proof: take one module chunk if budgeted
-    const items = [];
-    items.push({ html:`📘 <b>${topic}</b>: ${unit.book}, ${unit.chapter} (pages ${from}–${to})`, mins:usedRead, type:'reading' });
-    items.push({ html:`🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): ${exCnt===1 ? 'Problem 1' : 'Problems 1–'+exCnt}`, mins:usedEx, type:'bookex' });
-
-    if(proofBudget>=12){
-      const mod = PROOF_MODULES[Math.floor(Math.random()*PROOF_MODULES.length)];
-      items.push({ html:`📗 <b>Proof module</b>: ${mod.title} (pages ${mod.pages[0]}–${mod.pages[1]}). Write at least one full proof.`, mins:proofBudget, type:'proof' });
-    }
-
-    // Balance to target (internal; UI hides minutes)
-    function total(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
-    let cur = total(items);
-    const slack = 2;
-
-    if(cur < minutesTarget - slack){
-      // try adding more exercises if capacity
-      const gap = minutesTarget - cur;
-      const extra = Math.min(unit.exCount - exCnt, Math.max(1, Math.floor((gap + 0.25*eRate)/eRate)));
-      if(extra>0){
-        exCnt += extra; usedEx = Math.round(exCnt*eRate);
-        items[1].mins = usedEx;
-        items[1].html = `🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): Problems 1–${exCnt}`;
-        cur = total(items);
-      }
-      // if still short, extend reading if pages remain
-      if(cur < minutesTarget - slack){
-        const morePages = Math.min(pAvail - pages, Math.max(0, Math.floor((minutesTarget-cur + 0.3*rRate)/rRate)));
-        if(morePages>0){
-          pages += morePages; to = unit.pStart + pages - 1; usedRead = Math.round(pages*rRate);
-          items[0].mins = usedRead;
-          items[0].html = `📘 <b>${topic}</b>: ${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
-          cur = total(items);
-        }
-      }
-    } else if(cur > minutesTarget + slack){
-      // trim exercises first
-      let over = cur - minutesTarget;
-      const canTrimEx = Math.max(0, exCnt - 1);
-      if(canTrimEx>0){
-        const trimCnt = Math.min(canTrimEx, Math.ceil(over / eRate));
-        exCnt -= trimCnt; usedEx = Math.round(exCnt*eRate);
-        items[1].mins = usedEx;
-        items[1].html = exCnt<=1
-          ? `🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): Problem 1`
-          : `🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): Problems 1–${exCnt}`;
-        cur = total(items);
-        over = cur - minutesTarget;
-      }
-      // then trim reading pages if needed
-      if(cur > minutesTarget + slack){
-        const trimPages = Math.min(pages - 2, Math.ceil((cur - minutesTarget)/rRate));
-        if(trimPages>0){
-          pages -= trimPages; to = unit.pStart + pages - 1; usedRead = Math.round(pages*rRate);
-          items[0].mins = usedRead;
-          items[0].html = `📘 <b>${topic}</b>: ${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
-        }
-      }
-    }
-
-    return items;
-  }
-
-  function buildTuneUpDay(minutesTarget, weakestTopic){
-    const topic = weakestTopic || pickTopicWeighted();
-    const pool = poolsForTopic(topic);
-    if(pool.length===0) return [{ html:`🔧 Tune-up: Review notes and rework recent misses in ${topic}.`, mins:minutesTarget }];
-    const unit = pool[Math.floor(Math.random()*pool.length)];
-    // lighter read
-    const rRate = minutesPerPage(unit.vol), eRate = minutesPerExercise(unit.vol);
-    const readBudget = Math.round(minutesTarget*0.6), exBudget = minutesTarget - readBudget;
-    const pages = Math.max(2, Math.min(unit.pEnd-unit.pStart+1, Math.floor((readBudget + 0.3*rRate)/rRate)));
-    const from = unit.pStart, to = unit.pStart + pages - 1;
-    const exCnt = Math.max(1, Math.min(unit.exCount, Math.floor((exBudget + 0.25*eRate)/eRate)));
-    return [
-      { html:`🔧 <b>Tune-up (${topic})</b>: ${unit.book}, ${unit.chapter} (pages ${from}–${to})`, mins:Math.round(pages*rRate) },
-      { html:`🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): ${exCnt===1?'Problem 1':'Problems 1–'+exCnt}`, mins:Math.round(exCnt*eRate) }
-    ];
-  }
-
-  /* ---------- Build whole plan ---------- */
-  function buildPlan(){
-    const start = new Date(today);
-    const end = new Date(testDate);
-    const totalDays = Math.max(1, diffDays(start, end));
-
-    // Practice tests start ≥30 days out if there’s enough runway; otherwise closer
-    const wantStartAtLeast = 30;
-    const practiceWindow = (totalDays >= wantStartAtLeast + 5)
-      ? wantStartAtLeast
-      : Math.max(7, Math.ceil(totalDays * 0.5)); // short runway pulls tests closer
-
-    const practiceStart = addDays(end, -practiceWindow + 1);
-    const practiceStartStr = fmt(practiceStart);
-
-    // Weekly constraint: ≤2 tests/week on Wed/Sat (3,6). Short runway adds Tue/Fri backups.
-    const preferredDOW = [3,6];                 // Wed, Sat
-    const backupDOW   = [2,5,3,6];              // Tue, Fri, Wed, Sat
-    const testsPerWeek = {};                    // week-key -> count
-    const reservedReview = new Set();           // dates reserved for review (day after test)
-
-    const pool = (goal==='amc10') ? PRACTICE.amc10
-               : (goal==='amc12') ? PRACTICE.amc12
-               : (goal==='aime')  ? PRACTICE.aime
-               : PRACTICE.usamo;
-    let poolIdx = 0;
-
-    // Find weakest topic for tune-ups
-    const ordered = Object.entries(weights).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
-    const weakest = ordered[0] || "Polynomials and Algebra";
-
-    const days = [];
-    for(let cur=new Date(start); fmt(cur) <= fmt(end); cur=addDays(cur,1)){
-      const dateStr = fmt(cur);
-      const items = [];
-
-      if(reservedReview.has(dateStr)){
-        items.push({ html:`✅ Review yesterday’s full mock: re-solve all missed/guessed problems. Write solutions and update your error log.`, mins:minutesPerDay });
-        days.push({ date: dateStr, items });
-        continue;
-      }
-
-      const inPractice = (dateStr >= practiceStartStr);
-      if(inPractice){
-        const weekKey = startOfWeekSunday(cur);
-        const count = testsPerWeek[weekKey] || 0;
-        const shortRunway = (diffDays(start, end) < 30);
-        const allowed = shortRunway ? backupDOW : preferredDOW;
-
-        if(count < 2 && allowed.includes(cur.getDay())){
-          const test = pool[poolIdx % pool.length]; poolIdx++;
-          items.push({ html:`📝 <a href="${test.url}" target="_blank" rel="noopener">Full practice test: ${test.name}</a>`, mins:Math.round(minutesPerDay*0.9) });
-          items.push({ html:`🔎 Simulate official conditions: strict timing, quiet room, no calculator (AMC), integer answers (AIME).`, mins:Math.round(minutesPerDay*0.1) });
-          testsPerWeek[weekKey] = count + 1;
-
-          // reserve next day for review
-          const next = addDays(cur,1);
-          if(fmt(next) <= fmt(end)) reservedReview.add(fmt(next));
-
-          days.push({ date: dateStr, items });
-          continue;
-        }
-
-        // Non-test day in practice window: light tune-up on weakest topic
-        buildTuneUpDay(minutesPerDay, weakest).forEach(x=>items.push(x));
-        days.push({ date: dateStr, items });
-        continue;
-      }
-
-      // Early phase: pure study day (book reading + exercises, occasional proof)
-      buildStudyDay(minutesPerDay).forEach(x=>items.push(x));
-      days.push({ date: dateStr, items });
-    }
-
-    return days;
-  }
-
-  const PLAN_DAYS = buildPlan();
-
-  /* ---------- Diagnostic nudges ---------- */
-  (function addNotices(){
-    const box = document.getElementById('notices');
-    let html = '';
-    const total = Object.values(input.subscores||{}).reduce((s,v)=>s+(v.total||0),0);
-    const correct = Object.values(input.subscores||{}).reduce((s,v)=>s+(v.right||0),0);
-    if(total){
-      const pct = Math.round(100*correct/total);
-      if((goal==='aime' || goal==='usamo' || goal==='usajmo') && pct < 40){
-        html += `<div class="card" style="background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12">Your diagnostic score (${pct}%) suggests starting with an easier path. Consider taking the ${goal==='aime' ? 'AMC 12' : 'AIME'} diagnostic first.</div>`;
-      } else if((goal==='amc10' || goal==='amc12') && pct > 85){
-        html += `<div class="card" style="background:#eef6ff;border:1px solid #cfe3ff;color:#0b3b8a">Great job on the diagnostic (${pct}%)! You might also try the ${goal==='amc10' ? 'AMC 12' : 'AIME'} diagnostic to stretch yourself.</div>`;
-      }
-    }
-    box.innerHTML = html;
-  })();
-
-  /* ---------- Calendar (month pager) ---------- */
-  const grid = document.getElementById('grid');
-  const monthTitle = document.getElementById('monthTitle');
-
-  const startDate = new Date(today);
-  const endDate = new Date(testDate);
-  const months = buildMonthList(startDate, endDate);
-  let monthIdx = 0;
-
-  document.getElementById('prevMonth').onclick = ()=>{ monthIdx = Math.max(0, monthIdx-1); renderMonth(months[monthIdx]); };
-  document.getElementById('nextMonth').onclick = ()=>{ monthIdx = Math.min(months.length-1, monthIdx+1); renderMonth(months[monthIdx]); };
-
-  function buildMonthList(s,e){
-    const out=[]; let cur=new Date(s.getFullYear(), s.getMonth(), 1); const last=new Date(e.getFullYear(), e.getMonth(), 1);
-    while(cur<=last){ out.push({year:cur.getFullYear(), month:cur.getMonth()}); cur=new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
     return out;
   }
 
-  function renderMonth({year, month}){
-    grid.innerHTML='';
-    const header = new Date(year,month,1).toLocaleString(undefined,{month:'long',year:'numeric'});
-    monthTitle.textContent = header;
+  // ------------ Composition knobs ------------
+  const minutesPerDay = Number(input.minutesPerDay||60);
+  const THRESH = { read:10 };     // minimum useful reading block
+  const QUOTA_SLACK = 2;          // +/- tolerance minutes (invisible to user)
+  function phaseNameForDay(d){
+    const totalDays = Math.ceil((end - start)/86400000);
+    const f=Math.floor(totalDays*0.55), m=Math.floor(totalDays*0.85);
+    return d<f?'Foundation':(d<m?'Mixed':'Final');
+  }
 
-    // DOW row
-    ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d=>{
-      const c=document.createElement('div'); c.className='cell dow'; c.innerHTML=`<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(c);
-    });
+  // Schedule full practice tests near the exam (max 2/week).
+  function mockStartDate(){
+    const spanDays = Math.ceil((end - start)/86400000);
+    if(spanDays >= 30) return new Date(end.getTime()-30*86400000);
+    if(spanDays >= 14) return new Date(end.getTime()-Math.floor(spanDays/2)*86400000);
+    return new Date(end.getTime()-7*86400000);
+  }
+  function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
+  function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
+  function makeMock(totalMinutes){
+    if(onAIMETrack){
+      const years=[...Array(22)].map((_,i)=>2004+i); const V=['I','II'];
+      const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
+      return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (15 problems). Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
+    }
+    const years=[...Array(18)].map((_,i)=>2006+i); const V=['A','B']; const lv=(input.goal==='amc10')?'10':'12';
+    const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
+    return {html:`<a href="${amcSetURL(lv,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${lv}${v}. Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
+  }
 
-    const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
-    for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='cell out-of-range'; grid.appendChild(e); }
+  // Reading + book exercises
+  function scheduleReadingAndExercises(phaseName, blockMinutes){
+    const tasks = [];
+    if(blockMinutes < 4) return tasks;
 
-    const keySet = new Map(PLAN_DAYS.map(d=>[d.date, d.items]));
-    for(let d=1; d<=daysInMonth; d++){
-      const dateObj=new Date(year,month,d); dateObj.setHours(0,0,0,0);
-      const key = dateObj.toISOString().slice(0,10);
-      const items = keySet.get(key) || [];
-      const inRange = (dateObj>=today && dateObj<=testDate);
+    const phaseBias = (phaseName==='Foundation') ? 0.62 : (phaseName==='Mixed' ? 0.55 : 0.45);
+    let readBudget = Math.max(6, Math.round(blockMinutes * phaseBias));
+    let exBudget = Math.max(0, blockMinutes - readBudget);
 
-      const box=document.createElement('div');
-      let cls='cell';
-      if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(key===todayStr) cls+=' today';
-      box.className=cls;
+    let chunks=0;
+    while(readBudget >= THRESH.read && chunks < 3){
+      const cat = pickTopic();
+      const units = availableUnitsFor(cat);
+      if(!units.length) { chunks++; continue; }
+      const unit = units[Math.floor(Math.random()*units.length)];
+      const rate = minutesPerPage(unit.vol);
+      const pagesAvail = unit.pEnd - unit.pStart + 1;
+      const pagesTarget = Math.max(2, Math.min(pagesAvail, Math.floor((readBudget + 0.3*rate)/rate)));
+      const from = unit.pStart, to = unit.pStart + pagesTarget - 1;
+      const readMins = Math.round(pagesTarget*rate);
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit, from, to)}`, mins:readMins, type:'reading', _ref:unit, _from:from, _to:to, _topic:cat});
+      readBudget -= readMins;
 
-      let html=`<div class="date">${d}</div>`;
-      if(inRange){
-        if(items.length===0){
-          html += `<div class="task" style="color:#94a3b8">—</div>`;
-        } else {
-          items.forEach(it=>{ html += `<div class="task">${it.html}</div>`; });
+      if(exBudget >= 6){
+        const ex = buildExercisesFromUnit(unit, Math.min(exBudget, Math.max(6, Math.round(blockMinutes*0.45))));
+        if(ex){ ex._topic = cat; tasks.push(ex); exBudget -= ex.mins; }
+      }
+      chunks++;
+    }
+
+    if(!tasks.length){
+      const fallbackCat = pickTopic();
+      const us = availableUnitsFor(fallbackCat);
+      if(us.length){
+        const u=us[0], rate=minutesPerPage(u.vol);
+        const pagesTarget = Math.max(2, Math.min(u.pEnd-u.pStart+1, Math.floor((blockMinutes+0.3*rate)/rate)));
+        const from=u.pStart, to=u.pStart+pagesTarget-1;
+        const mins=Math.round(pagesTarget*rate);
+        tasks.push({html:`📘 <b>${fallbackCat}</b>: ${formatReading(u, from, to)}`, mins, type:'reading', _ref:u, _from:from, _to:to, _topic:fallbackCat});
+      }
+    }
+    return tasks;
+  }
+
+  function buildExercisesFromUnit(unit, wantMins){
+    const per = (unit.vol===V1) ? 6.0 : (isUSAMOTrack?9.0:8.0);
+    const cnt = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
+    const start = 1, end = Math.min(unit.exCount||cnt, start+cnt-1);
+    const used = Math.round((end-start+1)*per);
+    const rangeText = (start===end) ? `Problem ${start}` : `Problems ${start}–${end}`;
+    return {html:`🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): ${rangeText}`, mins:used, type:'bookex'};
+  }
+
+  // Pack a day to the minutes quota (internally) while UI stays clean (no minutes shown)
+  function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
+  function balanceToQuota(arr, target){
+    let cur = totalMins(arr);
+    if(Math.abs(cur - target) <= QUOTA_SLACK) return;
+
+    if(cur < target){
+      // Add a little more reading from the last topic if possible
+      const last = arr.findLast?.(x=>x.type==='reading');
+      if(last && last._ref){
+        const rate = minutesPerPage(last._ref.vol);
+        const canAddPages = Math.max(0, last._ref.pEnd - last._to);
+        if(canAddPages>0){
+          const addPages = Math.min(canAddPages, Math.ceil((target-cur)/rate));
+          last._to += addPages;
+          last.mins += Math.round(addPages*rate);
+          last.html = `📘 <b>${last._topic}</b>: ${formatReading(last._ref, last._from, last._to)}`;
+          cur = totalMins(arr);
+          if(Math.abs(cur - target) <= QUOTA_SLACK) return;
         }
       }
-      box.innerHTML = html;
-      grid.appendChild(box);
+      // Otherwise add a short exercise set
+      arr.push({html:`🧠 <b>Book exercises</b>: short mixed set`, mins:Math.max(4, target-cur), type:'bookex'});
+      return;
+    }
+
+    // Too long → trim the last task if it's exercises or reading
+    for(let i=arr.length-1;i>=0;i--){
+      const t=arr[i];
+      if(!t || (t.type!=='bookex' && t.type!=='reading')) continue;
+      const cut = Math.min(t.mins-4, cur-target);
+      if(cut>0){
+        t.mins -= cut;
+        if(t.type==='reading' && t._ref){
+          const rate = minutesPerPage(t._ref.vol);
+          const pagesLess = Math.floor(cut/rate);
+          if(pagesLess>0){
+            t._to = Math.max(t._from, t._to - pagesLess);
+            t.html = `📘 <b>${t._topic}</b>: ${formatReading(t._ref, t._from, t._to)}`;
+          }
+        } else if(t.type==='bookex'){
+          t.html = t.html.replace(/(Problems?\s+\d+(?:–\d+)?).*/,'$1'); // keep label tidy
+        }
+        cur = totalMins(arr);
+        if(Math.abs(cur - target) <= QUOTA_SLACK) return;
+      }
     }
   }
 
-  renderMonth(months[monthIdx]);
+  // ------------ Build plan day-by-day ------------
+  const tasksByDay=[];
+  const mockStart = mockStartDate();
+  const weekMockCounts = new Map(); // key = YYYY-WW → count
+  function isoWeekKey(d){
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - dayNum + 3);
+    const firstThursday = new Date(Date.UTC(date.getUTCFullYear(),0,4));
+    const week = 1 + Math.round(((date - firstThursday)/86400000 - 3 + ((firstThursday.getUTCDay()+6)%7))/7);
+    return `${date.getUTCFullYear()}-${String(week).padStart(2,'0')}`;
+  }
 
-  /* ---------- ICS export ---------- */
-  document.getElementById('downloadIcs').onclick = ()=>{
-    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
-    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
-    const days = Math.max(1, Math.ceil((testDate - today)/86400000));
-    for(let i=0;i<days;i++){
-      const day=new Date(today.getTime()+i*86400000);
-      const key=day.toISOString().slice(0,10);
-      const items=(PLAN_DAYS.find(x=>x.date===key)||{}).items||[];
-      if(!items.length) continue;
-      const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0));
-      const endUTC=new Date(startUTC.getTime()+minutesPerDay*60000);
-      const desc=items.map(t=>(t.html||'').replace(/<[^>]+>/g,'')).join('\\n');
-      lines.push('BEGIN:VEVENT',`UID:olympiadprep-${i}@studyplan`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${goal.toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
+  for(let d=0; d<days; d++){
+    const dateObj = new Date(start.getTime()+d*86400000);
+    dateObj.setHours(0,0,0,0);
+    const phase = phaseNameForDay(d);
+
+    let dayTasks = [];
+
+    // Decide if this day should be a full mock
+    if(dateObj >= mockStart){
+      const wk = isoWeekKey(dateObj);
+      const used = weekMockCounts.get(wk)||0;
+      const dow = dateObj.getDay(); // 0 Sun .. 6 Sat
+      const goodSpacing = (dow===3 || dow===6); // Wed/Sat default
+      if(used < 2 && goodSpacing){
+        const mock = makeMock(minutesPerDay);
+        dayTasks.push(mock);
+        weekMockCounts.set(wk, used+1);
+        tasksByDay.push(dayTasks);
+        continue;
+      }
     }
-    lines.push('END:VCALENDAR');
-    const blob = new Blob([lines.join('\\r\\n')], {type:'text/calendar'});
-    const url = URL.createObjectURL(blob); const a=document.createElement('a');
-    a.href=url; a.download='OlympiadPrep-StudyPlan.ics'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+
+    // Otherwise: study mix (reading + exercises + optional proof)
+    dayTasks = scheduleReadingAndExercises(phase, minutesPerDay);
+
+    if(useProof){
+      const proofShare = isUSAMOTrack ? 0.22 : (onAIMETrack ? 0.12 : 0.0);
+      const proofBudget = Math.round(minutesPerDay * proofShare);
+      if(proofBudget>0){
+        const p = scheduleProofBlock(proofBudget);
+        p.forEach(t=>dayTasks.push(t));
+      }
+    }
+
+    balanceToQuota(dayTasks, minutesPerDay);
+    tasksByDay.push(dayTasks);
+  }
+
+  // ------------ Calendar rendering (1 month at a time, pager) ------------
+  const taskMap = new Map();
+  for(let i=0;i<days;i++){
+    const d = new Date(start.getTime()+i*86400000);
+    const key = d.toISOString().slice(0,10);
+    taskMap.set(key, tasksByDay[i]);
+  }
+
+  const months = buildMonthList(start, end); let monthIdx=0; renderOneMonth(months[monthIdx]);
+  document.getElementById('prevMonth').onclick = ()=>{ if(monthIdx>0){monthIdx--;renderOneMonth(months[monthIdx]);}};
+  document.getElementById('nextMonth').onclick = ()=>{ if(monthIdx<months.length-1){monthIdx++;renderOneMonth(months[monthIdx]);}};
+
+  document.getElementById('downloadIcs').onclick = ()=>{
+    const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
+    const blob = new Blob([ics], {type:'text/calendar'}); const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='OlympiadPrep-StudyPlan.ics'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   };
+  document.getElementById('rebuildBtn').onclick = ()=>{
+    const m = Number(document.getElementById('mPerDay').value||0), t = document.getElementById('testDate').value;
+    if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
+    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href = 'timeline.html?v=rebuild';
+  };
+
+  function buildMonthList(startDate, endDate){
+    const out=[]; let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    while(cur<=last){ out.push({year:cur.getFullYear(), month:cur.getMonth()}); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+    return out;
+  }
+  function renderOneMonth({year, month}){
+    const cal = document.getElementById('calendar'); cal.innerHTML='';
+    const wrap=document.createElement('section'); wrap.className='month';
+    const header = new Date(year, month, 1).toLocaleString(undefined,{month:'long',year:'numeric'});
+    wrap.innerHTML=`<h3>${header}</h3><div class="cal"></div>`; const grid=wrap.querySelector('.cal');
+
+    ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d=>{
+      const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
+      head.innerHTML=`<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
+    });
+
+    const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
+    for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e); }
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    for(let day=1; day<=daysInMonth; day++){
+      const dateObj=new Date(year,month,day); dateObj.setHours(0,0,0,0);
+      const key=dateObj.toISOString().slice(0,10); const tasks=taskMap.get(key)||[];
+      const inRange=(dateObj>=start && dateObj<=end);
+      const box=document.createElement('div'); let cls='day';
+      if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(dateObj.getTime()===today.getTime()) cls+=' today';
+      box.className=cls;
+
+      let html=`<div class="date">${day}</div>`;
+      if(inRange){ tasks.forEach(t=>{ html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Study'}</a>` : (t.text||''))}</div>`; }); }
+      box.innerHTML=html; grid.appendChild(box);
+    }
+    cal.appendChild(wrap);
+    document.getElementById('monthLabel').innerText = `Month ${months.indexOf(months.find(m=>m.year===year&&m.month===month))+1} of ${months.length} • ${header}`;
+    document.getElementById('prevMonth').disabled=(monthIdx===0);
+    document.getElementById('nextMonth').disabled=(monthIdx===months.length-1);
+  }
+
+  function buildICS(startDate, spanDays, tasks, minutes, meta){
+    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()+0).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
+    for(let i=0;i<spanDays;i++){
+      const day=new Date(startDate.getTime()+i*86400000); const items=tasks[i]||[]; if(!items.length) continue;
+      const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0)); const endUTC=new Date(startUTC.getTime()+minutes*60000);
+      const desc=items.map(t=>(t.html||'').replace(/<[^>]+>/g,'')).join('\\n');
+      lines.push('BEGIN:VEVENT',`UID:olympiadprep-${i}@studyplan`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${meta.goal.toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
+    }
+    lines.push('END:VCALENDAR'); return lines.join('\r\n');
+  }
+
+  // ----------------------------- END OF INIT -----------------------------
 })();
 </script>
 </body>
