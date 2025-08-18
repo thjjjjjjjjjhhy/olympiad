@@ -15,6 +15,7 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
+  <!-- Minimal UI -->
   <style>
     :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; --grid:#e5e7eb; }
     body{color:var(--fg)}
@@ -41,7 +42,12 @@
     .rec-h{margin:.6rem 0 .25rem}
     .notice{border-left:4px solid var(--accent);background:#f0f9ff;padding:10px;border-radius:8px}
     @media (max-width:700px){.row{grid-template-columns:1fr}}
-    @media print { .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; } body { background:#fff; } .card { box-shadow:none; border:1px solid #e5e7eb } .container { max-width:none } }
+    @media print {
+      .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; }
+      body { background:#fff; }
+      .card { box-shadow:none; border:1px solid #e5e7eb }
+      .container { max-width:none }
+    }
   </style>
 </head>
 <body>
@@ -132,20 +138,80 @@
   // ---------- Test bank (A, B, C) ----------
   const tests = {
     A: {
-      title: "Diagnostic Test A (AMC Readiness)",
+      title: "Diagnostic Test A (AMC Readiness — Harder)",
       format: "10 multiple-choice (A–E)",
-      time: 30,
+      time: 35,
       questions: [
-        { type:"mcq", topic:"Polynomials and Algebra", latex:"Solve \\(3(x-2)=2(x+5)\\).", choices:["8","10","12","14","16"], answerIndex:4 },
-        { type:"mcq", topic:"Polynomials and Algebra", latex:"The average of four tests is 80. After a fifth equally-weighted test, the overall average is 82. What was the fifth score?", choices:["84","86","88","90","92"], answerIndex:3 },
-        { type:"mcq", topic:"Geometry", latex:"In a right triangle with legs 6 and 8, the inradius is", choices:["1","2","2.5","3","4"], answerIndex:1 },
-        { type:"mcq", topic:"Number Theory", latex:"Find the remainder when \\(2^{2019}\\) is divided by 7.", choices:["0","1","2","3","6"], answerIndex:1 },
-        { type:"mcq", topic:"Combinatorics", latex:"How many 3-digit even numbers have all digits distinct?", choices:["300","308","320","328","336"], answerIndex:3 },
-        { type:"mcq", topic:"Polynomials and Algebra", latex:"If the roots of \\(x^2-7x+k=0\\) are consecutive integers, then \\(k=\\)", choices:["10","11","12","13","14"], answerIndex:2 },
-        { type:"mcq", topic:"Probability", latex:"Two fair dice are rolled. The probability that the sum is prime equals", choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{3}{8}\\)","\\(\\tfrac{5}{12}\\)","\\(\\tfrac{7}{18}\\)","\\(\\tfrac{11}{36}\\)"], answerIndex:2 },
-        { type:"mcq", topic:"Geometry", latex:"A cube has volume \\(64\\). Its surface area is", choices:["64","80","96","112","128"], answerIndex:2 },
-        { type:"mcq", topic:"Functions", latex:"For how many integers \\(x\\in[0,10]\\) does \\(|x-3|<3\\)?", choices:["4","5","6","7","8"], answerIndex:1 },
-        { type:"mcq", topic:"Functions", latex:"Lines \\(y=2x+3\\) and \\(y=tx+1\\) intersect at \\(x=-2\\). Then \\(t=\\)", choices:["\\(-1\\)","0","1","2","3"], answerIndex:2 }
+        {
+          type:"mcq",
+          topic:"Polynomials and Algebra",
+          latex:"Let the roots of \\((x-3)(x+5)=14\\) be \\(r_1,r_2\\). Compute \\(r_1^2+r_2^2\\).",
+          choices:["58","60","62","64","66"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Number Theory",
+          latex:"Find the least positive integer \\(n\\) with \\(7n\\equiv 1\\pmod{30}\\).",
+          choices:["7","11","13","17","19"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Geometry",
+          latex:"A triangle has side lengths \\(13,14,15\\). Its circumradius \\(R\\) equals",
+          choices:["\\(\\tfrac{15}{4}\\)","\\(\\tfrac{13}{2}\\)","\\(\\tfrac{65}{8}\\)","\\(\\tfrac{17}{2}\\)","\\(\\tfrac{33}{4}\\)"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Combinatorics",
+          latex:"How many distinct arrangements of the letters of \\(\\text{BANANA}\\) have no two \\(\\text{N}\\) adjacent?",
+          choices:["30","36","40","42","48"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Sequences and Series",
+          latex:"Let \\(a_n=3\\cdot 2^n-5\\). Compute \\(\\sum_{n=1}^{6} a_n\\).",
+          choices:["336","342","348","356","360"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Functions",
+          latex:"For real \\(t\\), the lines \\(y=tx+1\\) and \\(y=(t+2)x-3\\) are perpendicular. Find \\(t\\).",
+          choices:["\\(-3\\)","\\(-2\\)","\\(-1\\)","0","1"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Polynomials and Algebra",
+          latex:"Solve \\((x-3)^2\\le 16\\). What is the length of the solution interval?",
+          choices:["6","7","8","9","10"],
+          answerIndex:2
+        },
+        {
+          type:"mcq",
+          topic:"Probability",
+          latex:"A two-digit integer is chosen uniformly at random. What is the probability it is divisible by 3 or 5 but not both?",
+          choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{2}{5}\\)","\\(\\tfrac{11}{30}\\)","\\(\\tfrac{7}{18}\\)","\\(\\tfrac{31}{90}\\)"],
+          answerIndex:1
+        },
+        {
+          type:"mcq",
+          topic:"Geometry",
+          latex:"In a cube, what is \\(\\cos\\theta\\) where \\(\\theta\\) is the angle between a space diagonal and any edge?",
+          choices:["\\(\\tfrac{1}{\\sqrt2}\\)","\\(\\tfrac{1}{\\sqrt3}\\)","\\(\\tfrac{1}{2}\\)","\\(\\tfrac{\\sqrt2}{3}\\)","\\(\\tfrac{\\sqrt3}{2}\\)"],
+          answerIndex:1
+        },
+        {
+          type:"mcq",
+          topic:"Functions",
+          latex:"Let \\(f(x)=|x-2|+|x-5|\\). What is the minimum value of \\(f(x)\\)?",
+          choices:["0","1","2","3","4"],
+          answerIndex:3
+        }
       ]
     },
     B: {
@@ -185,13 +251,12 @@
   };
   const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
-  // ---------- Book catalog (selection UI) ----------
+  // ---------- Book catalog (expanded) ----------
   const BOOKS = [
     // Core AoPS
     {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
     {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
-
-    // Topic series (AoPS)
+    {id:'prealg', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics'], priority:2, link:'https://artofproblemsolving.com/store/book/prealgebra'},
     {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-algebra'},
     {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-counting'},
     {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
@@ -199,15 +264,26 @@
     {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
     {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
     {id:'aops-precalc', title:'AoPS Precalculus', level:['AIME'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
-    {id:'prealg', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics'], priority:1, link:'https://artofproblemsolving.com/store/book/prealgebra'},
     {id:'cmms', title:'Competition Math for Middle School', level:['AMC'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-middle-school'},
 
-    // Proof / Olympiad staples
+    // Geometry / Proof & Olympiad staples
+    {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
+    {id:'geometry-rev', title:'Geometry Revisited (Coxeter & Greitzer)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://press.princeton.edu/books/paperback/9780883856192/geometry-revisited'},
+    {id:'prasolov', title:'Problems in Plane Geometry (Prasolov)', level:['USAMO'], topics:['Geometry'], priority:1, link:'https://www.mccme.ru/free-books/prasolov-geombook.pdf'},
+
+    // Proof / General PS
     {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
     {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
     {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
-    {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://bookstore.ams.org/prb-27/'},
-    {id:'geometry-rev', title:'Geometry Revisited (Coxeter & Greitzer)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://press.princeton.edu/books/paperback/9780883856192/geometry-revisited'}
+    {id:'larson', title:'Problem-Solving Through Problems (Larson)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://maa.org/press/maa-reviews/problem-solving-through-problems'},
+
+    // Topic problem collections
+    {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.springer.com/gp/book/9780817645273'},
+    {id:'102comb', title:'102 Combinatorial Problems (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.springer.com/gp/book/9780817642999'},
+    {id:'103trig', title:'103 Trigonometry Problems (Titu Andreescu)', level:['AIME','USAMO'], topics:['Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817641978'},
+    {id:'mot', title:'Mathematical Olympiad Treasures (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817644498'},
+    {id:'moc', title:'Mathematical Olympiad Challenges (Andreescu & Gelca)', level:['AIME','USAMO'], topics:['Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.springer.com/gp/book/9780817645280'},
+    {id:'otis', title:'OTIS Excerpts (Evan Chen)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://web.evanchen.cc/otis.html'}
   ];
 
   // ---------- Elements ----------
@@ -251,7 +327,8 @@
     brkWrap.innerHTML = '';
     levelAdvice.style.display='none';
     builder.style.display = 'none';
-    recBooksEl.innerHTML=''; otherBooksEl.innerHTML='';
+    recBooksEl.innerHTML='';
+    otherBooksEl.innerHTML='';
 
     meta.innerHTML = `
       <h3 style="margin:.2rem 0">${t.title}</h3>
@@ -364,6 +441,7 @@
     renderTopicTable(new Map(Object.entries(agg)));
     document.getElementById('breakdown').style.display = 'block';
 
+    // Up/down suggestion around levels
     const pct = Math.round(100*correct/total);
     let advice = '';
     if(testId==='A' && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
@@ -373,6 +451,7 @@
     levelAdvice.style.display = advice ? 'block' : 'none';
     levelAdvice.textContent = advice;
 
+    // Reveal builder
     builder.style.display = 'block';
     const today = new Date(); today.setHours(0,0,0,0);
     const minStr = today.toISOString().slice(0,10);
@@ -391,8 +470,7 @@
       if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
       if(!dateStr){ alert('Please choose your test date.'); return; }
 
-      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')]
-        .map(ch => ch.value);
+      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
 
       const payload = {
         goal: goalSel.value,
@@ -429,6 +507,7 @@
 
   // ---------- Recommend books based on goal + weaknesses ----------
   function buildBookRecommendations(testId, agg){
+    const goal = goalSel.value;
     const weakTopics = Object.entries(agg).map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
       .sort((a,b)=>a.score-b.score).slice(0,3).map(x=>x.k);
 
@@ -438,11 +517,17 @@
       if(weakTopics.includes('Number Theory')) base.push('intro-nt');
       if(weakTopics.includes('Geometry')) base.push('intro-geo');
       if(weakTopics.includes('Combinatorics')) base.push('cmms');
+      if(weakTopics.includes('Polynomials and Algebra')) base.push('prealg');
     } else if(testId==='B'){ // AIME
       base.push('aops-v2','int-alg','int-cp','aops-precalc');
       if(weakTopics.includes('Geometry')) base.push('egmo','geometry-rev');
+      if(weakTopics.includes('Number Theory')) base.push('104nt');
+      if(weakTopics.includes('Combinatorics')) base.push('102comb');
     } else { // USAMO/USAJMO
-      base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel','geometry-rev');
+      base.push('aops-v2','int-alg','int-cp','egmo','velleman','zeitz','engel','geometry-rev','moc','mot');
+      if(weakTopics.includes('Number Theory')) base.push('104nt');
+      if(weakTopics.includes('Combinatorics')) base.push('102comb');
+      if(weakTopics.includes('Geometry')) base.push('prasolov','103trig');
     }
 
     const baseSet = new Set(base);
