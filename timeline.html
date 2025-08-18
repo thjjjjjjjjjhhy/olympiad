@@ -137,7 +137,15 @@
   if(!cats.length) cats.push('Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability');
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // ------------ Reading banks (same as before) ------------
+  // ------------ Topic cooldown to reduce repeats ------------
+  const RECENT_TOPIC_WINDOW = 3; // do not repeat same topic too often
+  const recentTopics = [];
+  function pushRecentTopic(t){
+    recentTopics.push(t);
+    if(recentTopics.length>RECENT_TOPIC_WINDOW) recentTopics.shift();
+  }
+
+  // ------------ Reading banks ------------
   const V1=1, V2=2;
   function minutesPerPage(vol){ return (vol===V1)?2.0:(isUSAMOTrack?3.2:2.7); }
 
@@ -240,6 +248,7 @@
     ]
   };
 
+  // Optional JSON extension
   async function tryFetchJSON(path){
     try{
       const r = await fetch(path, {cache:'no-store'});
@@ -276,14 +285,13 @@
     AIME:  buildTopicIndex('AIME')
   };
 
-  // Helper: pick a single problem (Problem of the day), respecting no repeats
+  // ------------- PROBLEM OF THE DAY (no repeats) -------------
   const usedProblems = new Set();
   function pickOneProblem(level, topicList){
-    const topics = (topicList && topicList.length) ? topicList : Object.keys(BANK_BY_TOPIC[level]||{});
-    // randomize topic order
-    const shuffled = topics.slice();
-    for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
-    for(const t of shuffled){
+    const topics = (topicList && topicList.length) ? topicList.slice() : Object.keys(BANK_BY_TOPIC[level]||{});
+    // randomize topic priority each pick
+    for(let i=topics.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [topics[i],topics[j]]=[topics[j],topics[i]]; }
+    for(const t of topics){
       const pool = (BANK_BY_TOPIC[level] && BANK_BY_TOPIC[level][t]) ? BANK_BY_TOPIC[level][t] : [];
       for(let i=0;i<pool.length;i++){
         const p = pool[i];
@@ -294,6 +302,176 @@
       }
     }
     return null;
+  }
+  function goalLevelFromInput(){
+    if(input.goal==='amc10') return 'AMC10';
+    if(input.goal==='amc12') return 'AMC12';
+    return 'AIME';
+  }
+  function makeProblemOfTheDay(blockMinutes, preferredTopics){
+    const level = goalLevelFromInput();
+    const p = pickOneProblem(level, preferredTopics);
+    const html = p
+      ? `🧩 <b>Problem of the day</b>: <a href="${p.url}" target="_blank" rel="noopener">${p.year} ${p.contest}${p.contest==='AIME' ? ' ' + (p.variant||'') : ' ' + (p.variant||'')} Problem ${p.number}</a>`
+      : `🧩 <b>Problem of the day</b>: <em>no available problem</em>`;
+    return {html, mins:blockMinutes, type:'drill'};
+  }
+  function makeTimedPractice(blockMinutes, preferredTopics){
+    const level = goalLevelFromInput();
+    const picks = [];
+    const t1 = pickOneProblem(level, preferredTopics); if(t1) picks.push(t1);
+    const t2 = (blockMinutes>=16) ? pickOneProblem(level, preferredTopics) : null; if(t2) picks.push(t2);
+    const list = picks.length
+      ? picks.map(p=>`<a href="${p.url}" target="_blank" rel="noopener">${p.year} ${p.contest}${p.contest==='AIME' ? ' ' + (p.variant||'') : ' ' + (p.variant||'')} P${p.number}</a>`).join(', ')
+      : '<em>no available problems</em>';
+    const html = `⏱️ <b>Timed practice</b>: ${list}`;
+    return {html, mins:blockMinutes, type:'timed'};
+  }
+
+  // ------------ Mock generator (weekly ~30 days out + final 3 days) ------------
+  function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
+  function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
+  function makeMock(totalMinutes){
+    if(onAIMETrack){
+      const years=[...Array(22)].map((_,i)=>2004+i); const V=['I','II'];
+      const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
+      return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (timed). Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
+    }
+    const years=[...Array(18)].map((_,i)=>2006+i); const V=['A','B']; const lv=(input.goal==='amc10')?'10':'12';
+    const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
+    return {html:`<a href="${amcSetURL(lv,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${lv}${v} (timed). Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
+  }
+
+  // ------------ Unit progress tracking (prevents repeats) ------------
+  // For each unit.id we track nextPage and nextExercise index.
+  const unitProgress = new Map(); // id -> {nextPage, nextExercise}
+  function getProg(u){
+    if(!unitProgress.has(u.id)){
+      unitProgress.set(u.id, { nextPage: u.pStart, nextExercise: 1 });
+    }
+    return unitProgress.get(u.id);
+  }
+
+  // ------------ Reading & exercises with progress and cooldown ------------
+  function availableUnitsFor(cat){
+    let units = [];
+    if(selectedBooks.has('aops-v1') && READS_VOL1[cat]) units = units.concat(READS_VOL1[cat].map(x=>({...x, type:'pages'})));
+    if(selectedBooks.has('aops-v2') && READS_VOL2[cat]) units = units.concat(READS_VOL2[cat].map(x=>({...x, type:'pages'})));
+    return units;
+  }
+  function formatReading(unit, from, to){
+    return `${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
+  }
+
+  // pick a topic with weights, but try not to overuse recent topics
+  function pickTopic(){
+    const entries = Object.entries(weights);
+    // Try up to 5 times to avoid most recent topic
+    for(let attempt=0; attempt<5; attempt++){
+      const sum=entries.reduce((a,[,w])=>a+w,0); let r=Math.random()*sum;
+      let chosen = entries[0][0];
+      for(const [k,w] of entries){ r-=w; if(r<=0){ chosen=k; break; } }
+      // cooldown: avoid repeating the exact same topic too often
+      const recentCount = recentTopics.filter(t=>t===chosen).length;
+      if(recentCount < 2) return chosen;
+    }
+    // fallback
+    return entries[0][0];
+  }
+
+  function scheduleReadingUnified(phaseName, blockMinutes){
+    const tasks = [];
+    if(blockMinutes < 4) return tasks;
+
+    const phaseBias = (phaseName==='Foundation') ? 0.60 : (phaseName==='Mixed' ? 0.55 : 0.45);
+    let readBudget = Math.max(6, Math.round(blockMinutes * phaseBias));
+    let exBudget = Math.max(0, blockMinutes - readBudget);
+
+    let chunks=0;
+    while(readBudget >= 4 && chunks < 3){
+      const cat = pickTopic();
+      const units = availableUnitsFor(cat);
+      if(!units.length) break;
+
+      // prefer the unit whose nextPage is smallest (progressing linearly)
+      units.sort((a,b)=>getProg(a).nextPage - getProg(b).nextPage);
+      const unit = units[0];
+      const prog = getProg(unit);
+
+      // pages remaining in unit
+      const rate = minutesPerPage(unit.vol);
+      const pagesAvail = Math.max(0, unit.pEnd - prog.nextPage + 1);
+      if(pagesAvail <= 0){
+        // move to next unit if this one is finished
+        units.shift();
+        if(!units.length) break;
+        continue;
+      }
+      const pagesTarget = Math.max(2, Math.min(pagesAvail, Math.floor((readBudget + 0.3*rate)/rate)));
+      const from = prog.nextPage, to = prog.nextPage + pagesTarget - 1;
+      const readMins = Math.round(pagesTarget*rate);
+
+      tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit, from, to)}`, mins:readMins, type:'reading', _ref:unit, _from:from, _to:to, _sub:(unit.subs||[]), _topic:cat});
+      pushRecentTopic(cat);
+
+      // advance progress
+      prog.nextPage = to + 1;
+      readBudget -= readMins;
+      chunks++;
+
+      // exercises for this unit using progress (no more Problems 1–3 every time)
+      if(exBudget >= 6){
+        const ex = buildExercisesFromUnit(unit, exBudget);
+        if(ex){ ex._topic = cat; tasks.push(ex); exBudget -= ex.mins; }
+      }
+    }
+
+    if(!tasks.length){
+      // fallback pick any available unit and allocate all to reading
+      const cat = pickTopic(); const units = availableUnitsFor(cat);
+      if(units.length){
+        const unit=units[0], prog=getProg(unit), rate=minutesPerPage(unit.vol);
+        const pagesAvail = Math.max(0, unit.pEnd - prog.nextPage + 1);
+        if(pagesAvail>0){
+          const pagesTarget = Math.max(2, Math.min(pagesAvail, Math.floor((blockMinutes+0.3*rate)/rate)));
+          const from = prog.nextPage, to = prog.nextPage + pagesTarget - 1;
+          const readMins = Math.round(pagesTarget*rate);
+          tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit, from, to)}`, mins:readMins, type:'reading', _ref:unit, _from:from, _to:to, _topic:cat});
+          pushRecentTopic(cat);
+          getProg(unit).nextPage = to + 1;
+        }
+      }
+    }
+    return tasks;
+  }
+
+  function buildExercisesFromUnit(unit, wantMins){
+    const per = (unit.vol===V1) ? 6.0 : (isUSAMOTrack?9.0:8.0);
+    const prog = getProg(unit);
+    const remaining = Math.max(0, (unit.exCount||30) - (prog.nextExercise - 1));
+    if(remaining <= 0) return null;
+
+    const cnt = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
+    const take = Math.min(cnt, remaining);
+    const start = prog.nextExercise, end = prog.nextExercise + take - 1;
+    const used = Math.round(take * per);
+    const rangeText = (start===end) ? `Problem ${start}` : `Problems ${start}–${end}`;
+    // advance exercise progress
+    prog.nextExercise = end + 1;
+
+    return {html:`🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): ${rangeText}`, mins:used, type:'bookex', _topic:canonicalTopic(unit.subs||[])};
+  }
+
+  function canonicalTopic(subs){
+    const s = (subs[0]||'').toLowerCase();
+    if(s.includes('mod')||s.includes('prime')||s.includes('dioph')) return 'Number Theory';
+    if(s.includes('count')||s.includes('color')||s.includes('binom')) return 'Combinatorics';
+    if(s.includes('prob')) return 'Probability';
+    if(s.includes('sequence')||s.includes('recur')) return 'Sequences and Series';
+    if(s.includes('function')||s.includes('functional')) return 'Functions';
+    if(s.includes('poly')||s.includes('quadratic')||s.includes('viet')) return 'Polynomials and Algebra';
+    if(s.includes('3d')||s.includes('angle')||s.includes('triangle')||s.includes('geo')) return 'Geometry';
+    return 'Polynomials and Algebra';
   }
 
   // ------------ Proof module (unchanged) ------------
@@ -332,142 +510,6 @@
     return out;
   }
 
-  // ------------ Reading & exercises (same behavior) ------------
-  function availableUnitsFor(cat){
-    let units = [];
-    if(selectedBooks.has('aops-v1') && READS_VOL1[cat]) units = units.concat(READS_VOL1[cat].map(x=>({...x, type:'pages'})));
-    if(selectedBooks.has('aops-v2') && READS_VOL2[cat]) units = units.concat(READS_VOL2[cat].map(x=>({...x, type:'pages'})));
-    return units;
-  }
-  function formatReading(unit, from, to){
-    if(unit.type==='pages') return `${unit.book}, ${unit.chapter} (pages ${from}–${to})`;
-    return `${unit.book} — ${unit.chapter}`;
-  }
-  function scheduleReadingUnified(phaseName, blockMinutes){
-    const tasks = [];
-    if(blockMinutes < 4) return tasks;
-
-    const phaseBias = (phaseName==='Foundation') ? 0.60 : (phaseName==='Mixed' ? 0.55 : 0.45);
-    let readBudget = Math.max(6, Math.round(blockMinutes * phaseBias));
-    let exBudget = Math.max(0, blockMinutes - readBudget);
-
-    let chunks=0;
-    while(readBudget >= 4 && chunks < 3){
-      const cat = pickTopic();
-      const units = availableUnitsFor(cat);
-      if(!units.length) break;
-      const unit = units[Math.floor(Math.random()*units.length)];
-
-      if(unit.type==='pages'){
-        const rate = minutesPerPage(unit.vol);
-        const pagesAvail = unit.pEnd - unit.pStart + 1;
-        const pagesTarget = Math.max(2, Math.min(pagesAvail, Math.floor((readBudget + 0.3*rate)/rate)));
-        const from = unit.pStart, to = unit.pStart + pagesTarget - 1;
-        const readMins = Math.round(pagesTarget*rate);
-        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(unit, from, to)}`, mins:readMins, type:'reading', _ref:unit, _from:from, _to:to, _sub:(unit.subs||[]), _topic:cat});
-        readBudget -= readMins;
-      }
-      chunks++;
-      if(readBudget < 4) break;
-
-      if(exBudget >= 6){
-        const ex = buildExercisesFromUnit(unit, Math.min(exBudget, Math.max(6, Math.round(blockMinutes*0.45))));
-        if(ex){ ex._topic = cat; tasks.push(ex); exBudget -= ex.mins; }
-      }
-    }
-
-    if(exBudget >= 6 && tasks.length){
-      const lastTopic = tasks[tasks.length-1]._topic || pickTopic();
-      const ex = {html:`🧠 <b>Book exercises</b> (${tasks[tasks.length-1]._ref?.book||'AoPS'}, ${tasks[tasks.length-1]._ref?.chapter||'selected'}): Problems 1–3`, mins:Math.min(12, exBudget), type:'bookex', _topic:lastTopic};
-      tasks.push(ex);
-    }
-
-    if(!tasks.length){
-      const cat = pickTopic(); const units = availableUnitsFor(cat); if(units.length){
-        const u=units[0];
-        const rate = minutesPerPage(u.vol);
-        const pagesTarget = Math.max(2, Math.min(u.pEnd-u.pStart+1, Math.floor((blockMinutes+0.3*rate)/rate)));
-        const from = u.pStart, to = u.pStart + pagesTarget - 1;
-        const readMins = Math.round(pagesTarget*rate);
-        tasks.push({html:`📘 <b>${cat}</b>: ${formatReading(u, from, to)}`, mins:readMins, type:'reading', _ref:u, _from:from, _to:to, _topic:cat});
-      }
-    }
-    return tasks;
-  }
-  function buildExercisesFromUnit(unit, wantMins){
-    const per = (unit.vol===V1) ? 6.0 : (isUSAMOTrack?9.0:8.0);
-    const cnt = Math.max(1, Math.floor((wantMins + 0.25*per)/per));
-    const start = 1, end = Math.min(unit.exCount||cnt, start+cnt-1);
-    const used = Math.round((end-start+1)*per);
-    const rangeText = (start===end) ? `Problem ${start}` : `Problems ${start}–${end}`;
-    return {html:`🧠 <b>Book exercises</b> (${unit.book}, ${unit.chapter}): ${rangeText}`, mins:used, type:'bookex', _topic:canonicalTopic(unit.subs||[])}; 
-  }
-  function canonicalTopic(subs){
-    const s = (subs[0]||'').toLowerCase();
-    if(s.includes('mod')||s.includes('prime')||s.includes('dioph')) return 'Number Theory';
-    if(s.includes('count')||s.includes('color')||s.includes('binom')) return 'Combinatorics';
-    if(s.includes('prob')) return 'Probability';
-    if(s.includes('sequence')||s.includes('recur')) return 'Sequences and Series';
-    if(s.includes('function')||s.includes('functional')) return 'Functions';
-    if(s.includes('poly')||s.includes('quadratic')||s.includes('viet')) return 'Polynomials and Algebra';
-    if(s.includes('3d')||s.includes('angle')||s.includes('triangle')||s.includes('geo')) return 'Geometry';
-    return 'Polynomials and Algebra';
-  }
-
-  // Topic picker weighted by diagnostic
-  function pickTopic(){
-    const sum=Object.values(weights).reduce((a,b)=>a+b,0); let r=Math.random()*sum;
-    for(const [k,w] of Object.entries(weights)){ r-=w; if(r<=0) return k; }
-    return cats[0];
-  }
-
-  // ------------ New: Problem-of-the-day & timed practice ------------
-  function goalLevelFromInput(){
-    if(input.goal==='amc10') return 'AMC10';
-    if(input.goal==='amc12') return 'AMC12';
-    return 'AIME';
-  }
-
-  // single random problem (no repeats), labeled "Problem of the day"
-  function makeProblemOfTheDay(blockMinutes, preferredTopics){
-    const level = goalLevelFromInput();
-    const p = pickOneProblem(level, preferredTopics);
-    const html = p
-      ? `🧩 <b>Problem of the day</b>: <a href="${p.url}" target="_blank" rel="noopener">${p.year} ${p.contest}${p.contest==='AIME' ? ' ' + (p.variant||'') : ' ' + (p.variant||'')} Problem ${p.number}</a>`
-      : `🧩 <b>Problem of the day</b>: <em>no available problem</em>`;
-    // keep the original duration budget so ICS quota balances out
-    return {html, mins:blockMinutes, type:'drill'};
-  }
-
-  // timed practice set (still random, could be single or quick set text)
-  function makeTimedPractice(blockMinutes, preferredTopics){
-    const level = goalLevelFromInput();
-    // assemble 1–2 problems quickly but present as one line
-    const picks = [];
-    const t1 = pickOneProblem(level, preferredTopics); if(t1) picks.push(t1);
-    const t2 = (blockMinutes>=16) ? pickOneProblem(level, preferredTopics) : null; if(t2) picks.push(t2);
-
-    const list = picks.length
-      ? picks.map(p=>`<a href="${p.url}" target="_blank" rel="noopener">${p.year} ${p.contest}${p.contest==='AIME' ? ' ' + (p.variant||'') : ' ' + (p.variant||'')} P${p.number}</a>`).join(', ')
-      : '<em>no available problems</em>';
-    const html = `⏱️ <b>Timed practice</b>: ${list}`;
-    return {html, mins:blockMinutes, type:'timed'};
-  }
-
-  // ------------ Mock generator (adds weekly mocks ~30 days out + final 3 days) ------------
-  function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
-  function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
-  function makeMock(totalMinutes){
-    if(onAIMETrack){
-      const years=[...Array(22)].map((_,i)=>2004+i); const V=['I','II'];
-      const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
-      return {html:`<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v} (timed). Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
-    }
-    const years=[...Array(18)].map((_,i)=>2006+i); const V=['A','B']; const lv=(input.goal==='amc10')?'10':'12';
-    const y=years[Math.floor(Math.random()*years.length)], v=V[Math.floor(Math.random()*V.length)];
-    return {html:`<a href="${amcSetURL(lv,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${lv}${v} (timed). Review & update your error log.</a>`, mins:totalMinutes, type:'mock'};
-  }
-
   // ------------ Study day composition ------------
   function baseMixForPhase(ph){ return (ph==='Foundation')?{read:0.65,drill:0.25,timed:0.10}:(ph==='Mixed')?{read:0.50,drill:0.35,timed:0.15}:{read:0.35,drill:0.35,timed:0.30}; }
   function adjustedMix(base,m){
@@ -483,7 +525,7 @@
   for(let d=0; d<totalDays; d++){
     const phase = phaseNameForDay(d);
 
-    // Final 3 days: full mock only (unchanged)
+    // Final 3 days: full mock only
     if(d >= totalDays-3){
       tasksByDay.push([ makeMock(minutesPerDay) ]);
       continue;
@@ -492,13 +534,13 @@
     // Weekly timed mocks starting about 30 days before the test
     const daysLeft = totalDays - d;
     const inMockWindow = daysLeft <= 30 && daysLeft > 3;
-    const isWeeklyMockDay = inMockWindow && ((daysLeft % 7) === 2); // roughly 30,23,16,9 days left
+    const isWeeklyMockDay = inMockWindow && ((daysLeft % 7) === 2); // ~30,23,16,9 days left
     if(isWeeklyMockDay){
       tasksByDay.push([ makeMock(minutesPerDay) ]);
       continue;
     }
 
-    // Otherwise: regular study mix
+    // Regular study mix
     const mix = adjustedMix(baseMixForPhase(phase), minutesPerDay);
     let mRead=Math.round(minutesPerDay*mix.read), mDrill=Math.round(minutesPerDay*mix.drill), mTimed=Math.max(0, minutesPerDay - mRead - mDrill);
 
@@ -517,11 +559,13 @@
 
     const dayTasks=[];
 
-    // Reading & book exercises
+    // Reading & book exercises (with unit progress)
     if(mRead > 0){
       const r = scheduleReadingUnified(phase, mRead);
       r.forEach(t=>dayTasks.push(t));
     }
+
+    // Proof (optional)
     if(useProof){
       const proofShare = isUSAMOTrack ? 0.22 : (onAIMETrack ? 0.12 : 0.0);
       const proofBudget = Math.round(minutesPerDay * proofShare);
@@ -534,18 +578,15 @@
 
     const todaysTopics = Array.from(new Set(dayTasks.map(t=>t._topic).filter(Boolean)));
 
-    // New: Problem of the day (random, no repeats)
-    if(mDrill>=THRESH.drill) dayTasks.push( makeProblemOfTheDay(mDrill, todaysTopics) );
+    // ALWAYS include a Problem of the day on non-mock days.
+    // If the drill block is small, still allocate at least 6 minutes and rebalance.
+    const podMinutes = Math.max(6, Math.min(Math.max(mDrill, 6), minutesPerDay));
+    dayTasks.push( makeProblemOfTheDay(podMinutes, todaysTopics) );
 
-    // Timed practice (still short, random problems)
+    // Timed practice (optional short set)
     if(mTimed>=THRESH.timed) dayTasks.push( makeTimedPractice(mTimed, todaysTopics) );
 
-    if(!dayTasks.length){
-      const r = scheduleReadingUnified(phase, minutesPerDay);
-      if(r.length){ r.forEach(t=>dayTasks.push(t)); }
-      else { dayTasks.push(makeProblemOfTheDay(minutesPerDay, [])); }
-    }
-
+    // Quota balance exactly to target
     balanceToQuota(dayTasks, minutesPerDay, phase, todaysTopics);
     tasksByDay.push(dayTasks);
   }
@@ -555,22 +596,23 @@
     let cur = totalMins(arr);
     if(Math.abs(cur - target) <= QUOTA_SLACK) return;
 
-    // If short: add another Problem of the day (still non-repeating)
     if(cur < target){
       const gap = target - cur;
+      // prefer adding to the POD rather than new tasks
+      const pod = arr.find(t=>t.type==='drill');
+      if(pod){ pod.mins += gap; return; }
       arr.push(makeProblemOfTheDay(gap, prefTopics));
       return;
     }
-    // If over: trim timed first
     let over = cur - target;
 
+    // Trim timed & POD first
     function shrinkPractice(idx, delta){
       const t = arr[idx];
       if(!t || (t.type!=='timed' && t.type!=='drill')) return 0;
-      const minBlock = (t.type==='timed')?THRESH.timed:THRESH.drill;
+      const minBlock = (t.type==='timed')?THRESH.timed:6; // POD can go down to 6
       const newBlock = Math.max(minBlock, t.mins - delta);
       if(newBlock >= t.mins) return 0;
-      // rebuild the label with new block time (we keep same problems/links)
       const saved = t.mins - newBlock; t.mins = newBlock; return saved;
     }
     for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){ over -= shrinkPractice(i, over) || 0; }
@@ -589,7 +631,7 @@
     }
     if(over<=QUOTA_SLACK) return;
 
-    // lastly trim readings/proof
+    // lastly trim reading/proof
     for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){
       const t=arr[i];
       if(t && (t.type==='reading' || t.type==='proof') && t.mins){
@@ -678,35 +720,11 @@
 </script>
 
 <!--
-================================================================================
-OPTIONAL: To scale up to ~300–400+ problems per AMC/AIME topic:
-Create JSON files and upload to your repo:
-
-1) data/amc_bank.json   (array of entries)
-   [
-     {"id":"2017-10A-12","contest":"AMC10","year":2017,"variant":"A","number":12,
-      "topic":"Number Theory","url":"https://artofproblemsolving.com/wiki/index.php/2017_AMC_10A_Problems/Problem_12","minutes":12},
-     {"id":"2019-12B-20","contest":"AMC12","year":2019,"variant":"B","number":20,
-      "topic":"Combinatorics","url":"https://artofproblemsolving.com/wiki/index.php/2019_AMC_12B_Problems/Problem_20","minutes":14}
-     ...
-   ]
-
-2) data/aime_bank.json  (array of entries)
-   [
-     {"id":"2020-AI-9","contest":"AIME","year":2020,"variant":"I","number":9,
-      "topic":"Combinatorics","url":"https://artofproblemsolving.com/wiki/index.php/2020_AIME_I_Problems/Problem_9","minutes":19},
-     {"id":"2015-AI-4","contest":"AIME","year":2015,"variant":"I","number":4,
-      "topic":"Geometry","url":"https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_4","minutes":16}
-     ...
-   ]
-
-TOPIC values must be one of:
-  "Polynomials and Algebra", "Number Theory", "Geometry",
-  "Combinatorics", "Probability", "Sequences and Series", "Functions"
-
-The page merges these with the embedded core set, keeps contest families
-(AMC-only for AMC goals, AIME-only for AIME goals), and ensures no repeats.
-================================================================================
+Notes:
+- Unit progress ensures readings/exercises advance each time that unit appears.
+- Topic cooldown reduces back-to-back repeats of the same topic.
+- Problem of the day appears every non-mock day; full mocks still scheduled weekly ~30 days out and in the final 3 days.
+- You can extend banks via data/amc_bank.json and data/aime_bank.json as before.
 -->
 </body>
 </html>
