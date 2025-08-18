@@ -134,7 +134,7 @@
     ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Sequences and Series','Functions','Probability'];
   const weights={}; cats.forEach(k=>{const r=(subs[k]?.right||0), t=(subs[k]?.total||1); weights[k]=1 - r/t + 0.05});
 
-  // ------------ Reading banks (same content as before) ------------
+  // ------------ Reading banks ------------
   const V1=1, V2=2;
   function minutesPerPage(vol){ return (vol===V1)?2.0:(isUSAMOTrack?3.2:2.7); }
 
@@ -191,23 +191,27 @@
   };
 
   // ------------------------------------------------------------
-  //  PROBLEM BANKS (as before; can be extended via /data/*.json)
+  //  PROBLEM BANKS (core + optional /data/*.json)
   // ------------------------------------------------------------
   const CORE_BANK = {
     AMC10: [
+      // Algebra
       {id:"2016-10A-16",contest:"AMC10",year:2016,variant:"A",number:16,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2016_AMC_10A_Problems/Problem_16",minutes:12},
       {id:"2015-10B-17",contest:"AMC10",year:2015,variant:"B",number:17,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_10B_Problems/Problem_17",minutes:12},
       {id:"2012-10A-16",contest:"AMC10",year:2012,variant:"A",number:16,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2012_AMC_10A_Problems/Problem_16",minutes:12},
+      // Number Theory
       {id:"2011-10A-21",contest:"AMC10",year:2011,variant:"A",number:21,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10A_Problems/Problem_21",minutes:13},
       {id:"2013-10B-22",contest:"AMC10",year:2013,variant:"B",number:22,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2013_AMC_10B_Problems/Problem_22",minutes:14},
       {id:"2010-10A-18",contest:"AMC10",year:2010,variant:"A",number:18,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2010_AMC_10A_Problems/Problem_18",minutes:12},
+      // Combinatorics / Probability
       {id:"2016-10A-17",contest:"AMC10",year:2016,variant:"A",number:17,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2016_AMC_10A_Problems/Problem_17",minutes:12},
-      {id:"2010-10A-18P",contest:"AMC10",year:2010,variant:"A",number:18,topic:"Probability",url:"https://artofproblemsolving.com/wiki/index.php/2010_AMC_10A_Problems/Problem_18",minutes:12},
+      {id:"2011-10A-20",contest:"AMC10",year:2011,variant:"A",number:20,topic:"Probability",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10A_Problems/Problem_20",minutes:12},
+      // Sequences/Functions
       {id:"2013-10A-19",contest:"AMC10",year:2013,variant:"A",number:19,topic:"Sequences and Series",url:"https://artofproblemsolving.com/wiki/index.php/2013_AMC_10A_Problems/Problem_19",minutes:13},
       {id:"2016-10B-18",contest:"AMC10",year:2016,variant:"B",number:18,topic:"Functions",url:"https://artofproblemsolving.com/wiki/index.php/2016_AMC_10B_Problems/Problem_18",minutes:12},
+      // Geometry
       {id:"2015-10A-16G",contest:"AMC10",year:2015,variant:"A",number:16,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_10A_Problems/Problem_16",minutes:12},
-      {id:"2011-10B-21G",contest:"AMC10",year:2011,variant:"B",number:21,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10B_Problems/Problem_21",minutes:14},
-      {id:"2013-10A-19G",contest:"AMC10",year:2013,variant:"A",number:19,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2013_AMC_10A_Problems/Problem_19",minutes:13},
+      {id:"2011-10B-21G",contest:"AMC10",year:2011,variant:"B",number:21,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_10B_Problems/Problem_21",minutes:14}
     ],
     AMC12: [
       {id:"2018-12B-22",contest:"AMC12",year:2018,variant:"B",number:22,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_22",minutes:15},
@@ -216,20 +220,24 @@
       {id:"2011-12A-19",contest:"AMC12",year:2011,variant:"A",number:19,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_12A_Problems/Problem_19",minutes:13},
       {id:"2011-12A-20",contest:"AMC12",year:2011,variant:"A",number:20,topic:"Probability",url:"https://artofproblemsolving.com/wiki/index.php/2011_AMC_12A_Problems/Problem_20",minutes:14},
       {id:"2021-12A-12",contest:"AMC12",year:2021,variant:"A",number:12,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2021_AMC_12A_Problems/Problem_12",minutes:14},
-      {id:"2015-12A-16G",contest:"AMC12",year:2015,variant:"A",number:16,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_12A_Problems/Problem_16",minutes:12},
+      {id:"2015-12A-16G",contest:"AMC12",year:2015,variant:"A",number:16,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2015_AMC_12A_Problems/Problem_16",minutes:12}
     ],
     AIME: [
+      // Algebra
       {id:"2016-AII-6",contest:"AIME",year:2016,variant:"II",number:6,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2016_AIME_II_Problems/Problem_6",minutes:18},
       {id:"2014-AI-6",contest:"AIME",year:2014,variant:"I",number:6,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2014_AIME_I_Problems/Problem_6",minutes:18},
       {id:"2016-AI-7",contest:"AIME",year:2016,variant:"I",number:7,topic:"Polynomials and Algebra",url:"https://artofproblemsolving.com/wiki/index.php/2016_AIME_I_Problems/Problem_7",minutes:18},
+      // Number Theory
       {id:"2015-AI-1",contest:"AIME",year:2015,variant:"I",number:1,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_1",minutes:14},
       {id:"2013-AI-11",contest:"AIME",year:2013,variant:"I",number:11,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2013_AIME_I_Problems/Problem_11",minutes:18},
       {id:"2009-AII-7",contest:"AIME",year:2009,variant:"II",number:7,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2009_AIME_II_Problems/Problem_7",minutes:20},
-      {id:"2018-AI-2",contest:"AIME",year:2018,variant:"I",number:2",topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_I_Problems/Problem_2",minutes:14},
+      {id:"2018-AI-2",contest:"AIME",year:2018,variant:"I",number:2,topic:"Number Theory",url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_I_Problems/Problem_2",minutes:14},
+      // Combinatorics
       {id:"2019-AI-4",contest:"AIME",year:2019,variant:"I",number:4,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2019_AIME_I_Problems/Problem_4",minutes:18},
       {id:"2020-AI-9",contest:"AIME",year:2020,variant:"I",number:9,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2020_AIME_I_Problems/Problem_9",minutes:19},
       {id:"2021-AI-12",contest:"AIME",year:2021,variant:"I",number:12,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2021_AIME_I_Problems/Problem_12",minutes:20},
       {id:"2023-AI-14",contest:"AIME",year:2023,variant:"I",number:14,topic:"Combinatorics",url:"https://artofproblemsolving.com/wiki/index.php/2023_AIME_I_Problems/Problem_14",minutes:22},
+      // Geometry
       {id:"2015-AI-4G",contest:"AIME",year:2015,variant:"I",number:4,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2015_AIME_I_Problems/Problem_4",minutes:16},
       {id:"2018-AII-14G",contest:"AIME",year:2018,variant:"II",number:14,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2018_AIME_II_Problems/Problem_14",minutes:24},
       {id:"2022-AI-3G",contest:"AIME",year:2022,variant:"I",number:3,topic:"Geometry",url:"https://artofproblemsolving.com/wiki/index.php/2022_AIME_I_Problems/Problem_3",minutes:16},
@@ -277,7 +285,7 @@
   function pickOneProblem(level, topicList, dayIndex){
     const allTopics = Object.keys(BANK_BY_TOPIC[level]||{});
     const topics = (topicList && topicList.length) ? topicList.slice() : allTopics.slice();
-    for(let i=topics.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [topics[i],topics[j]]=[topics[j],topics[i]]; }
+    for(let i=topics.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [topics[i],topics[j]]=[topics[j]]; }
 
     // pass 1: unused problems
     for(const t of topics){
@@ -486,7 +494,7 @@
     return 'Polynomials and Algebra';
   }
 
-  // ---------- Proof module (unchanged) ----------
+  // ---------- Proof module ----------
   const PROOF_BOOKS_SELECTED = ['velleman','zeitz','engel','egmo'].filter(id=>selectedBooks.has(id));
   const PROOF_MODULE = {
     'velleman': [
@@ -615,7 +623,6 @@
     for(let i=arr.length-1;i>=0 && over>QUOTA_SLACK;i--){
       const t=arr[i];
       if(t && t.type==='bookex'){
-        const per = 8;
         const newBlock=Math.max(4, t.mins - over);
         if(newBlock < t.mins){ over -= (t.mins - newBlock); t.mins=newBlock; }
       }
