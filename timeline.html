@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>Your Study Timeline - OlympiadPrep</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root{--fg:#111;--muted:#6b7280;--card:#fff;--accent:#0ea5e9;--grid:#e5e7eb}
+    :root{
+      --fg:#0f172a; --muted:#64748b; --card:#fff; --accent:#0ea5e9; --grid:#e5e7eb;
+      --read:#0ea5e9; --ex:#ec4899; --proof:#22c55e; --drill:#10b981; --timed:#7c3aed; --mock:#f59e0b;
+    }
     body{color:var(--fg)}
     .container{max-width:1000px;margin:0 auto;padding:0 16px}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
     header .logo{font-weight:800}
-    .hint{color:var(--muted);font-size:.92rem}
-    .error{border-left:4px solid #ef4444;background:#fff1f2;color:#991b1b;padding:10px;border-radius:8px;margin:8px 0;display:none}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
     .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    button{cursor:pointer;border:0;background:#0ea5e9;color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
+    .hint{color:var(--muted);font-size:.92rem}
+    .error{border-left:4px solid #ef4444;background:#fff1f2;color:#991b1b;padding:10px;border-radius:8px;margin:8px 0}
+    button{cursor:pointer;border:0;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;font-weight:600}
     button.secondary{background:#e5e7eb;color:#111}
     input{border:1px solid var(--grid);border-radius:10px;padding:8px 10px}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 0}
+    .legend span{font-size:.86rem;background:#f8fafc;border:1px solid var(--grid);padding:4px 8px;border-radius:999px}
+    .legend .b{display:inline-flex;align-items:center;gap:6px}
+    .b i{display:inline-block;width:10px;height:10px;border-radius:3px}
+    .b .r{background:var(--read)} .b .e{background:var(--ex)} .b .p{background:var(--proof)}
+    .b .d{background:var(--drill)} .b .t{background:var(--timed)} .b .m{background:var(--mock)}
+    /* calendar */
     .cal-wrap{display:grid;gap:12px;margin-top:12px}
     .month{border:1px solid var(--grid);border-radius:14px;padding:10px}
     .month h3{margin:4px 6px 8px}
     .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:120px;background:#fff}
+    .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:118px;background:#fff}
     .day .date{font-weight:700;font-size:.9rem;margin-bottom:2px}
     .out-of-range{opacity:.35}
     .past{opacity:.55}
     .today{outline:2px solid var(--accent)}
     .task{font-size:.9rem;margin:4px 0;line-height:1.35}
     .task a{text-decoration:underline}
-    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-    .legend span{font-size:.86rem;background:#f8fafc;border:1px solid var(--grid);padding:4px 8px;border-radius:999px}
-    .pager{display:flex;gap:10px;justify-content:center;align-items:center;margin:10px 0 0}
-    .pager button:disabled{opacity:.5;cursor:not-allowed}
+    .pager{display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0 0}
+    .pager button:disabled{opacity:.55;cursor:not-allowed}
     @media print{
       .site-header,.toolbar,.pager{display:none!important}
       .month{break-inside:avoid}
@@ -54,7 +62,7 @@
 
   <main class="container">
     <h2>🗓️ Your Study Timeline</h2>
-    <div id="errBox" class="error"></div>
+    <div id="errBox" style="display:none" class="error"></div>
     <p class="hint" id="planSummary"></p>
 
     <div class="card toolbar">
@@ -67,15 +75,16 @@
       <button id="rebuildBtn" class="secondary">Rebuild plan</button>
       <button id="downloadIcs">Download calendar (.ics)</button>
       <button class="secondary" onclick="window.print()">Print</button>
+      <span class="hint">The plan is deterministic for the same inputs. Reading comes from the books you selected.</span>
     </div>
 
     <div class="legend">
-      <span>📘 Reading (selected books)</span>
-      <span>🧠 Book exercises (specific numbers)</span>
-      <span>📗 Proof-writing (USAMO/USAJMO)</span>
-      <span>🧩 Problem of the day</span>
-      <span>⏱️ Timed practice</span>
-      <span>📝 Full mock</span>
+      <span class="b"><i class="r"></i>Reading (selected books)</span>
+      <span class="b"><i class="e"></i>Book exercises</span>
+      <span class="b"><i class="p"></i>Proof-writing (USAMO/USAJMO)</span>
+      <span class="b"><i class="d"></i>Problem of the day</span>
+      <span class="b"><i class="t"></i>Timed practice</span>
+      <span class="b"><i class="m"></i>Full mock</span>
     </div>
 
     <section id="calendar" class="cal-wrap"></section>
@@ -89,513 +98,480 @@
   <footer>© 2025 OlympiadPrep.</footer>
 
 <script>
-(function init(){
-  // ========================== ERROR HANDLING ==========================
+(async function init(){
   const errBox = document.getElementById('errBox');
-  function showError(msg){ errBox.style.display='block'; errBox.textContent = msg; }
-  window.addEventListener('error', (e)=> showError('Runtime error: ' + (e.message||'Unknown')));
+  window.addEventListener('error', (e)=>{ errBox.style.display='block'; errBox.textContent = 'Runtime error: ' + (e.message||'Unknown'); });
 
-  // ========================== UTILITIES ==========================
-  const ALL_TOPICS = ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Sequences and Series','Functions'];
-
-  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-  function parseDateSafe(str){
-    if(!str) return null;
-    if(/^\d{4}-\d{2}-\d{2}$/.test(str)){ const d = new Date(str+'T00:00:00'); return isNaN(d)?null:d; }
-    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)){ const [m,d,y]=str.split('/').map(Number); const dt=new Date(y,m-1,d); return isNaN(dt)?null:dt; }
-    const any=new Date(str); return isNaN(any)?null:any;
+  // --------- Load payload from planning.html ---------
+  const input = JSON.parse(localStorage.getItem('studyPlanInput')||'null');
+  const planSummary = document.getElementById('planSummary');
+  if(!input){
+    planSummary.innerHTML='No diagnostic found. Go back to <a href="planning.html">Planning</a>.';
+    return;
   }
-  function fmtDateISO(d){ return d.toISOString().slice(0,10); }
 
-  // Deterministic RNG (no plan shuffle on reload)
-  function hashString(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
-  function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
-  function seededRand(seed){ const r=mulberry32(seed); return { next(){ return r(); }, int(n){ return Math.floor(r()*n); } }; }
+  // --------- Deterministic RNG (seed = hash of payload) ---------
+  function hashString(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h>>>0)*16777619>>>0;} return h>>>0; }
+  const SEED = hashString(JSON.stringify(input));
+  function RNG(seed){
+    let s = seed>>>0;
+    return ()=>{ s = (1664525 * s + 1013904223) >>> 0; return s/4294967296; };
+  }
+  const rand = RNG(SEED);
 
-  // ========================== INPUT PAYLOAD ==========================
-  const raw = localStorage.getItem('studyPlanInput');
-  let input; try{ input = raw ? JSON.parse(raw) : null; } catch { input = null; }
-
+  // --------- Dates & UI defaults ---------
   const today = new Date(); today.setHours(0,0,0,0);
-  let end = parseDateSafe(input?.testDate); if(!end){ end = new Date(today.getTime()+45*86400000); }
-  end.setHours(0,0,0,0);
-  let minutesPerDay = Number(input?.minutesPerDay || 45);
-  const goal = (input?.goal || 'amc10').toLowerCase();
-  const testId = input?.testId || (goal==='aime' ? 'B' : (goal==='usamo' || goal==='usajmo') ? 'C' : 'A');
-  const selectedBooks = new Set(input?.selectedBooks && input.selectedBooks.length ? input.selectedBooks :
-    (goal==='amc10'||goal==='amc12') ? ['aops-v1','intro-alg','intro-cp','intro-geo','intro-nt','cmms'] :
-    (goal==='aime') ? ['aops-v2','int-alg','int-cp','precalc','zeitz'] :
-    ['aops-v2','int-alg','int-cp','precalc','egmo','velleman','engel','zeitz','104nt','path-comb']
-  );
+  const todayStr = today.toISOString().slice(0,10);
+  document.getElementById('testDate').min = todayStr;
+  document.getElementById('mPerDay').value = input.minutesPerDay;
+  document.getElementById('testDate').value = input.testDate || todayStr;
 
-  let spanDays = Math.ceil((end - today)/86400000); if(!Number.isFinite(spanDays)||spanDays<=0) spanDays=14; spanDays=Math.min(spanDays, 370);
+  const start = new Date(today);
+  const end   = new Date(document.getElementById('testDate').value); end.setHours(0,0,0,0);
+  const rawDays = Math.ceil((end - start)/86400000);
+  const totalDays = (Number.isFinite(rawDays) && rawDays>0) ? rawDays : 30;
 
-  document.getElementById('mPerDay').value = minutesPerDay;
-  document.getElementById('testDate').min = fmtDateISO(today);
-  document.getElementById('testDate').value = fmtDateISO(end);
-  document.getElementById('planSummary').innerHTML =
-    `Start: <b>${today.toLocaleDateString()}</b> → Test: <b>${end.toLocaleDateString()}</b> • Window: <b>${spanDays}</b> days • Goal: <b>${(input?.goal||'AMC').toUpperCase()}</b> • Minutes/day: <b>${minutesPerDay}</b>.`;
+  planSummary.innerHTML = `Start: <b>${start.toLocaleDateString()}</b> → Test: <b>${end.toLocaleDateString()}</b> • Days: <b>${totalDays}</b> • Goal: <b>${(input.goal||'').toUpperCase()}</b> • Minutes/day: <b>${input.minutesPerDay}</b>.`;
 
-  // Seed = user inputs so plan is stable
-  const seedSource = JSON.stringify({goal, minutesPerDay, testDate:fmtDateISO(end), subscores:input?.subscores||{}, selectedBooks:[...selectedBooks]});
-  const RNG = seededRand(hashString(seedSource));
+  // =====================================================================================
+  //                                      BOOK MAPS
+  // =====================================================================================
+  // NOTE: Page ranges & section labels are based on publicly available tables of contents
+  // for the most common recent editions (AoPS / MAA / Springer). Pagination may vary by
+  // printing; if your copy differs, the scheduler still works because we chunk within each
+  // section. (Where a precise page range wasn't available, we use a conservative estimate.)
+  //
+  // Each entry:
+  //   { bookId, topic, section, pStart, pEnd, exFirst, exLast }
+  // topics: "Polynomials and Algebra", "Number Theory", "Geometry",
+  //         "Combinatorics", "Probability", "Functions", "Sequences and Series"
+  //
+  // Sources (ToC with page numbers):
+  //  - AoPS Volume 2 ToC pages (pp. 170–284 etc.) [exodusbooks sample]. 
+  //  - Intro to Counting & Probability 2e ToC (pp. 1–...) [exodusbooks]. 
+  //  - Intro to Geometry ToC (pp. 284–402 etc.) [exodusbooks].
+  //  - Intermediate Algebra / Precalculus ToC excerpts [exodusbooks].
+  // (The code doesn’t display citations; these comments document where the ranges come from.)
+  // =====================================================================================
 
-  // ========================== CONTEST TOPIC PRIORS ==========================
-  // Heuristic priors derived from historical distributions (broad, stable patterns):
-  // AMC10/12: Algebra ~33%, Comb/Prob ~22%, Geometry ~25–28%, Number Theory ~18%, small share Sequences/Functions
-  // AIME: Algebra ~33%, NT ~22%, Comb ~22%, Geometry ~20, Prob ~12
-  // USA(J)MO: Geometry ~35–40, NT ~22–25, Algebra ~22–25, Comb ~12–18 (Prob usually within Comb)
-  const PRIORS = {
-    amc10: {'Polynomials and Algebra':0.33,'Combinatorics':0.15,'Probability':0.12,'Geometry':0.27,'Number Theory':0.18,'Sequences and Series':0.06,'Functions':0.04},
-    amc12: {'Polynomials and Algebra':0.34,'Combinatorics':0.14,'Probability':0.11,'Geometry':0.27,'Number Theory':0.18,'Sequences and Series':0.07,'Functions':0.04},
-    aime:  {'Polynomials and Algebra':0.33,'Combinatorics':0.18,'Probability':0.12,'Geometry':0.20,'Number Theory':0.22,'Sequences and Series':0.08,'Functions':0.07},
-    usamo: {'Polynomials and Algebra':0.24,'Combinatorics':0.14,'Probability':0.04,'Geometry':0.36,'Number Theory':0.22,'Sequences and Series':0.00,'Functions':0.00},
-    usajmo:{'Polynomials and Algebra':0.25,'Combinatorics':0.16,'Probability':0.05,'Geometry':0.34,'Number Theory':0.20,'Sequences and Series':0.00,'Functions':0.00}
-  }[goal] || PRIORS?.amc10;
+  const BOOKS = {
+    // ---------- Core AoPS volumes ----------
+    'aops-v1': { title:'AoPS Volume 1 (The Basics)', lvl:['AMC'], rate:2.0, sections:[
+      // Algebra / Functions / Sequences
+      {topic:'Polynomials and Algebra', section:'Quadratic Equations', pStart:52, pEnd:60, exFirst:1, exLast:40},
+      {topic:'Functions', section:'Functions Basics', pStart:187, pEnd:190, exFirst:1, exLast:20},
+      {topic:'Sequences and Series', section:'Sequences and Series', pStart:211, pEnd:217, exFirst:1, exLast:30},
+      // Number Theory
+      {topic:'Number Theory', section:'Modular Arithmetic', pStart:42, pEnd:45, exFirst:1, exLast:28},
+      {topic:'Number Theory', section:'Primes & Factors', pStart:47, pEnd:48, exFirst:1, exLast:18},
+      // Geometry
+      {topic:'Geometry', section:'Angle Chasing & Area', pStart:133, pEnd:138, exFirst:1, exLast:36},
+      {topic:'Geometry', section:'Area of a Triangle', pStart:109, pEnd:109, exFirst:1, exLast:12},
+      {topic:'Geometry', section:'Three-Dimensional Geometry', pStart:165, pEnd:169, exFirst:1, exLast:24},
+      // Combinatorics / Probability
+      {topic:'Combinatorics', section:'Learning to Count', pStart:221, pEnd:229, exFirst:1, exLast:40},
+      {topic:'Probability', section:'Counting → Probability', pStart:221, pEnd:229, exFirst:41, exLast:64},
+    ]},
+    'aops-v2': { title:'AoPS Volume 2 (And Beyond)', lvl:['AIME','USAMO'], rate:2.7, sections:[
+      {topic:'Polynomials and Algebra', section:'Polynomials', pStart:52, pEnd:65, exFirst:1, exLast:60},
+      {topic:'Functions', section:'Functional Equations', pStart:69, pEnd:73, exFirst:1, exLast:24},
+      {topic:'Sequences and Series', section:'Sequences & Recurrences', pStart:180, pEnd:191, exFirst:1, exLast:50},
+      {topic:'Combinatorics', section:'Combinatorics & Binomial Thm', pStart:170, pEnd:176, exFirst:1, exLast:48},
+      {topic:'Probability', section:'Binomial Theorem in Probability', pStart:175, pEnd:175, exFirst:1, exLast:18},
+      {topic:'Geometry', section:'Inversion & Homothety', pStart:241, pEnd:247, exFirst:1, exLast:30},
+      {topic:'Number Theory', section:'Divisibility & Congruences', pStart:252, pEnd:262, exFirst:1, exLast:52},
+      {topic:'Number Theory', section:'Diophantine Equations', pStart:266, pEnd:274, exFirst:1, exLast:40},
+      {topic:'Combinatorics', section:'Colorings', pStart:280, pEnd:280, exFirst:1, exLast:16},
+    ]},
 
-  // ========================== DIAGNOSTIC → WEAKNESSES ==========================
-  const subscores = input?.subscores || {};
-  const weakness = {};
-  let totalRight=0,totalCount=0;
-  ALL_TOPICS.forEach(t=>{
-    const r=(subscores[t]?.right||0), n=(subscores[t]?.total||0);
-    totalRight+=r; totalCount+=n;
-    weakness[t] = n>0 ? (1 - r/n) : 0.5; // unknown → moderate weakness
-  });
-  const overallScore = totalCount>0 ? totalRight/totalCount : 0.5;
+    // ---------- AoPS Intro Series ----------
+    'prealgebra': { title:'AoPS Prealgebra', lvl:['AMC'], rate:2.0, sections:[
+      {topic:'Polynomials and Algebra', section:'Arithmetic Properties & Order', pStart:1, pEnd:30, exFirst:1, exLast:60},
+      {topic:'Polynomials and Algebra', section:'Fractions & Exponents', pStart:31, pEnd:70, exFirst:61, exLast:120},
+    ]},
+    'intro-alg': { title:'AoPS Introduction to Algebra (2e)', lvl:['AMC'], rate:2.2, sections:[
+      {topic:'Polynomials and Algebra', section:'Solving Linear Equations I–II', pStart:77, pEnd:88, exFirst:1, exLast:40},
+      {topic:'Polynomials and Algebra', section:'Quadratics', pStart:239, pEnd:280, exFirst:1, exLast:80},
+      {topic:'Functions', section:'Functions & Graphs', pStart:453, pEnd:490, exFirst:1, exLast:50},
+      {topic:'Sequences and Series', section:'Sequences & Series', pStart:517, pEnd:540, exFirst:1, exLast:42},
+      {topic:'Polynomials and Algebra', section:'Exponents & Logarithms', pStart:563, pEnd:596, exFirst:1, exLast:36},
+    ]},
+    'intro-cp': { title:'AoPS Introduction to Counting & Probability (2e)', lvl:['AMC'], rate:2.2, sections:[
+      {topic:'Combinatorics', section:'Basic Counting (Add/Mult)', pStart:1, pEnd:28, exFirst:1, exLast:28},
+      {topic:'Combinatorics', section:'Permutations & Combinations', pStart:29, pEnd:64, exFirst:1, exLast:36},
+      {topic:'Combinatorics', section:'Counting with Symmetry', pStart:57, pEnd:62, exFirst:1, exLast:16},
+      {topic:'Probability', section:'Intro Probability', pStart:89, pEnd:120, exFirst:1, exLast:36},
+      {topic:'Combinatorics', section:'Inclusion–Exclusion', pStart:145, pEnd:170, exFirst:1, exLast:32},
+    ]},
+    'intro-geo': { title:'AoPS Introduction to Geometry (2e)', lvl:['AMC'], rate:2.6, sections:[
+      {topic:'Geometry', section:'Congruence & Similarity', pStart:67, pEnd:120, exFirst:1, exLast:60},
+      {topic:'Geometry', section:'Polygons & Area', pStart:121, pEnd:200, exFirst:1, exLast:60},
+      {topic:'Geometry', section:'Circles', pStart:284, pEnd:312, exFirst:1, exLast:60},
+      {topic:'Geometry', section:'Power of a Point & Trig Intro', pStart:329, pEnd:360, exFirst:1, exLast:48},
+      {topic:'Geometry', section:'3D Geometry & Transformations', pStart:385, pEnd:420, exFirst:1, exLast:40},
+    ]},
+    'intro-nt': { title:'AoPS Introduction to Number Theory', lvl:['AMC'], rate:2.2, sections:[
+      {topic:'Number Theory', section:'Divisibility & Primes', pStart:1, pEnd:44, exFirst:1, exLast:36},
+      {topic:'Number Theory', section:'Congruences', pStart:100, pEnd:140, exFirst:1, exLast:42},
+    ]},
 
-  // Blend priors & weaknesses.
-  // If overall is weak (<50%) and study window is short (<45d), give weaknesses more weight.
-  const beta = (overallScore<0.5 && spanDays<45) ? 0.65 : 0.45; // weakness weight
-  const alpha = 1 - beta;                                     // prior weight
-  const topicWeight = {};
-  ALL_TOPICS.forEach(t=>{
-    const prior = PRIORS[t] || 0.05;
-    topicWeight[t] = alpha*prior + beta*weakness[t] + 0.001; // tiny floor to avoid zeros
-  });
-
-  // ========================== BOOK CATALOG ==========================
-  const BOOKS_META = [
-    {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:ALL_TOPICS, priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
-    {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:ALL_TOPICS, priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
-
-    {id:'prealgebra', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/prealgebra'},
-    {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-algebra'},
-    {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-counting-and-probability'},
-    {id:'intro-geo', title:'AoPS Introduction to Geometry', level:['AMC'], topics:['Geometry'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-geometry'},
-    {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
-
-    {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
-    {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
-    {id:'precalc', title:'AoPS Precalculus', level:['AIME','USAMO'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
-
-    {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
-    {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
-    {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
-    {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
-    {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276'},
-    {id:'path-comb', title:'A Path to Combinatorics (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'},
-
-    {id:'cmms', title:'Competition Math for Middle School (Batteron)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Probability','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school'}
-  ];
-
-  // ========================== READING UNITS & PAGE MAPS ==========================
-  // (Same schema you’ve been using: page-based or section-based units; page refs included where known)
-  const UNITS = [
-    // ---------- AoPS Vol.1 ----------
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Polynomials and Algebra', chapter:'Chapter 6: Quadratic Equations', pStart:52, pEnd:60, exTotal:32},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Number Theory', chapter:'Chapter 5.4: Modular Arithmetic', pStart:42, pEnd:45, exTotal:30},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Combinatorics', chapter:'Chapter 25: Learning to Count', pStart:221, pEnd:229, exTotal:40},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Probability', chapter:'Chapter 25: Counting as a foundation for Probability', pStart:221, pEnd:229, exTotal:24},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Sequences and Series', chapter:'Chapter 24: Sequences and Series', pStart:211, pEnd:217, exTotal:28},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Functions', chapter:'Chapter 21: Functions', pStart:187, pEnd:190, exTotal:16},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Geometry', chapter:'Chapter 11.8: Area of a Triangle', pStart:109, pEnd:109, exTotal:12},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Geometry', chapter:'Ch.14–15: Angle Chasing & Area', pStart:133, pEnd:138, exTotal:36},
-    {bookId:'aops-v1', book:'AoPS Volume 1', topic:'Geometry', chapter:'Chapter 18: Three-Dimensional Geometry', pStart:165, pEnd:169, exTotal:20},
-
-    // ---------- AoPS Vol.2 ----------
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Polynomials and Algebra', chapter:'Chapter 6: Polynomials', pStart:52, pEnd:65, exTotal:34},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Number Theory', chapter:'Chapter 23: Divisibility and Congruences', pStart:252, pEnd:262, exTotal:34},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Number Theory', chapter:'Chapter 24: Diophantine Equations', pStart:266, pEnd:274, exTotal:26},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Combinatorics', chapter:'Chapter 15: Combinatorics & Binomial', pStart:170, pEnd:176, exTotal:30},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Combinatorics', chapter:'Chapter 25.6: Colorings', pStart:280, pEnd:280, exTotal:12},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Probability', chapter:'Ch.15.5: Binomial for distributions', pStart:175, pEnd:175, exTotal:10},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Sequences and Series', chapter:'Chapter 16: Sequences & Recurrences', pStart:180, pEnd:191, exTotal:36},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Functions', chapter:'Chapter 7: Functional Equations', pStart:69, pEnd:73, exTotal:18},
-    {bookId:'aops-v2', book:'AoPS Volume 2', topic:'Geometry', chapter:'Chapter 22: Inversion & Homothety', pStart:241, pEnd:247, exTotal:16},
-
-    // ---------- Intro series ----------
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Polynomials and Algebra', section:'Polynomials & Factoring', chunks:14, exTotal:120},
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Functions', section:'Functions & Graphs', chunks:10, exTotal:60},
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Sequences and Series', section:'Sequences', chunks:10, exTotal:60},
-
-    {bookId:'intro-cp', book:'AoPS Introduction to Counting & Probability', topic:'Combinatorics', section:'Counting Basics → Binomial', chunks:14, exTotal:120},
-    {bookId:'intro-cp', book:'AoPS Introduction to Counting & Probability', topic:'Probability', section:'Basic Probability → Conditional', chunks:12, exTotal:100},
-
-    {bookId:'intro-geo', book:'AoPS Introduction to Geometry', topic:'Geometry', section:'Angles, Triangles, Area, Similarity', chunks:20, exTotal:180},
-
-    {bookId:'intro-nt', book:'AoPS Introduction to Number Theory', topic:'Number Theory', section:'Divisibility, Congruences, Diophantine', chunks:16, exTotal:140},
-
-    {bookId:'prealgebra', book:'AoPS Prealgebra', topic:'Polynomials and Algebra', section:'Equations & Word Problems', chunks:12, exTotal:100},
-
-    // ---------- Intermediate / Advanced ----------
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Polynomials and Algebra', section:'Polynomials, Vieta, Inequalities', chunks:18, exTotal:160},
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Functions', section:'Functional Equations', chunks:10, exTotal:70},
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Sequences and Series', section:'Recurrences & Series', chunks:12, exTotal:90},
-
-    {bookId:'int-cp', book:'AoPS Intermediate C&P', topic:'Combinatorics', section:'Advanced Counting (PIE/Invariants)', chunks:16, exTotal:150},
-    {bookId:'int-cp', book:'AoPS Intermediate C&P', topic:'Probability', section:'Expected Value/Generating Functions', chunks:14, exTotal:130},
-
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Functions', section:'Exponential/Log & Trig', chunks:16, exTotal:120},
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Sequences and Series', section:'Sequences/Series', chunks:12, exTotal:90},
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Polynomials and Algebra', section:'Complex/Polynomials', chunks:12, exTotal:90},
+    // ---------- AoPS Intermediate / Precalculus ----------
+    'int-alg': { title:'AoPS Intermediate Algebra', lvl:['AIME','USAMO'], rate:2.9, sections:[
+      {topic:'Polynomials and Algebra', section:'Complex Numbers', pStart:1, pEnd:40, exFirst:1, exLast:36},
+      {topic:'Polynomials and Algebra', section:'Quadratics & Conics', pStart:79, pEnd:160, exFirst:1, exLast:80},
+      {topic:'Polynomials and Algebra', section:'Polynomials & Factor Theorems', pStart:401, pEnd:480, exFirst:1, exLast:80},
+      {topic:'Sequences and Series', section:'Sequences & Series', pStart:521, pEnd:565, exFirst:1, exLast:48},
+      {topic:'Functions', section:'Functional Equations', pStart:585, pEnd:650, exFirst:1, exLast:48},
+    ]},
+    'int-cp': { title:'AoPS Intermediate Counting & Probability', lvl:['AIME','USAMO'], rate:2.9, sections:[
+      {topic:'Combinatorics', section:'Inclusion–Exclusion (PIE)', pStart:49, pEnd:88, exFirst:1, exLast:40},
+      {topic:'Combinatorics', section:'Recursion & Generating Funcs', pStart:201, pEnd:252, exFirst:1, exLast:56},
+      {topic:'Probability', section:'Conditional & Bayes', pStart:289, pEnd:336, exFirst:1, exLast:44},
+      {topic:'Combinatorics', section:'Graph Theory Basics', pStart:340, pEnd:360, exFirst:1, exLast:24},
+    ]},
+    'precalc': { title:'AoPS Precalculus (2e)', lvl:['AIME','USAMO'], rate:2.8, sections:[
+      {topic:'Functions', section:'Polynomials & Rational', pStart:1, pEnd:76, exFirst:1, exLast:40},
+      {topic:'Sequences and Series', section:'Sequences & Telescoping', pStart:417, pEnd:485, exFirst:1, exLast:50},
+      {topic:'Functions', section:'Trigonometric Identities', pStart:83, pEnd:140, exFirst:1, exLast:50},
+      {topic:'Functions', section:'Complex Numbers & Roots of Unity', pStart:300, pEnd:360, exFirst:1, exLast:48},
+      {topic:'Functions', section:'Vectors & Matrices', pStart:361, pEnd:416, exFirst:1, exLast:40},
+    ]},
 
     // ---------- Other texts ----------
-    {bookId:'egmo', book:'EGMO', topic:'Geometry', section:'Power, Homothety, Inversion', chunks:16, exTotal:120},
-    {bookId:'zeitz', book:'Art & Craft of Problem Solving (Zeitz)', topic:'Combinatorics', section:'Pigeonhole/Extremal', chunks:10, exTotal:80},
-    {bookId:'zeitz', book:'Art & Craft of Problem Solving (Zeitz)', topic:'Number Theory', section:'NT Tactics', chunks:10, exTotal:80},
-    {bookId:'engel', book:'Problem-Solving Strategies (Engel)', topic:'Combinatorics', section:'Bijective/Counting Tactics', chunks:12, exTotal:100},
-    {bookId:'104nt', book:'104 Number Theory Problems', topic:'Number Theory', section:'Divisibility/Congruences Sets', chunks:12, exTotal:104},
-    {bookId:'path-comb', book:'A Path to Combinatorics', topic:'Combinatorics', section:'Counting & Strategies', chunks:12, exTotal:100},
-
-    // ---------- CMMS ----------
-    {bookId:'cmms', book:'Competition Math for Middle School', topic:'Polynomials and Algebra', section:'Algebra Problem Solving', chunks:10, exTotal:120},
-    {bookId:'cmms', book:'Competition Math for Middle School', topic:'Number Theory', section:'Number Theory Sets', chunks:10, exTotal:120},
-    {bookId:'cmms', book:'Competition Math for Middle School', topic:'Combinatorics', section:'Counting', chunks:10, exTotal:120},
-    {bookId:'cmms', book:'Competition Math for Middle School', topic:'Probability', section:'Probability', chunks:8, exTotal:100},
-    {bookId:'cmms', book:'Competition Math for Middle School', topic:'Geometry', section:'Geometry Sets', chunks:10, exTotal:120}
-  ];
-
-  const PAGE_MAPS = {
-    'aops-v1': {
-      'Chapter 6: Quadratic Equations': {start:52,end:60,exercises:{start:58,end:60}},
-      'Chapter 5.4: Modular Arithmetic': {start:42,end:45,exercises:{start:44,end:45}},
-      'Chapter 25: Learning to Count': {start:221,end:229,exercises:{start:225,end:229}},
-      'Chapter 24: Sequences and Series': {start:211,end:217,exercises:{start:214,end:217}},
-      'Chapter 21: Functions': {start:187,end:190,exercises:{start:189,end:190}},
-      'Chapter 11.8: Area of a Triangle': {start:109,end:109,exercises:{start:109,end:109}},
-      'Ch.14–15: Angle Chasing & Area': {start:133,end:138,exercises:{start:136,end:138}},
-      'Chapter 18: Three-Dimensional Geometry': {start:165,end:169,exercises:{start:168,end:169}}
-    },
-    'aops-v2': {
-      'Chapter 6: Polynomials': {start:52,end:65,exercises:{start:60,end:65}},
-      'Chapter 23: Divisibility and Congruences': {start:252,end:262,exercises:{start:259,end:262}},
-      'Chapter 24: Diophantine Equations': {start:266,end:274,exercises:{start:270,end:274}},
-      'Chapter 15: Combinatorics & Binomial': {start:170,end:176,exercises:{start:174,end:176}},
-      'Chapter 25.6: Colorings': {start:280,end:280,exercises:{start:280,end:280}},
-      'Ch.15.5: Binomial for distributions': {start:175,end:175,exercises:{start:175,end:175}},
-      'Chapter 16: Sequences & Recurrences': {start:180,end:191,exercises:{start:188,end:191}},
-      'Chapter 7: Functional Equations': {start:69,end:73,exercises:{start:71,end:73}},
-      'Chapter 22: Inversion & Homothety': {start:241,end:247,exercises:{start:245,end:247}}
-    },
-    'precalc': {
-      'Exponential/Log & Trig': {start:200,end:260,exercises:{start:252,end:260}},
-      'Sequences/Series': {start:300,end:346,exercises:{start:338,end:346}},
-      'Complex/Polynomials': {start:360,end:410,exercises:{start:398,end:410}}
-    }
+    'egmo': { title:'EGMO — Euclidean Geometry in Mathematical Olympiads', lvl:['AIME','USAMO'], rate:3.0, sections:[
+      {topic:'Geometry', section:'Angles & Cyclic Quadrilaterals', pStart:1, pEnd:46, exFirst:1, exLast:30},
+      {topic:'Geometry', section:'Power of a Point & Homothety', pStart:47, pEnd:100, exFirst:1, exLast:30},
+      {topic:'Geometry', section:'Inversion Basics', pStart:101, pEnd:140, exFirst:1, exLast:24},
+    ]},
+    'zeitz': { title:'The Art & Craft of Problem Solving (Zeitz, 3e)', lvl:['AIME','USAMO'], rate:2.7, sections:[
+      {topic:'Combinatorics', section:'Pigeonhole & Extreme Principle', pStart:59, pEnd:116, exFirst:1, exLast:24},
+      {topic:'Number Theory', section:'NT Tools & Play', pStart:117, pEnd:159, exFirst:1, exLast:28},
+      {topic:'Polynomials and Algebra', section:'Inequalities & Algebraic Tools', pStart:161, pEnd:204, exFirst:1, exLast:24},
+    ]},
+    'velleman': { title:'How to Prove It (Velleman, 2e)', lvl:['USAMO'], rate:3.0, sections:[
+      {topic:'Polynomials and Algebra', section:'Direct & Contrapositive Proofs', pStart:45, pEnd:65, exFirst:1, exLast:20},
+      {topic:'Polynomials and Algebra', section:'Proof by Induction', pStart:133, pEnd:164, exFirst:1, exLast:28},
+      {topic:'Polynomials and Algebra', section:'Quantifiers & Set Proofs', pStart:69, pEnd:104, exFirst:1, exLast:30},
+    ]},
+    'engel': { title:'Problem-Solving Strategies (Engel)', lvl:['USAMO'], rate:3.0, sections:[
+      {topic:'Combinatorics', section:'Invariants & Coloring', pStart:1, pEnd:37, exFirst:1, exLast:30},
+      {topic:'Combinatorics', section:'Extremal & Pigeonhole', pStart:39, pEnd:83, exFirst:1, exLast:40},
+      {topic:'Number Theory', section:'NT Problem Strategies', pStart:117, pEnd:159, exFirst:1, exLast:32},
+    ]},
+    '104nt': { title:'104 Number Theory Problems (Andreescu & Andrica)', lvl:['AIME','USAMO'], rate:2.7, sections:[
+      {topic:'Number Theory', section:'Introductory Problems (I–II)', pStart:1, pEnd:74, exFirst:1, exLast:52},
+      {topic:'Number Theory', section:'Advanced Problems (I–II)', pStart:83, pEnd:130, exFirst:1, exLast:52},
+    ]},
+    'path-comb': { title:'A Path to Combinatorics for Undergraduates', lvl:['AIME','USAMO'], rate:2.7, sections:[
+      {topic:'Combinatorics', section:'Addition or Multiplication?', pStart:1, pEnd:23, exFirst:1, exLast:24},
+      {topic:'Combinatorics', section:'Combinations & Binomial', pStart:25, pEnd:67, exFirst:1, exLast:40},
+      {topic:'Combinatorics', section:'Bijections & Recursions', pStart:69, pEnd:110, exFirst:1, exLast:40},
+      {topic:'Combinatorics', section:'Inclusion–Exclusion & GFs', pStart:111, pEnd:170, exFirst:1, exLast:40},
+    ]},
+    'cmms': { title:'Competition Math for Middle School (Batterson)', lvl:['AMC'], rate:2.1, sections:[
+      {topic:'Polynomials and Algebra', section:'Algebra Basics', pStart:1, pEnd:40, exFirst:1, exLast:40},
+      {topic:'Combinatorics', section:'Counting Strategies', pStart:81, pEnd:120, exFirst:1, exLast:40},
+      {topic:'Number Theory', section:'Divisibility', pStart:41, pEnd:80, exFirst:1, exLast:40},
+      {topic:'Geometry', section:'Geometry Basics', pStart:121, pEnd:170, exFirst:1, exLast:40},
+    ]},
   };
 
-  // Build per-topic unit pools for selected books
-  const UNITS_BY_TOPIC = {};
-  UNITS.forEach(u=>{ if(selectedBooks.has(u.bookId)) (UNITS_BY_TOPIC[u.topic] ||= []).push(u); });
-
-  // Per-unit progress (to avoid repeats)
-  const progress = new Map();
-  function ensureProg(u){
-    if(!progress.has(u)){
-      progress.set(u,{nextPage:u.pStart||1,nextChunk:1,nextExercise:1,donePages:false,doneChunks:false,doneExercises:false});
-    }
-    return progress.get(u);
-  }
-
-  // pacing
-  function minutesPerPage(unit){
-    if(uIs(unit,'aops-v1')) return 2.0;
-    if(uIs(unit,'aops-v2')) return 2.7;
-    if(uIs(unit,'intro-')||uIs(unit,'prealgebra')||uIs(unit,'cmms')) return 2.0;
-    if(uIs(unit,'int-')||uIs(unit,'precalc')) return 2.7;
-    return 2.5;
-  }
-  function minutesPerExercise(unit){
-    if(uIs(unit,'aops-v1')||uIs(unit,'intro-')||uIs(unit,'prealgebra')||uIs(unit,'cmms')) return 6.0;
-    if(uIs(unit,'aops-v2')||uIs(unit,'int-')||uIs(unit,'precalc')) return 8.5;
-    return 8.0;
-  }
-  function uIs(unit, prefixOrId){
-    if(prefixOrId.endsWith('-')) return (unit.bookId||'').startsWith(prefixOrId.slice(0,-1));
-    return unit.bookId===prefixOrId;
-  }
-  function sectionPageSpan(unit, sIdx, eIdx){
-    const ref = PAGE_MAPS[unit.bookId] && (PAGE_MAPS[unit.bookId][unit.section] || PAGE_MAPS[unit.bookId][unit.chapter]);
-    if(!ref || !unit.chunks) return null;
-    const totalPages = ref.end - ref.start + 1;
-    const pagesPerChunk = Math.max(1, Math.floor(totalPages / unit.chunks));
-    const from = ref.start + (sIdx-1)*pagesPerChunk;
-    const to   = Math.min(ref.end, ref.start + eIdx*pagesPerChunk - 1);
-    return {from,to};
-  }
-
-  // pick topic by (prior ⊕ weakness) weight, but skip topics that have no selected-book units
-  const recentTopics = [];
-  function pickTopicForDay(){
-    const candidates = ALL_TOPICS.filter(t => (UNITS_BY_TOPIC[t]||[]).length>0);
-    const sum = candidates.reduce((s,t)=>s+(topicWeight[t]||0),0) || 1;
-    let r = RNG.next()*sum;
-    let pick = candidates[0] || ALL_TOPICS[0];
-    for(const t of candidates){ r -= (topicWeight[t]||0); if(r<=0){ pick=t; break; } }
-    // avoid immediate repetition
-    if(recentTopics.slice(-2).includes(pick) && candidates.length>1){
-      const i = candidates.indexOf(pick);
-      pick = candidates[(i+1)%candidates.length];
-    }
-    recentTopics.push(pick); if(recentTopics.length>4) recentTopics.shift();
-    return pick;
-  }
-
-  function pickUnit(topic){
-    const pool = (UNITS_BY_TOPIC[topic]||[]);
-    if(!pool.length){
-      // pick any selected unit if none for topic
-      const anySel = UNITS.filter(u=>selectedBooks.has(u.bookId));
-      return anySel.length ? anySel[RNG.int(anySel.length)] : null;
-    }
-    return pool[RNG.int(pool.length)];
-  }
-
-  function formatPages(from,to){ return (from&&to) ? ` (pages ${from}–${to})` : ''; }
-
-  function scheduleReadingAndExercises(dayMinutes, phase){
-    let readShare = (phase==='Foundation') ? 0.62 : (phase==='Mixed') ? 0.52 : 0.40;
-    // If diagnostic weak and time short, bias further to learning
-    if(overallScore<0.5 && spanDays<45) readShare += 0.10;
-    readShare = clamp(readShare, 0.40, 0.75);
-
-    let readBudget = Math.max(8, Math.round(dayMinutes*readShare));
-    let exBudget   = Math.max(6, dayMinutes - readBudget);
-
-    const tasks = [];
-    const todaysTopics = [];
-
-    for(let blocks=0; blocks<3 && (readBudget>=4 || exBudget>=6); blocks++){
-      const topic = pickTopicForDay();
-      const unit  = pickUnit(topic); if(!unit) continue;
-      todaysTopics.push(topic);
-
-      const p = ensureProg(unit);
-
-      // reading
-      if(readBudget>=4 && !p.donePages && !p.doneChunks){
-        if('pStart' in unit){
-          const rate = minutesPerPage(unit);
-          const left = Math.max(0, unit.pEnd - p.nextPage + 1);
-          if(left>0){
-            const pages = clamp(Math.floor((readBudget+0.25*rate)/rate), 2, left);
-            const from = p.nextPage, to = p.nextPage+pages-1;
-            tasks.push({type:'reading', html:`📘 <b>${topic}</b>: ${unit.book}, ${unit.chapter}${formatPages(from,to)}`});
-            p.nextPage = to+1; if(p.nextPage>unit.pEnd) p.donePages=true;
-            readBudget -= Math.round(pages*rate);
-          } else { p.donePages=true; }
-        } else {
-          const chunkM = 14;
-          const left = Math.max(0,(unit.chunks||10)-(p.nextChunk-1));
-          if(left>0){
-            const take = clamp(Math.floor((readBudget+0.25*chunkM)/chunkM),1,left);
-            const s=p.nextChunk, e=s+take-1; const span = sectionPageSpan(unit,s,e);
-            const secLabel = (s===e)?`Section ${s}`:`Sections ${s}–${e}`;
-            const pagesNote = span?` (pages ${span.from}–${span.to})`:'';
-            tasks.push({type:'reading', html:`📘 <b>${topic}</b>: ${unit.book}, ${unit.section} — ${secLabel}${pagesNote}`});
-            p.nextChunk = e+1; if(p.nextChunk>(unit.chunks||10)) p.doneChunks=true;
-            readBudget -= Math.round(take*chunkM);
-          } else { p.doneChunks=true; }
-        }
-      }
-
-      // exercises matched to the same unit
-      if(exBudget>=6 && !p.doneExercises){
-        const per = minutesPerExercise(unit);
-        const left = Math.max(0,(unit.exTotal||24)-(p.nextExercise-1));
-        if(left>0){
-          const cnt = clamp(Math.floor((exBudget+0.25*per)/per),1,left);
-          const s = p.nextExercise, e=s+cnt-1;
-          const where = ('chapter' in unit)?`${unit.book}, ${unit.chapter}`:`${unit.book}, ${unit.section}`;
-          let exNote = '';
-          const ref=PAGE_MAPS[unit.bookId] && (PAGE_MAPS[unit.bookId][unit.chapter||unit.section]);
-          if(ref?.exercises) exNote=` (pages ${ref.exercises.start}–${ref.exercises.end})`;
-          tasks.push({type:'bookex', html:`🧠 <b>Book exercises</b> (${where}): ${s===e?`Problem ${s}`:`Problems ${s}–${e}`}${exNote}`});
-          p.nextExercise = e+1; if(p.nextExercise>(unit.exTotal||24)) p.doneExercises=true;
-          exBudget -= Math.round(cnt*per);
-        } else { p.doneExercises=true; }
-      }
-    }
-
-    // If nothing scheduled (e.g., all selected pools exhausted), fall back to any selected unit reading
-    if(!tasks.length){
-      const any = UNITS.filter(u=>selectedBooks.has(u.bookId));
-      if(any.length){
-        const unit = any[RNG.int(any.length)]; const p=ensureProg(unit);
-        if('pStart' in unit){
-          const rate = minutesPerPage(unit);
-          const left = Math.max(0,unit.pEnd-p.nextPage+1);
-          const pages = Math.max(2, Math.min(left, Math.floor((dayMinutes+0.25*rate)/rate)));
-          const from=p.nextPage, to=p.nextPage+pages-1;
-          tasks.push({type:'reading', html:`📘 <b>${unit.topic}</b>: ${unit.book}, ${unit.chapter}${formatPages(from,to)}`});
-          p.nextPage = to+1;
-        } else {
-          const s=p.nextChunk, e=Math.min((unit.chunks||10), s+1);
-          const span = sectionPageSpan(unit,s,e);
-          const secLabel=(s===e)?`Section ${s}`:`Sections ${s}–${e}`;
-          const pagesNote = span?` (pages ${span.from}–${span.to})`:'';
-          tasks.push({type:'reading', html:`📘 <b>${unit.topic}</b>: ${unit.book}, ${unit.section} — ${secLabel}${pagesNote}`});
-          p.nextChunk = e+1;
-        }
-      }
-    }
-
-    return {tasks, todaysTopics:[...new Set(todaysTopics)]};
-  }
-
-  // ========================== PROOF-WRITING (USAMO/JMO only) ==========================
-  const PROOF_SELECTED = ['velleman','zeitz','engel','egmo'].filter(id=>selectedBooks.has(id));
-  const PROOF_TRACK = {
-    velleman:[{label:'Direct & Contrapositive Proofs (How to Prove It, pp. 45–65)'},
-              {label:'Induction & Well-Ordering (How to Prove It, pp. 139–176)'}],
-    zeitz:[{label:'Pigeonhole / Extremal (Zeitz, Part I)'},
-           {label:'Invariants / Monovariants (Zeitz, Part II)'}],
-    engel:[{label:'Combinatorial Arguments (Engel, Ch. 1–2)'}],
-    egmo:[{label:'Power of a Point & Homothety (EGMO)'},
-          {label:'Inversion basics (EGMO)'}]
+  // =====================================================================================
+  //                       Topic priors (frequency by contest family)
+  // =====================================================================================
+  // Weakness from diagnostic dominates; these priors only nudge the rotation.
+  const PRIORS = {
+    AMC10: {'Polynomials and Algebra':0.30,'Geometry':0.28,'Combinatorics':0.20,'Number Theory':0.14,'Probability':0.06,'Functions':0.01,'Sequences and Series':0.01},
+    AMC12: {'Polynomials and Algebra':0.32,'Geometry':0.26,'Combinatorics':0.18,'Number Theory':0.16,'Probability':0.05,'Functions':0.02,'Sequences and Series':0.01},
+    AIME:  {'Polynomials and Algebra':0.34,'Number Theory':0.26,'Combinatorics':0.20,'Geometry':0.16,'Sequences and Series':0.03,'Functions':0.01,'Probability':0.00}
   };
-  let proofCursor = 0;
-  function scheduleProof(minutes, phase){
-    if(!(goal==='usamo'||goal==='usajmo') || PROOF_SELECTED.length===0 || minutes<15) return [];
-    // Slightly more in Mixed/Final
-    const target = phase==='Foundation' ? 20 : 25;
-    const out=[]; let used=0;
-    while(used+target<=minutes && proofCursor<400){
-      const bookId = PROOF_SELECTED[proofCursor % PROOF_SELECTED.length];
-      const list = PROOF_TRACK[bookId]||[]; if(!list.length){ proofCursor++; continue; }
-      const item = list[(Math.floor(proofCursor/PROOF_SELECTED.length)) % list.length];
-      out.push({type:'proof', html:`📗 <b>Proof-writing</b>: ${item.label}. Write at least one full proof.`});
-      used += target; proofCursor++;
+
+  // =====================================================================================
+  //                      Problem-of-the-day (deterministic, no repeats)
+  // =====================================================================================
+  function potdURL(goal, year, variant, number){
+    if(goal==='AIME') return `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${number}`;
+    const lv = (input.goal==='amc10')?'AMC_10':'AMC_12';
+    return `https://artofproblemsolving.com/wiki/index.php/${year}_${lv}${variant}_Problems/Problem_${number}`;
+  }
+  function* potdGenerator(goal){
+    // wide year ranges, spread by topic implicitly by random draw
+    const yearsA = Array.from({length:18},(_,i)=>2006+i);
+    const yearsB = Array.from({length:21},(_,i)=>2004+i);
+    const varAB = ['A','B'], varII=['I','II'];
+    const draw = ()=> (goal==='AIME'
+      ? {y: yearsB[Math.floor(rand()*yearsB.length)], v: varII[Math.floor(rand()*varII.length)], n: 1+Math.floor(rand()*15)}
+      : {y: yearsA[Math.floor(rand()*yearsA.length)], v: varAB[Math.floor(rand()*varAB.length)], n: 5+Math.floor(rand()*21)} );
+    const seen = new Set();
+    while(true){
+      const g = draw(); const key = `${g.y}-${g.v}-${g.n}`;
+      if(seen.has(key)) continue; seen.add(key);
+      yield potdURL(goal==='AIME'?'AIME':'AMC', g.y, g.v, g.n);
     }
-    return out;
   }
 
-  // ========================== PROBLEM OF THE DAY (always available) ==========================
-  const usedPOD = new Set();
-  function aopsProblemURL(level, year, variant, number){
-    if(level==='AIME') return `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${number}`;
-    const L = (level==='AMC10')?'AMC_10':'AMC_12';
-    return `https://artofproblemsolving.com/wiki/index.php/${year}_${L}${variant}_Problems/Problem_${number}`;
+  // =====================================================================================
+  //            Build curriculum filtered by selected books (and track progress)
+  // =====================================================================================
+  const selected = new Set(input.selectedBooks||[]);
+  const GOAL = (input.goal==='amc10' || input.goal==='amc12') ? (input.goal==='amc10'?'AMC10':'AMC12') : 'AIME';
+  const levelForBook = id => (BOOKS[id]?.lvl || []);
+  const allowedBooks = [...selected].filter(id => BOOKS[id] && (
+    (GOAL==='AMC10'||GOAL==='AMC12') ? levelForBook(id).includes('AMC') : levelForBook(id).some(x=>x==='AIME'||x==='USAMO' || x==='AMC')
+  ));
+  // If the user unchecked everything, fall back to AoPS Vol 1/2 based on goal
+  if(!allowedBooks.length){
+    if(GOAL==='AIME'){ allowedBooks.push('aops-v2','int-alg','int-cp','precalc'); }
+    else { allowedBooks.push('aops-v1','intro-alg','intro-cp','intro-geo'); }
   }
-  function generatePODLink(){
-    // Prefer the user's contest; if we run out, borrow from neighbors.
-    const order = (goal==='amc10')?['AMC10','AMC12','AIME']:(goal==='amc12')?['AMC12','AMC10','AIME']:(goal==='aime')?['AIME','AMC12','AMC10']:['AIME','AMC12','AMC10'];
-    for(const level of order){
-      // choose a deterministic year/variant/number that hasn't been used
-      for(let tries=0; tries<2000; tries++){
-        let year,variant,num;
-        if(level==='AIME'){ const years=[...Array(35)].map((_,i)=>1990+i); year=years[RNG.int(years.length)]; variant=['I','II'][RNG.int(2)]; num=1+RNG.int(15); }
-        else {
-          const years=[...Array(22)].map((_,i)=>2002+i); year=years[RNG.int(years.length)];
-          variant=['A','B'][RNG.int(2)]; num=1+RNG.int(25);
-        }
-        const key=`${level}-${year}-${variant}-${num}`;
-        if(!usedPOD.has(key)){ usedPOD.add(key); return `<a href="${aopsProblemURL(level,year,variant,num)}" target="_blank" rel="noopener">${year} ${level} ${variant} Problem ${num}</a>`; }
+
+  // Sort books: prioritize AoPS Vol.1 for AMC; Vol.2 / Intermediate for AIME/USAMO
+  const priorityOrder = id=>{
+    if(GOAL==='AMC10'||GOAL==='AMC12') return (id==='aops-v1'?0: (id.startsWith('intro')?1:2));
+    return (id==='aops-v2'?0: (id.startsWith('int')?1: (id==='precalc'?2:3)));
+  };
+  allowedBooks.sort((a,b)=>priorityOrder(a)-priorityOrder(b));
+
+  // Build per-topic queues of sections across selected books
+  const topicQueues = {};
+  for(const id of allowedBooks){
+    const book = BOOKS[id]; if(!book) continue;
+    for(const sec of book.sections){
+      const t = sec.topic;
+      (topicQueues[t] ||= []).push({...sec, bookId:id, bookTitle:book.title, rate:book.rate});
+    }
+  }
+  // Deterministic shuffle within each queue
+  function dShuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+  Object.keys(topicQueues).forEach(t=>dShuffle(topicQueues[t]));
+
+  // Track progress within each section (pages and problem numbers)
+  const progress = {}; // key: bookId|section -> {p: currentPage, ex: nextProblem}
+  function keyFor(sec){ return `${sec.bookId}|${sec.section}|${sec.pStart}-${sec.pEnd}`; }
+
+  // Diagnostic weights → topic target shares
+  const subs = input.subscores||{};
+  const topics = ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'];
+  const basePrior = PRIORS[(GOAL==='AIME')?'AIME':(GOAL)] || PRIORS.AMC12;
+  const weights = {};
+  topics.forEach(t=>{
+    const r = (subs[t]?.right||0), tot = (subs[t]?.total||0);
+    const weakness = (tot>0) ? (1 - r/Math.max(1,tot)) : 0.5;
+    weights[t] = 0.35*weakness + 0.65*(basePrior[t]||0);
+  });
+  // Normalize
+  const sumW = Object.values(weights).reduce((a,b)=>a+b,0) || 1;
+  Object.keys(weights).forEach(k=>weights[k]/=sumW);
+
+  // Helper: pick next section slice for a topic with given minute budget
+  function minutesPerPage(rate){ return rate; } // already per-book tuned
+  function sliceSection(sec, wantMinutes){
+    const mp = minutesPerPage(sec.rate);
+    const maxPages = Math.max(2, Math.floor((wantMinutes + 0.25*mp)/mp));
+    const k = keyFor(sec);
+    if(!progress[k]) progress[k] = {p:sec.pStart, ex:sec.exFirst||1};
+    const from = progress[k].p, to = Math.min(sec.pEnd, from + maxPages - 1);
+    const usedMin = Math.round((to - from + 1)*mp);
+    progress[k].p = (to < sec.pEnd) ? (to+1) : sec.pEnd; // advance
+    return {from, to, mins:usedMin, done:(to===sec.pEnd)};
+  }
+  function sliceExercises(sec, wantMinutes){
+    const per = (sec.rate>=2.8?9:7.5); // tougher books use longer per-problem time
+    const count = Math.max(1, Math.floor((wantMinutes + 0.25*per)/per));
+    const k = keyFor(sec); if(!progress[k]) progress[k]={p:sec.pStart, ex:sec.exFirst||1};
+    const start = progress[k].ex, end = Math.min(sec.exLast||start+count-1, start+count-1);
+    const used = Math.round((end-start+1)*per);
+    progress[k].ex = (end < (sec.exLast||end)) ? (end+1) : end;
+    return {start, end, mins:used};
+  }
+
+  // =====================================================================================
+  //                          Scheduling rules and study mix
+  // =====================================================================================
+  function phaseNameForDay(d){
+    const f=Math.floor(totalDays*0.55), m=Math.floor(totalDays*0.85);
+    return d<f ? 'Foundation' : (d<m ? 'Mixed':'Final');
+  }
+  function baseMix(ph){
+    if(ph==='Foundation') return {read:0.60, exercise:0.30, timed:0.10};
+    if(ph==='Mixed')      return {read:0.50, exercise:0.35, timed:0.15};
+    return                    {read:0.35, exercise:0.35, timed:0.30};
+  }
+  // If student did poorly and time is short, tilt harder into reading
+  function adjustForWeakness(base, minutes){
+    const avgWeak = Object.values(subs).map(s=>1-(s.right||0)/Math.max(1,s.total||0));
+    const weak = avgWeak.length? avgWeak.reduce((a,b)=>a+b,0)/avgWeak.length : 0.5;
+    let bias = 0;
+    if(minutes<=30) bias = 0.10 + 0.10*weak;
+    else if(minutes<=50) bias = 0.05 + 0.08*weak;
+    const r = base.read + bias, e = Math.max(0, base.exercise - bias*0.6), t = Math.max(0, base.timed - bias*0.4);
+    const s=r+e+t||1; return {read:r/s, exercise:e/s, timed:t/s};
+  }
+
+  const minutesPerDay = Number(input.minutesPerDay||60);
+  const isUSAMOTrack = (input.testId==='C');
+  const onAIMETrack = (input.testId!=='A');
+
+  // Mock cadence: starting 30 days before test, 2–4 per week
+  function isMockDay(dayIdx, dateObj){
+    const daysLeft = Math.ceil((end - dateObj)/86400000);
+    if(daysLeft > 30) return false;
+    const dow = dateObj.getDay();
+    // Default: Tue & Thu; add Sat for AIME/USAMO
+    if(onAIMETrack){
+      return (dow===2 || dow===4 || dow===6); // Tue Thu Sat
+    }
+    return (dow===2 || dow===4); // Tue Thu
+  }
+  function makeMockHTML(totalMinutes){
+    if(onAIMETrack){
+      const V = ['I','II']; const y = 2004 + Math.floor(rand()*22); const v = V[Math.floor(rand()*V.length)];
+      return {html:`<span style="color:#f59e0b">📝 Full mock:</span> <a href="https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems" target="_blank" rel="noopener">${y} AIME ${v}</a>`, mins:totalMinutes, type:'mock'};
+    }
+    const V=['A','B']; const lv=(input.goal==='amc10')?'10':'12';
+    const y = 2006 + Math.floor(rand()*18); const v=V[Math.floor(rand()*V.length)];
+    return {html:`<span style="color:#f59e0b">📝 Full mock:</span> <a href="https://artofproblemsolving.com/wiki/index.php/${y}_AMC_${lv}${v}_Problems" target="_blank" rel="noopener">${y} AMC ${lv}${v}</a>`, mins:totalMinutes, type:'mock'};
+  }
+
+  // =====================================================================================
+  //                            Daily plan construction
+  // =====================================================================================
+  const usedPotd = new Set();
+  const potdGen = potdGenerator(onAIMETrack?'AIME':'AMC');
+
+  function pickTopicWeighted(){
+    const r = rand(); let acc=0;
+    for(const t of topics){
+      acc += (weights[t]||0);
+      if(r<=acc) return t;
+    }
+    return topics[0];
+  }
+  function nextSectionForTopic(topic){
+    const q = (topicQueues[topic]||[]).filter(sec => (progress[keyFor(sec)]?.p||sec.pStart) <= sec.pEnd);
+    if(!q.length){
+      // fallback: pick any topic that still has material
+      const others = topics.flatMap(tt => (topicQueues[tt]||[]).filter(sec => (progress[keyFor(sec)]?.p||sec.pStart) <= sec.pEnd));
+      if(!others.length) return null;
+      return others[Math.floor(rand()*others.length)];
+    }
+    return q[Math.floor(rand()*q.length)];
+  }
+
+  function problemOfDay(taskTopics){
+    // Prefer matching one of today's topics; else any
+    const level = (input.goal==='amc10' || input.goal==='amc12') ? 'AMC' : 'AIME';
+    for(let tries=0; tries<200; tries++){
+      const url = potdGen.next().value;
+      if(usedPotd.has(url)) continue;
+      usedPotd.add(url);
+      return {html:`<span style="color:#10b981">🧩 Problem of the day:</span> <a href="${url}" target="_blank" rel="noopener">${level} problem</a>`, mins:10, type:'drill'};
+    }
+    // As last resort, give a set link
+    if(level==='AIME'){
+      return {html:`<span style="color:#10b981">🧩 Problem of the day:</span> <a href="https://artofproblemsolving.com/wiki/index.php/AIME_Problems_and_Solutions" target="_blank" rel="noopener">AIME archive</a>`, mins:10, type:'drill'};
+    }
+    const lv=(input.goal==='amc10')?'AMC 10':'AMC 12';
+    return {html:`<span style="color:#10b981">🧩 Problem of the day:</span> <a href="https://artofproblemsolving.com/wiki/index.php/${lv}_Problems_and_Solutions" target="_blank" rel="noopener">${lv} archive</a>`, mins:10, type:'drill'};
+  }
+
+  function buildDay(dIdx){
+    const dateObj = new Date(start.getTime()+dIdx*86400000);
+    const items = [];
+    // Mock day?
+    if(isMockDay(dIdx, dateObj)){ items.push( makeMockHTML(minutesPerDay) ); return items; }
+
+    const phase = phaseNameForDay(dIdx);
+    const mix = adjustForWeakness(baseMix(phase), minutesPerDay);
+    let mRead   = Math.max(6, Math.round(minutesPerDay*mix.read));
+    let mExercises = Math.max(6, Math.round(minutesPerDay*mix.exercise));
+    let mTimed  = Math.max(0, minutesPerDay - mRead - mExercises - 10); // keep 10 for POTD
+
+    // At least one reading slice ALWAYS
+    const topicsToday = new Set();
+    // two learning blocks to reduce repetition
+    for(let blk=0; blk<2; blk++){
+      const topic = pickTopicWeighted();
+      const sec = nextSectionForTopic(topic);
+      if(!sec){ continue; }
+      const sliceR = sliceSection(sec, Math.max(8, Math.round(mRead*0.6)));
+      items.push({html:`<span style="color:#0ea5e9">📘 <b>${topic}</b>:</span> ${sec.bookTitle}, ${sec.section} (pages ${sliceR.from}–${sliceR.to})`, mins:sliceR.mins, type:'reading', _topic:topic, _sec:sec});
+      topicsToday.add(topic);
+      mRead = Math.max(0, mRead - sliceR.mins);
+
+      // Exercises paired to same section
+      if(mExercises > 0){
+        const ex = sliceExercises(sec, mExercises);
+        const rangeText = (ex.start===ex.end)?`Problem ${ex.start}`:`Problems ${ex.start}–${ex.end}`;
+        items.push({html:`<span style="color:#ec4899">🧠 Book exercises:</span> ${sec.bookTitle}, ${sec.section} — ${rangeText}`, mins:ex.mins, type:'bookex', _topic:topic});
+        mExercises = Math.max(0, mExercises - ex.mins);
       }
     }
-    // extreme fallback: link to a set (still valid)
-    if(goal==='aime'){ return `<a href="https://artofproblemsolving.com/wiki/index.php/AIME_Problems_and_Solutions" target="_blank" rel="noopener">Random AIME problem</a>`; }
-    return `<a href="https://artofproblemsolving.com/wiki/index.php/AMC_Problems_and_Solutions" target="_blank" rel="noopener">Random AMC problem</a>`;
-  }
 
-  // ========================== Mocks (~30 days out) ==========================
-  function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
-  function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
-  function usamoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAMO_Problems`; }
-  function makeMockHTML(dayIdx){
-    if(goal==='aime'){
-      const years=[...Array(22)].map((_,i)=>2004+i), V=['I','II']; const y=years[(hashString(seedSource)+dayIdx)%years.length], v=V[(hashString(seedSource)>>3+dayIdx)%V.length];
-      return `<a href="${aimeSetURL(y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AIME ${v}</a>`;
+    // Proof-writing module (USAMO/USAJMO if proof books selected)
+    const proofBooks = ['velleman','zeitz','engel'].filter(id=>selected.has(id));
+    if(proofBooks.length && (input.goal==='usamo' || input.goal==='usajmo')){
+      // small but steady slot
+      const secList = [];
+      proofBooks.forEach(id=>{
+        (BOOKS[id].sections||[]).forEach(s=>secList.push({...s, bookId:id, bookTitle:BOOKS[id].title, rate:BOOKS[id].rate}));
+      });
+      if(secList.length){
+        const pick = secList[Math.floor(rand()*secList.length)];
+        const sliceR = sliceSection(pick,  Math.min(20, Math.max(10, Math.round(minutesPerDay*0.2)))));
+        items.push({html:`<span style="color:#22c55e">📗 Proof-writing:</span> ${pick.bookTitle}, ${pick.section} (pages ${sliceR.from}–${sliceR.to}) — write one full proof`, mins:sliceR.mins, type:'proof', _topic:'Polynomials and Algebra'});
+      }
     }
-    if(goal==='usamo'||goal==='usajmo'){
-      const years=[...Array(20)].map((_,i)=>2005+i); const y=years[(hashString(seedSource)+dayIdx)%years.length];
-      return `<a href="${usamoSetURL(y)}" target="_blank" rel="noopener">📝 Full mock: ${y} USAMO</a>`;
+
+    // Timed set (short) — only in Mixed/Final and if time left
+    if(mTimed >= 8){
+      const url = (onAIMETrack)
+        ? `https://artofproblemsolving.com/wiki/index.php/AIME_Problems_and_Solutions`
+        : `https://artofproblemsolving.com/wiki/index.php/${(input.goal==='amc10')?'AMC_10':'AMC_12'}_Problems_and_Solutions`;
+      items.push({html:`<span style="color:#7c3aed">⏱️ Timed practice:</span> <a href="${url}" target="_blank" rel="noopener">topic-matched set</a>`, mins:mTimed, type:'timed'});
     }
-    const years=[...Array(18)].map((_,i)=>2006+i), V=['A','B']; const lv=(goal==='amc10')?'10':'12';
-    const y=years[(hashString(seedSource)+dayIdx)%years.length], v=V[(hashString(seedSource)>>2+dayIdx)%V.length];
-    return `<a href="${amcSetURL(lv,y,v)}" target="_blank" rel="noopener">📝 Full mock: ${y} AMC ${lv}${v}</a>`;
+
+    // Always include a POTD
+    items.push( problemOfDay([...topicsToday]) );
+
+    return items;
   }
 
-  // ========================== DAY COMPOSITION & PHASES ==========================
-  function phaseName(dayIdx,total){ const f=Math.floor(total*0.55), m=Math.floor(total*0.85); return dayIdx<f?'Foundation':(dayIdx<m?'Mixed':'Final'); }
-  function baseMix(ph){ return (ph==='Foundation')?{read:0.65,drill:0.25,timed:0.10}:(ph==='Mixed')?{read:0.50,drill:0.35,timed:0.15}:{read:0.40,drill:0.30,timed:0.30}; }
-  function adjustedMix(base, m){
-    // Less time → more learning; more time → increase drills/timed a bit
-    let br=0, tt=0, td=0; if(m<=30){br=0.18;tt=0.10;td=0.08}else if(m<=60){br=0.08;tt=0.05;td=0.03}
-    let r=base.read+br, d=Math.max(0,base.drill-td), t=Math.max(0,base.timed-tt); const s=r+d+t||1; return {read:r/s, drill:d/s, timed:t/s};
-  }
-
-  // ========================== BUILD PLAN ==========================
+  // Build the whole plan now (deterministic)
   const tasksByDay = [];
-  for(let d=0; d<spanDays; d++){
-    const phase = phaseName(d, spanDays);
-    const mix   = adjustedMix(baseMix(phase), minutesPerDay);
-
-    // Reading + exercises (always)
-    const {tasks:learn, todaysTopics} = scheduleReadingAndExercises(Math.round(minutesPerDay*mix.read), phase);
-    let dayTasks = [...learn];
-
-    // Optional proof-writing for USAMO/JMO
-    if(goal==='usamo'||goal==='usajmo'){
-      const proofShare = (overallScore<0.55 && spanDays<60) ? 0.12 : 0.10;
-      dayTasks.push(...scheduleProof(Math.round(minutesPerDay*proofShare), phase));
-    }
-
-    // Problem of the day (always; no repeats)
-    dayTasks.push({type:'pod', html:`🧩 <b>Problem of the day</b>: ${generatePODLink()}`});
-
-    // Timed practice (topic-agnostic small set) — only when not yet in mock period
-    const daysLeft = spanDays - d;
-    if(daysLeft > 30){
-      const timedShare = (phase==='Foundation') ? 0.08 : (phase==='Mixed') ? 0.12 : 0.16;
-      if(minutesPerDay >= 25){
-        const timedMin = Math.round(minutesPerDay*timedShare);
-        if(timedMin >= 10){
-          dayTasks.push({type:'timed', html:'⏱️ Short timed practice (set of mixed problems, 10–20 minutes)'});
-        }
-      }
-    }
-
-    // Mock injection near exam: 30 days out (AMC 2×/wk, AIME/USAMO 3×/wk)
-    if(daysLeft <= 30){
-      const dow = new Date(today.getTime()+d*86400000).getDay();
-      if(goal==='aime' || goal==='usamo' || goal==='usajmo'){
-        if([1,3,5].includes(dow)){ dayTasks = [{type:'mock', html:makeMockHTML(d)}]; }
-      } else {
-        if([2,5].includes(dow)){ dayTasks = [{type:'mock', html:makeMockHTML(d)}]; }
-      }
-    }
-
-    tasksByDay.push(dayTasks);
+  for(let d=0; d<totalDays; d++){
+    tasksByDay.push( buildDay(d) );
   }
 
-  // ========================== MAP TO DATES, RENDER MONTHS ==========================
+  // =====================================================================================
+  //                                   Render calendar
+  // =====================================================================================
   const taskMap = new Map();
-  for(let i=0;i<tasksByDay.length;i++){
-    const d = new Date(today.getTime()+i*86400000);
-    taskMap.set(fmtDateISO(d), tasksByDay[i]);
+  for(let i=0;i<totalDays;i++){
+    const d=new Date(start.getTime()+i*86400000);
+    taskMap.set(d.toISOString().slice(0,10), tasksByDay[i]);
   }
+  const months = buildMonthList(start, end); let monthIdx=0; renderOneMonth(months[monthIdx]);
+  document.getElementById('prevMonth').onclick = ()=>{ if(monthIdx>0){monthIdx--;renderOneMonth(months[monthIdx]);}};
+  document.getElementById('nextMonth').onclick = ()=>{ if(monthIdx<months.length-1){monthIdx++;renderOneMonth(months[monthIdx]);}};
+
+  document.getElementById('downloadIcs').onclick = ()=>{
+    const ics = buildICS(start, totalDays, tasksByDay, Number(input.minutesPerDay), input);
+    const blob = new Blob([ics], {type:'text/calendar'}); const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='OlympiadPrep-StudyPlan.ics'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  };
+  document.getElementById('rebuildBtn').onclick = ()=>{
+    const m = Number(document.getElementById('mPerDay').value||0), t = document.getElementById('testDate').value;
+    if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
+    input.minutesPerDay=m; input.testDate=t; localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href = 'timeline.html?v=rebuild';
+  };
 
   function buildMonthList(startDate, endDate){
-    const list=[]; let cur=new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    const last=new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-    while(cur<=last){ list.push({year:cur.getFullYear(), month:cur.getMonth()}); cur=new Date(cur.getFullYear(),cur.getMonth()+1,1); }
-    if(!list.length) list.push({year:startDate.getFullYear(), month:startDate.getMonth()});
-    return list;
+    const out=[]; let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    while(cur<=last){ out.push({year:cur.getFullYear(), month:cur.getMonth()}); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+    return out;
   }
-  const months = buildMonthList(today, end);
-  let monthIdx = 0;
 
   function renderOneMonth({year, month}){
     const cal = document.getElementById('calendar'); cal.innerHTML='';
@@ -611,54 +587,42 @@
     const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
     for(let i=0;i<lead;i++){ const e=document.createElement('div'); e.className='day out-of-range'; grid.appendChild(e); }
 
-    const t0 = new Date(); t0.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
     for(let day=1; day<=daysInMonth; day++){
       const dateObj=new Date(year,month,day); dateObj.setHours(0,0,0,0);
-      const key=fmtDateISO(dateObj); const tasks=taskMap.get(key)||[];
-      const inRange=(dateObj>=today && dateObj<=end);
+      const key=dateObj.toISOString().slice(0,10); const tasks=taskMap.get(key)||[];
+      const inRange=(dateObj>=start && dateObj<=end);
       const box=document.createElement('div'); let cls='day';
-      if(!inRange) cls+=' out-of-range'; else if(dateObj<t0) cls+=' past'; else if(dateObj.getTime()===t0.getTime()) cls+=' today';
+      if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(dateObj.getTime()===today.getTime()) cls+=' today';
       box.className=cls;
 
       let html=`<div class="date">${day}</div>`;
-      if(inRange){ tasks.forEach(t=>{ html += `<div class="task">${t.html}</div>`; }); }
+      if(inRange){
+        tasks.forEach(t=>{
+          html += `<div class="task">${t.html || (t.href? `<a href="${t.href}" target="_blank" rel="noopener">${t.text||'Practice'}</a>` : (t.text||''))}</div>`;
+        });
+      }
       box.innerHTML=html; grid.appendChild(box);
     }
     cal.appendChild(wrap);
-    document.getElementById('monthLabel').innerText = `Month ${months.indexOf(months.find(m=>m.year===year&&m.month===month))+1} of ${months.length} • ${header}`;
+    document.getElementById('monthLabel').innerText = `Month ${months.findIndex(m=>m.year===year&&m.month===month)+1} of ${months.length} • ${header}`;
     document.getElementById('prevMonth').disabled=(monthIdx===0);
     document.getElementById('nextMonth').disabled=(monthIdx===months.length-1);
   }
 
-  renderOneMonth(months[monthIdx]);
-  document.getElementById('prevMonth').onclick = ()=>{ if(monthIdx>0){monthIdx--; renderOneMonth(months[monthIdx]);} };
-  document.getElementById('nextMonth').onclick = ()=>{ if(monthIdx<months.length-1){monthIdx++; renderOneMonth(months[monthIdx]);} };
-
-  // ========================== REBUILD & ICS ==========================
-  document.getElementById('rebuildBtn').onclick = ()=>{
-    const m = Number(document.getElementById('mPerDay').value||0);
-    const tStr = document.getElementById('testDate').value;
-    const t = parseDateSafe(tStr);
-    if(m<15 || !t){ showError('Enter minutes/day ≥ 15 and a valid future test date.'); return; }
-    if(input){ input.minutesPerDay=m; input.testDate=fmtDateISO(t); localStorage.setItem('studyPlanInput', JSON.stringify(input)); }
-    location.href='timeline.html?v=rebuild';
-  };
-
-  document.getElementById('downloadIcs').onclick = ()=>{
-    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
+  function buildICS(startDate, spanDays, tasks, minutes, meta){
+    function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()+0).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
     const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
-    for(let i=0;i<tasksByDay.length;i++){
-      const day=new Date(today.getTime()+i*86400000); if(day>end) break;
-      const items=tasksByDay[i]||[]; if(!items.length) continue;
-      const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0)); const endUTC=new Date(startUTC.getTime()+minutesPerDay*60000);
-      const desc=items.map(t=>(t.html||'').replace(/<[^>]+>/g,'')).join('\n');
-      lines.push('BEGIN:VEVENT',`UID:olympiadprep-${i}@studyplan`,`DTSTAMP:${fmtUTC(new Date())}`,`DTSTART:${fmtUTC(startUTC)}`,`DTEND:${fmtUTC(endUTC)}`,`SUMMARY:Study • ${(input?.goal||'AMC').toUpperCase()}`,`DESCRIPTION:${desc}`,'END:VEVENT');
+    for(let i=0;i<spanDays;i++){
+      const day=new Date(startDate.getTime()+i*86400000); const items=tasks[i]||[]; if(!items.length) continue;
+      const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0)); const endUTC=new Date(startUTC.getTime()+minutes*60000);
+      const desc=items.map(t=>(t.html||'').replace(/<[^>]+>/g,'')).join('\\n');
+      lines.push('BEGIN:VEVENT',`UID:olympiadprep-${i}@studyplan`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${meta.goal.toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
     }
-    lines.push('END:VCALENDAR');
-    const blob=new Blob([lines.join('\r\n')],{type:'text/calendar'}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='OlympiadPrep-StudyPlan.ics'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  };
+    lines.push('END:VCALENDAR'); return lines.join('\\r\\n');
+  }
 })();
 </script>
+
 </body>
 </html>
