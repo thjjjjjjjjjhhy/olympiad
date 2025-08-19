@@ -41,6 +41,10 @@
     .pill input{transform:scale(1.1)}
     .rec-h{margin:.6rem 0 .25rem}
     .notice{border-left:4px solid var(--accent);background:#f0f9ff;padding:10px;border-radius:8px}
+    .wkgrid{display:grid;grid-template-columns:repeat(7,minmax(80px,1fr));gap:8px;margin-top:6px}
+    .wkgrid label{display:flex;gap:6px;align-items:center;border:1px solid var(--grid);border-radius:10px;padding:8px;background:#fff}
+    @media (max-width:900px){.wkgrid{grid-template-columns:repeat(4,minmax(100px,1fr))}}
+    @media (max-width:600px){.wkgrid{grid-template-columns:repeat(3,minmax(100px,1fr))}}
     @media (max-width:700px){.row{grid-template-columns:1fr}}
     @media print { .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; } body { background:#fff; } .card { box-shadow:none; border:1px solid #e5e7eb } .container { max-width:none } }
   </style>
@@ -84,21 +88,12 @@
             </select>
           </div>
         </div>
-        <!-- NEW: upfront off-days (prefill for builder, can be changed later) -->
-        <div class="row" style="margin-top:8px">
-          <div>
-            <label for="daysOff"><b>Days off per week</b></label>
-            <select id="daysOff" name="daysOff" style="width:100%">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-            </select>
-            <p class="hint" style="margin:.25rem 0 0">You can change this later before generating the plan.</p>
-          </div>
+
+        <!-- NEW: upfront weekday off picker (prefill for builder; can be changed later) -->
+        <div style="margin-top:10px">
+          <label><b>Weekly off days (choose specific weekdays)</b></label>
+          <div id="topOffDays" class="wkgrid"></div>
+          <p class="hint" style="margin:.25rem 0 0">Example: check Monday to always take Mondays off. You can change this later before generating the plan.</p>
         </div>
 
         <button type="submit" style="margin-top:10px">Start Diagnostic →</button>
@@ -119,26 +114,18 @@
       <div id="levelAdvice" class="notice" style="display:none;margin-top:10px"></div>
     </section>
 
-    <!-- Builder: minutes/date + book recommendations/selection + DAYS OFF -->
+    <!-- Builder: minutes/date + book recommendations/selection + weekday off picker -->
     <section id="timelineBuilder" class="card" style="display:none; margin-top:16px">
       <h3 style="margin:.2rem 0 .6rem">Generate Your Study Plan</h3>
       <div class="row">
         <label><b>Minutes per day</b><br><input id="minutesPerDay" type="number" min="15" step="5" style="width:100%" placeholder="e.g., 45"></label>
         <label><b>Test date</b><br><input id="testDate" type="date" style="width:100%"></label>
       </div>
-      <!-- NEW: builder off-days (saved to payload) -->
-      <div class="row" style="margin-top:8px">
-        <label><b>Days off per week</b><br>
-          <select id="daysOffBuild" style="width:100%">
-            <option value="0" selected>0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </label>
+
+      <!-- NEW: builder weekday off picker (this drives payload) -->
+      <div style="margin-top:8px">
+        <label><b>Weekly off days</b></label>
+        <div id="buildOffDays" class="wkgrid"></div>
       </div>
 
       <div id="recBlock" style="margin-top:12px">
@@ -252,8 +239,35 @@
   const testDateEl = document.getElementById('testDate');
   const recBooksEl = document.getElementById('recBooks');
   const otherBooksEl = document.getElementById('otherBooks');
-  const daysOffTopEl = document.getElementById('daysOff');          // top (prefill only)
-  const daysOffBuildEl = document.getElementById('daysOffBuild');  // in builder (payload)
+  const topOffDaysWrap = document.getElementById('topOffDays');      // top (prefill only)
+  const buildOffDaysWrap = document.getElementById('buildOffDays');  // builder (payload)
+
+  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function weekdayPickerHTML(prefix){
+    return WEEKDAYS.map((d,i)=>`
+      <label><input type="checkbox" id="${prefix}-wd-${i}" value="${i}"> ${d}</label>
+    `).join('');
+  }
+  function getCheckedWeekdays(prefix){
+    const out=[];
+    for(let i=0;i<7;i++){
+      const el=document.getElementById(`${prefix}-wd-${i}`);
+      if(el && el.checked) out.push(i);
+    }
+    return out;
+  }
+  function setCheckedWeekdays(prefix, arr){
+    const set=new Set(arr||[]);
+    for(let i=0;i<7;i++){
+      const el=document.getElementById(`${prefix}-wd-${i}`);
+      if(el) el.checked = set.has(i);
+    }
+  }
+
+  // Render both weekday pickers
+  topOffDaysWrap.innerHTML = weekdayPickerHTML('top');
+  buildOffDaysWrap.innerHTML = weekdayPickerHTML('build');
 
   // ---------- Submit (render test) ----------
   form.addEventListener('submit', (e) => {
@@ -416,13 +430,9 @@
     }
     minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
 
-    // Prefill builder off-days from the top selector
-    try{
-      if(daysOffBuildEl){
-        const picked = daysOffTopEl?.value ?? '0';
-        daysOffBuildEl.value = picked;
-      }
-    }catch{}
+    // Prefill builder weekday off picks from the top selection
+    const topOff = getCheckedWeekdays('top');
+    setCheckedWeekdays('build', topOff);
 
     // Book recs
     buildBookRecommendations(testId, agg);
@@ -436,8 +446,8 @@
 
       const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
 
-      // NEW: days off value (prefer builder control, fallback to top)
-      const daysOffVal = Number((daysOffBuildEl?.value) ?? (daysOffTopEl?.value) ?? 0);
+      // NEW: specific weekday off choices from builder
+      const offDays = getCheckedWeekdays('build'); // array of 0..6
 
       const payload = {
         goal: goalSel.value,
@@ -446,7 +456,7 @@
         testDate: dateStr,
         subscores: agg,
         selectedBooks: selected,
-        daysOffPerWeek: daysOffVal,   // <-- ADDED
+        offDays,                    // <-- pass exact weekdays off
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('lastMinutes', String(minutes));
@@ -474,7 +484,6 @@
   }
 
   function buildBookRecommendations(testId, agg){
-    const goal = goalSel.value;
     const weakTopics = Object.entries(agg).map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
       .sort((a,b)=>a.score-b.score).slice(0,3).map(x=>x.k);
 
@@ -483,7 +492,7 @@
       base.push('aops-v1','intro-alg','intro-cp');
       if(weakTopics.includes('Number Theory')) base.push('intro-nt');
       if(weakTopics.includes('Geometry')) base.push('intro-geo');
-      base.push('cmms'); // optional foundation
+      base.push('cmms');
     } else if(testId==='B'){ // AIME
       base.push('aops-v2','int-alg','int-cp','precalc');
       if(weakTopics.includes('Geometry')) base.push('egmo');
