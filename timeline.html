@@ -71,7 +71,7 @@
 
     <div class="legend">
       <span>📘 Reading (selected books)</span>
-      <span>🧠 Book exercises (specific numbers)</span>
+      <span>🧠 Book exercises (specific numbers, page refs when available)</span>
       <span>📗 Proof-writing (USAMO/USAJMO)</span>
       <span>🧩 Problem of the day</span>
       <span>⏱️ Timed practice</span>
@@ -152,7 +152,6 @@
     weights[t] = 1 - r/n + 0.05;
   });
 
-  // Deterministic weighted pick
   const recentTopics = [];
   function pickWeightedTopic(){
     const entries = Object.entries(weights).length ? Object.entries(weights) : topics.map(t=>[t,1]);
@@ -160,7 +159,6 @@
     let r = rand()*sum, choice = entries[0][0];
     for(const [k,w] of entries){ r-=w; if(r<=0){ choice=k; break; } }
     if(recentTopics.filter(x=>x===choice).length>=2){
-      // pick next deterministically
       const idx = (entries.findIndex(e=>e[0]===choice)+1) % entries.length;
       choice = entries[idx][0];
     }
@@ -168,95 +166,197 @@
     return choice;
   }
 
-  // ---------- Selected books (strict) ----------
-  const selected = new Set(input.selectedBooks || []);
-
-  // ---------- Banks ----------
+  // ---------- BOOKS: units (reading/ex totals) ----------
+  // Schema:
+  // - page-based: {bookId, book, vol?, topic, chapter, pStart, pEnd, exTotal}
+  // - section-based: {bookId, book, topic, section, chunks, exTotal}
+  // NOTE: Page numbers vary by edition. Exact page maps go into PAGE_MAPS below.
   const V1=1, V2=2;
+
+  const BOOK_UNITS = [
+    // AoPS Volume 1 (The Basics) — page-based where known
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Polynomials and Algebra', chapter:'Chapter 6: Quadratic Equations', pStart:52,  pEnd:60,  exTotal:32},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Number Theory',           chapter:'Chapter 5.4: Modular Arithmetic',       pStart:42,  pEnd:45,  exTotal:30},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Number Theory',           chapter:'Chapter 5.6–5.7: Primes and Factors',    pStart:47,  pEnd:48,  exTotal:18},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Functions',               chapter:'Chapter 21: Functions',                  pStart:187, pEnd:190, exTotal:16},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Sequences and Series',    chapter:'Chapter 24: Sequences and Series',       pStart:211, pEnd:217, exTotal:28},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Combinatorics',           chapter:'Chapter 25: Learning to Count',          pStart:221, pEnd:229, exTotal:40},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Probability',             chapter:'Chapter 25: Counting as foundation',     pStart:221, pEnd:229, exTotal:24},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry',                chapter:'Chapter 11.8: Area of a Triangle',       pStart:109, pEnd:109, exTotal:12},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry',                chapter:'Chapter 14–15: Angle Chasing & Area',    pStart:133, pEnd:138, exTotal:36},
+    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry',                chapter:'Chapter 18: Three-Dimensional Geometry', pStart:165, pEnd:169, exTotal:20},
+
+    // AoPS Volume 2 (And Beyond) — page-based where known
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Polynomials and Algebra', chapter:'Chapter 6: Polynomials',                 pStart:52,  pEnd:65,  exTotal:34},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Number Theory',           chapter:'Chapter 23: Divisibility & Congruences', pStart:252, pEnd:262, exTotal:34},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Number Theory',           chapter:'Chapter 24: Diophantine Equations',      pStart:266, pEnd:274, exTotal:26},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Combinatorics',           chapter:'Chapter 15: Comb. & Binomial',           pStart:170, pEnd:176, exTotal:30},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Combinatorics',           chapter:'Chapter 25.6: Colorings',                pStart:280, pEnd:280, exTotal:12},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Probability',             chapter:'Chapter 15.5: Distributions',            pStart:175, pEnd:175, exTotal:10},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Sequences and Series',    chapter:'Chapter 16: Sequences & Recurrences',    pStart:180, pEnd:191, exTotal:36},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Functions',               chapter:'Chapter 7: Functional Equations',        pStart:69,  pEnd:73,  exTotal:18},
+    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Geometry',                chapter:'Chapter 22: Inversion & Homothety',      pStart:241, pEnd:247, exTotal:16},
+
+    // AoPS Prealgebra (section-based)
+    {bookId:'prealgebra', book:'AoPS Prealgebra', topic:'Polynomials and Algebra', section:'Integers & Order of Operations', chunks:10, exTotal:30},
+
+    // AoPS Intro series (section-based)
+    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Polynomials and Algebra', section:'Equations & Factoring', chunks:12, exTotal:40},
+    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Functions',               section:'Functions & Graphs',   chunks:8,  exTotal:25},
+    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Sequences and Series',    section:'Sequences',            chunks:8,  exTotal:20},
+
+    {bookId:'intro-cp',  book:'AoPS Introduction to Counting & Probability', topic:'Combinatorics', section:'Counting Strategies', chunks:12, exTotal:40},
+    {bookId:'intro-cp',  book:'AoPS Introduction to Counting & Probability', topic:'Probability',    section:'Basic Probability',   chunks:10, exTotal:35},
+
+    {bookId:'intro-geo', book:'AoPS Introduction to Geometry', topic:'Geometry', section:'Triangles & Circles', chunks:14, exTotal:50},
+    {bookId:'intro-nt',  book:'AoPS Introduction to Number Theory', topic:'Number Theory', section:'Divisibility & Primes', chunks:12, exTotal:45},
+
+    // AoPS Intermediate / Precalculus (section-based)
+    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Polynomials and Algebra', section:'Polynomials & Rational Functions', chunks:14, exTotal:45},
+    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Functions',               section:'Functional Equations',             chunks:10, exTotal:30},
+    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Sequences and Series',    section:'Recurrences',                      chunks:10, exTotal:30},
+
+    {bookId:'int-cp',  book:'AoPS Intermediate Counting & Probability', topic:'Combinatorics', section:'Advanced Counting',                 chunks:14, exTotal:45},
+    {bookId:'int-cp',  book:'AoPS Intermediate Counting & Probability', topic:'Probability',    section:'Conditional & Expected Value',      chunks:12, exTotal:40},
+
+    {bookId:'precalc', book:'AoPS Precalculus', topic:'Functions',            section:'Exponential/Log & Trig', chunks:16, exTotal:35},
+    {bookId:'precalc', book:'AoPS Precalculus', topic:'Sequences and Series', section:'Series & Binomial',      chunks:14, exTotal:30},
+    {bookId:'precalc', book:'AoPS Precalculus', topic:'Polynomials and Algebra', section:'Complex & Roots',     chunks:14, exTotal:30},
+
+    // Other texts (section-based)
+    {bookId:'egmo',      book:'EGMO', topic:'Geometry',        section:'Power of a Point & Homothety', chunks:12, exTotal:24},
+    {bookId:'egmo',      book:'EGMO', topic:'Geometry',        section:'Inversion (basics)',            chunks:12, exTotal:24},
+    {bookId:'zeitz',     book:'Zeitz — Art & Craft', topic:'Combinatorics', section:'Pigeonhole / Extremal',  chunks:10, exTotal:28},
+    {bookId:'zeitz',     book:'Zeitz — Art & Craft', topic:'Number Theory', section:'Modular / Diophantine',  chunks:10, exTotal:24},
+    {bookId:'engel',     book:'Engel — Problem-Solving Strategies', topic:'Combinatorics', section:'Invariants / Extremal', chunks:10, exTotal:24},
+    {bookId:'104nt',     book:'104 Number Theory Problems', topic:'Number Theory', section:'Problem Sets 1–4', chunks:10, exTotal:30},
+    {bookId:'path-comb', book:'A Path to Combinatorics', topic:'Combinatorics', section:'Counting Strategies', chunks:10, exTotal:30},
+    {bookId:'cmms',      book:'Competition Math for Middle School', topic:'Number Theory', section:'NT Core',         chunks:10, exTotal:25},
+    {bookId:'cmms',      book:'Competition Math for Middle School', topic:'Polynomials and Algebra', section:'Algebra Core',      chunks:10, exTotal:25},
+    {bookId:'cmms',      book:'Competition Math for Middle School', topic:'Probability', section:'Probability Core',  chunks:8,  exTotal:20},
+    {bookId:'cmms',      book:'Competition Math for Middle School', topic:'Combinatorics', section:'Counting Core',   chunks:8,  exTotal:20},
+    {bookId:'cmms',      book:'Competition Math for Middle School', topic:'Geometry', section:'Geometry Core',         chunks:10, exTotal:25}
+  ];
+
+  // ---------- PAGE MAPS (fill as you verify editions) ----------
+  // Use exact editions you own. When present, pages will appear for both reading and exercises.
+  // Leave entries out if you don't know; UI will fall back to "Section N".
+  const PAGE_MAPS = {
+    // Examples with pages filled for AoPS volumes (keep if correct in your edition):
+    'aops-v1': {
+      'Chapter 6: Quadratic Equations':                 {start:52,end:60, exercises:{start:58,end:60}},
+      'Chapter 5.4: Modular Arithmetic':                {start:42,end:45, exercises:{start:44,end:45}},
+      'Chapter 5.6–5.7: Primes and Factors':            {start:47,end:48, exercises:{start:47,end:48}},
+      'Chapter 21: Functions':                           {start:187,end:190, exercises:{start:189,end:190}},
+      'Chapter 24: Sequences and Series':                {start:211,end:217, exercises:{start:215,end:217}},
+      'Chapter 25: Learning to Count':                   {start:221,end:229, exercises:{start:226,end:229}},
+      'Chapter 25: Counting as foundation':              {start:221,end:229, exercises:{start:226,end:229}},
+      'Chapter 11.8: Area of a Triangle':                {start:109,end:109, exercises:{start:109,end:109}},
+      'Chapter 14–15: Angle Chasing & Area':             {start:133,end:138, exercises:{start:136,end:138}},
+      'Chapter 18: Three-Dimensional Geometry':          {start:165,end:169, exercises:{start:168,end:169}}
+    },
+    'aops-v2': {
+      'Chapter 6: Polynomials':                          {start:52,end:65, exercises:{start:60,end:65}},
+      'Chapter 23: Divisibility & Congruences':          {start:252,end:262, exercises:{start:258,end:262}},
+      'Chapter 24: Diophantine Equations':               {start:266,end:274, exercises:{start:270,end:274}},
+      'Chapter 15: Comb. & Binomial':                    {start:170,end:176, exercises:{start:174,end:176}},
+      'Chapter 25.6: Colorings':                         {start:280,end:280, exercises:{start:280,end:280}},
+      'Chapter 15.5: Distributions':                     {start:175,end:175, exercises:{start:175,end:175}},
+      'Chapter 16: Sequences & Recurrences':             {start:180,end:191, exercises:{start:188,end:191}},
+      'Chapter 7: Functional Equations':                 {start:69,end:73, exercises:{start:72,end:73}},
+      'Chapter 22: Inversion & Homothety':               {start:241,end:247, exercises:{start:245,end:247}}
+    },
+
+    // Section-based examples — fill with your edition pages when ready:
+    'prealgebra': {
+      'Integers & Order of Operations':                  {start:20,end:80, exercises:{start:72,end:80}}
+    },
+    'intro-alg': {
+      'Equations & Factoring':                           {start:75,end:150, exercises:{start:140,end:150}},
+      'Functions & Graphs':                              {start:484,end:584, exercises:{start:574,end:584}},
+      'Sequences':                                       {start:589,end:630, exercises:{start:620,end:630}}
+    },
+    'intro-cp': {
+      'Counting Strategies':                             {start:20,end:90, exercises:{start:80,end:90}},
+      'Basic Probability':                               {start:91,end:150, exercises:{start:140,end:150}}
+    },
+    'intro-geo': {
+      'Triangles & Circles':                             {start:60,end:140, exercises:{start:128,end:140}}
+    },
+    'intro-nt': {
+      'Divisibility & Primes':                           {start:30,end:85, exercises:{start:76,end:85}}
+    },
+    'int-alg': {
+      'Polynomials & Rational Functions':                {start:40,end:120, exercises:{start:108,end:120}},
+      'Functional Equations':                            {start:121,end:170, exercises:{start:160,end:170}},
+      'Recurrences':                                     {start:171,end:210, exercises:{start:200,end:210}}
+    },
+    'int-cp': {
+      'Advanced Counting':                               {start:50,end:120, exercises:{start:108,end:120}},
+      'Conditional & Expected Value':                    {start:121,end:180, exercises:{start:168,end:180}}
+    },
+    'precalc': {
+      'Exponential/Log & Trig':                          {start:200,end:260, exercises:{start:255,end:260}},
+      'Series & Binomial':                               {start:261,end:320, exercises:{start:315,end:320}},
+      'Complex & Roots':                                 {start:321,end:380, exercises:{start:375,end:380}}
+    },
+    'egmo': {
+      'Power of a Point & Homothety':                    {start:97,end:128, exercises:{start:120,end:128}},
+      'Inversion (basics)':                              {start:153,end:180, exercises:{start:170,end:180}}
+    },
+    'zeitz': {
+      'Pigeonhole / Extremal':                           {start:50,end:96,  exercises:{start:88,end:96}},
+      'Modular / Diophantine':                           {start:120,end:170, exercises:{start:160,end:170}}
+    },
+    'engel': {
+      'Invariants / Extremal':                           {start:1,end:48,   exercises:{start:40,end:48}}
+    },
+    '104nt': {
+      'Problem Sets 1–4':                                {start:1,end:72,   exercises:{start:1,end:72}}
+    },
+    'path-comb': {
+      'Counting Strategies':                             {start:1,end:90,   exercises:{start:78,end:90}}
+    },
+    'cmms': {
+      'NT Core':                                         {start:40,end:72,  exercises:{start:64,end:72}},
+      'Algebra Core':                                    {start:73,end:120, exercises:{start:110,end:120}},
+      'Probability Core':                                {start:121,end:150,exercises:{start:142,end:150}},
+      'Counting Core':                                   {start:151,end:190,exercises:{start:180,end:190}},
+      'Geometry Core':                                   {start:191,end:235,exercises:{start:224,end:235}}
+    }
+  };
+
+  // ---------- Exercise page maps by chapter name (optional overrides) ----------
+  // If a chapter’s problem sets live on a different page span than the reading.
+  const EX_PAGE_MAPS = {
+    // Example:
+    // 'aops-v1': {
+    //   'Chapter 6: Quadratic Equations': {start:58,end:60}
+    // }
+  };
+
+  // ---------- Helpers for rates ----------
   function minutesPerPage(vol){ return (vol===V1)?2.0:(difficultTrack?3.0:2.6); }
   function minutesPerExercise(vol){ return (vol===V1)?6.0:(difficultTrack?9.0:8.0); }
 
-  // Units schema:
-  //  - page-based: {bookId, book, vol, topic, chapter, pStart, pEnd, ex}
-  //  - section-based: {bookId, book, topic, section, ex, chunks} with chunks=how many reading splits
-  const BOOK_UNITS = [
-    // AoPS Volume 1 (page-based)
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Number Theory', chapter:'Chapter 5.4: Modular Arithmetic', pStart:42, pEnd:45, ex:30},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Number Theory', chapter:'Chapter 5.6–5.7: Primes and Factors', pStart:47, pEnd:48, ex:18},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Combinatorics', chapter:'Chapter 25: Learning to Count', pStart:221, pEnd:229, ex:40},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Probability', chapter:'Chapter 25: Counting as a foundation for Probability', pStart:221, pEnd:229, ex:24},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Sequences and Series', chapter:'Chapter 24: Sequences and Series', pStart:211, pEnd:217, ex:28},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Functions', chapter:'Chapter 21: Functions', pStart:187, pEnd:190, ex:16},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Polynomials and Algebra', chapter:'Chapter 6: Quadratic Equations', pStart:52, pEnd:60, ex:32},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry', chapter:'Chapter 11.8: Area of a Triangle', pStart:109, pEnd:109, ex:12},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry', chapter:'Chapter 14–15: Angle Chasing & Area', pStart:133, pEnd:138, ex:36},
-    {bookId:'aops-v1', book:'AoPS Volume 1', vol:V1, topic:'Geometry', chapter:'Chapter 18: Three-Dimensional Geometry', pStart:165, pEnd:169, ex:20},
-
-    // AoPS Volume 2 (page-based)
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Number Theory', chapter:'Chapter 23: Divisibility and Congruences', pStart:252, pEnd:262, ex:34},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Number Theory', chapter:'Chapter 24: Diophantine Equations', pStart:266, pEnd:274, ex:26},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Combinatorics', chapter:'Chapter 15: Combinatorics & Binomial', pStart:170, pEnd:176, ex:30},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Combinatorics', chapter:'Chapter 25.6: Colorings', pStart:280, pEnd:280, ex:12},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Probability', chapter:'Chapter 15.5: Distributions', pStart:175, pEnd:175, ex:10},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Sequences and Series', chapter:'Chapter 16: Sequences & Recurrences', pStart:180, pEnd:191, ex:36},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Functions', chapter:'Chapter 7: Functional Equations', pStart:69, pEnd:73, ex:18},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Polynomials and Algebra', chapter:'Chapter 6: Polynomials', pStart:52, pEnd:65, ex:34},
-    {bookId:'aops-v2', book:'AoPS Volume 2', vol:V2, topic:'Geometry', chapter:'Chapter 22: Inversion & Homothety', pStart:241, pEnd:247, ex:16},
-
-    // AoPS Intro series (section-based with deterministic chunking)
-    {bookId:'prealgebra', book:'AoPS Prealgebra', topic:'Polynomials and Algebra', section:'Integers & Order of Operations', ex:30, chunks:10},
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Polynomials and Algebra', section:'Equations & Factoring', ex:40, chunks:12},
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Functions', section:'Functions & Graphs', ex:25, chunks:8},
-    {bookId:'intro-alg', book:'AoPS Introduction to Algebra', topic:'Sequences and Series', section:'Sequences', ex:20, chunks:8},
-    {bookId:'intro-cp', book:'AoPS Intro to Counting & Probability', topic:'Combinatorics', section:'Counting Strategies', ex:40, chunks:12},
-    {bookId:'intro-cp', book:'AoPS Intro to Counting & Probability', topic:'Probability', section:'Basic Probability', ex:35, chunks:10},
-    {bookId:'intro-geo', book:'AoPS Introduction to Geometry', topic:'Geometry', section:'Triangles & Circles', ex:50, chunks:14},
-    {bookId:'intro-nt', book:'AoPS Introduction to Number Theory', topic:'Number Theory', section:'Divisibility & Primes', ex:45, chunks:12},
-
-    // Intermediate / advanced (section-based)
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Polynomials and Algebra', section:'Polynomials & Rational Functions', ex:45, chunks:14},
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Functions', section:'Functional Equations', ex:30, chunks:10},
-    {bookId:'int-alg', book:'AoPS Intermediate Algebra', topic:'Sequences and Series', section:'Recurrences', ex:30, chunks:10},
-    {bookId:'int-cp',  book:'AoPS Intermediate Counting & Probability', topic:'Combinatorics', section:'Advanced Counting', ex:45, chunks:14},
-    {bookId:'int-cp',  book:'AoPS Intermediate Counting & Probability', topic:'Probability', section:'Conditional & Expected Value', ex:40, chunks:12},
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Functions', section:'Exponential/Log & Trig', ex:35, chunks:16},
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Sequences and Series', section:'Series & Binomial', ex:30, chunks:14},
-    {bookId:'precalc', book:'AoPS Precalculus', topic:'Polynomials and Algebra', section:'Complex & Roots', ex:30, chunks:14},
-
-    // Other texts (section-based)
-    {bookId:'egmo',   book:'EGMO', topic:'Geometry', section:'Power of a Point & Homothety', ex:24, chunks:12},
-    {bookId:'zeitz',  book:'Zeitz — Art & Craft', topic:'Combinatorics', section:'Pigeonhole / Extremal', ex:28, chunks:10},
-    {bookId:'zeitz',  book:'Zeitz — Art & Craft', topic:'Number Theory', section:'Modular / Diophantine', ex:24, chunks:10},
-    {bookId:'engel',  book:'Engel — Problem-Solving Strategies', topic:'Combinatorics', section:'Invariants / Extremal', ex:24, chunks:10},
-    {bookId:'104nt',  book:'104 Number Theory Problems', topic:'Number Theory', section:'Problem Sets 1–4', ex:30, chunks:10},
-    {bookId:'path-comb', book:'A Path to Combinatorics', topic:'Combinatorics', section:'Counting Strategies', ex:30, chunks:10},
-    {bookId:'cmms',   book:'Competition Math for Middle School', topic:'Number Theory', section:'NT Core', ex:25, chunks:10},
-    {bookId:'cmms',   book:'Competition Math for Middle School', topic:'Polynomials and Algebra', section:'Algebra Core', ex:25, chunks:10},
-    {bookId:'cmms',   book:'Competition Math for Middle School', topic:'Probability', section:'Probability Core', ex:20, chunks:8},
-    {bookId:'cmms',   book:'Competition Math for Middle School', topic:'Combinatorics', section:'Counting Core', ex:20, chunks:8},
-    {bookId:'cmms',   book:'Competition Math for Middle School', topic:'Geometry', section:'Geometry Core', ex:20, chunks:8}
-  ];
-
-  // Filter to selected only
+  // ---------- Selected books strictly control what gets scheduled ----------
+  const selected = new Set(input.selectedBooks || []);
   const UNITS_BY_TOPIC = {};
   for(const u of BOOK_UNITS){
     if(!selected.has(u.bookId)) continue;
     (UNITS_BY_TOPIC[u.topic] ||= []).push(u);
   }
-
-  // If user picked nothing (edge case), we can't schedule book work
   const hasAnyBook = Object.keys(UNITS_BY_TOPIC).length>0;
 
-  // Per-unit progress (no repeats across days)
+  // ---------- Per-unit progress (prevents repeats) ----------
   const progress = new Map();
   function getProg(u){
     if(!progress.has(u)){
-      const isPage = ('pStart' in u);
       progress.set(u, {
-        nextPage: isPage ? u.pStart : 1,
-        nextExercise: 1,
+        nextPage: ('pStart' in u) ? u.pStart : 1,
         nextChunk: 1,
-        donePages: isPage ? false : false,  // section-based uses chunks instead of pages
+        nextExercise: 1,
+        donePages: false,
         doneChunks: false,
         doneExercises: false
       });
@@ -264,66 +364,39 @@
     return progress.get(u);
   }
 
-  // ---------- Proof-writing (USAMO/USAJMO only, deterministic) ----------
-  const PROOF_BANK = {
-    velleman: [
-      {id:'Vell-2', book:'Velleman — How to Prove It', section:'Chapter 2: Sentential Logic', pStart:45, pEnd:65, ex:20},
-      {id:'Vell-3', book:'Velleman — How to Prove It', section:'Chapter 3: Quantifiers', pStart:67, pEnd:92, ex:24},
-      {id:'Vell-4', book:'Velleman — How to Prove It', section:'Chapter 4: Proofs', pStart:95, pEnd:132, ex:30}
-    ],
-    zeitz: [
-      {id:'Zeitz-2', book:'Zeitz — The Art and Craft of Problem Solving', section:'Chapter 2: Strategies', pStart:25, pEnd:58, ex:30},
-      {id:'Zeitz-3', book:'Zeitz — Invariants, Extremal, Pigeonhole', section:'Chapter 3 (selected)', pStart:59, pEnd:96, ex:28}
-    ],
-    engel: [
-      {id:'Engel-1', book:'Engel — Problem-Solving Strategies', section:'Chapter 1: Invariant Principle', pStart:1, pEnd:24, ex:20},
-      {id:'Engel-2', book:'Engel — Extremal Principle', section:'Chapter 2', pStart:25, pEnd:48, ex:20}
-    ],
-    egmo: [
-      {id:'EGMO-5', book:'EGMO', section:'Chapter 5: Power of a Point & Homothety', pStart:97, pEnd:128, ex:24},
-      {id:'EGMO-7', book:'EGMO', section:'Chapter 7: Inversion (basics)', pStart:153, pEnd:180, ex:24}
-    ]
-  };
-  const proofSelection = ['velleman','zeitz','engel','egmo'].filter(id=>selected.has(id));
-  const proofProgress = new Map();
-  function getProofProg(u){
-    if(!proofProgress.has(u.id)){
-      proofProgress.set(u.id,{nextPage:u.pStart,nextExercise:1,donePages:false,doneExercises:false});
-    }
-    return proofProgress.get(u.id);
-  }
+  // ---------- Proof-writing (USAMO/USAJMO only when selected) ----------
+  const proofIds = ['velleman','zeitz','engel','egmo'].filter(id=>selected.has(id));
   function scheduleProofBlock(minutes){
-    if(!((track==='USAMO'||track==='USAJMO') && proofSelection.length && minutes>=10)) return [];
-    const out=[]; let remaining=minutes;
-    for(const src of proofSelection){
-      const units = PROOF_BANK[src];
-      for(const unit of units){
-        if(remaining<10) break;
-        const pp = getProofProg(unit);
-        if(!pp.donePages){
-          const rate=3.0, left = unit.pEnd-pp.nextPage+1;
-          if(left>0){
-            const pages = Math.max(2, Math.min(left, Math.floor((remaining+0.3*rate)/rate)));
-            const from = pp.nextPage, to = pp.nextPage + pages - 1;
-            out.push({type:'proof', mins:Math.round(pages*rate), html:`📗 <b>Proof-writing</b>: ${unit.book}, ${unit.section} (pages ${from}–${to}) — write summaries.`});
-            pp.nextPage = to + 1; if(pp.nextPage>unit.pEnd) pp.donePages=true;
-            remaining -= Math.round(pages*rate);
-          }
-        }
-        if(remaining>=10 && !pp.doneExercises){
-          const per=15, left=(unit.ex||20)-(pp.nextExercise-1);
-          if(left>0){
-            const cnt = Math.max(1, Math.min(left, Math.floor((remaining+0.25*per)/per)));
-            const s=pp.nextExercise, e=s+cnt-1;
-            out.push({type:'proof', mins:Math.round(cnt*per), html:`📗 <b>Proof exercises</b>: ${unit.book}, ${unit.section}: ${s===e?`Exercise ${s}`:`Exercises ${s}–${e}`}`});
-            pp.nextExercise=e+1; if(pp.nextExercise>(unit.ex||20)) pp.doneExercises=true;
-            remaining -= Math.round(cnt*per);
-          }
-        }
+    if(!(track==='USAMO'||track==='USAJMO')) return [];
+    if(!proofIds.length || minutes<10) return [];
+    const tasks=[]; let remaining=minutes;
+
+    // Build a small proof unit list from PAGE_MAPS entries for selected proof books
+    const proofUnits=[];
+    for(const id of proofIds){
+      const m = PAGE_MAPS[id]||{};
+      for(const sec of Object.keys(m)){
+        proofUnits.push({bookId:id, book: (id==='velleman'?'Velleman — How to Prove It': id==='zeitz'?'Zeitz — Art & Craft': id==='engel'?'Engel — Problem-Solving Strategies':'EGMO'), section:sec, pages:m[sec]});
       }
-      if(remaining<10) break;
     }
-    return out;
+
+    // Deterministic cycle through proof units
+    for(let i=0; i<proofUnits.length && remaining>=10; i++){
+      const unit = proofUnits[(i + Math.floor(SEED/7)) % proofUnits.length];
+      const rate=3.0;
+      const startP = unit.pages?.start || 1;
+      const endP   = unit.pages?.end   || (startP+20);
+      const span   = endP - startP + 1;
+      const take   = Math.max(2, Math.min(span, Math.floor((remaining+0.3*rate)/rate)));
+      const from   = startP;
+      const to     = startP + take - 1;
+      tasks.push({type:'proof', mins:Math.round(take*rate), html:`📗 <b>Proof-writing</b>: ${unit.book}, ${unit.section} (pages ${from}–${to}) — write summaries / two full proofs.`});
+      // move the window forward deterministically
+      unit.pages.start = to+1;
+      if(unit.pages.start> endP) { /* unit exhausted; continue */ }
+      remaining -= Math.round(take*rate);
+    }
+    return tasks;
   }
 
   // ---------- Problem of the Day & Mocks (deterministic) ----------
@@ -347,7 +420,6 @@
                     : (track==='AIME' ? allAIMEProblems() : allAIMEProblems());
   const usedPOD = new Set();
   function pickPOD(){
-    // deterministic walk through pool using rng
     for(let tries=0; tries<5000; tries++){
       const i = randi(POD_POOL.length);
       const k = POD_POOL[i].url;
@@ -398,7 +470,7 @@
     return {html, type:'mock', mins:0};
   }
 
-  // ---------- Study day builder (fills the day with BOOK work) ----------
+  // ---------- Scheduling core (fills each day with BOOK work first) ----------
   const THRESH = {read:10, drill:10, timed:8};
   const QUOTA_SLACK = 2;
 
@@ -408,18 +480,27 @@
 
   function totalMins(arr){ return Math.round(arr.reduce((s,t)=>s+(t.mins||0),0)); }
 
+  function sectionPageSpan(u, sIdx, eIdx){
+    const map = PAGE_MAPS[u.bookId] && PAGE_MAPS[u.bookId][u.section];
+    if(!map) return null;
+    const totalChunks = u.chunks || 10;
+    const totalPages  = (map.end - map.start + 1);
+    const pagesPerChunk = Math.max(1, Math.floor(totalPages / totalChunks));
+    const from = map.start + (sIdx-1)*pagesPerChunk;
+    const to   = Math.min(map.end, map.start + eIdx*pagesPerChunk - 1);
+    return {from, to};
+    // (If you prefer proportional non-uniform splits, swap to ratios by TOC weight.)
+  }
+
   function scheduleFromBooks(targetMinutes){
-    // target mix: foundation of reading+exercises; small leftover can host POD/timed
     let readBudget = Math.max(8, Math.round(targetMinutes*0.58));
     let exBudget   = Math.max(6, targetMinutes - readBudget);
 
     const tasks=[]; const todayTopics=[];
 
-    // Always try to place at least two blocks (topic-driven)
     for(let blocks=0; blocks<3 && (readBudget>=4 || exBudget>=6); blocks++){
+      // pick a topic, rotate if no units
       let topic = pickWeightedTopic();
-
-      // If no units for that topic, deterministically rotate to some available topic
       let tries=0;
       while(unitsForTopic(topic).filter(u=>{
         const p=getProg(u); return !p.donePages || !p.doneExercises || !p.doneChunks;
@@ -432,13 +513,12 @@
       });
       if(!pool.length) continue;
 
-      // Deterministic pick of unit within topic
-      const idx = randi(pool.length);
-      const unit = pool[idx];
+      // deterministic pick
+      const unit = pool[(Math.floor(SEED/13)+blocks) % pool.length];
       const p = getProg(unit);
       todayTopics.push(topic);
 
-      // Reading: pages or section chunk
+      // reading
       if(readBudget>=4 && !p.donePages && !p.doneChunks){
         if('pStart' in unit){
           const rate = minutesPerPage(unit.vol||V1);
@@ -453,14 +533,23 @@
             p.donePages=true;
           }
         }else{
-          // section-based: split into deterministic "chunks"
           const chunkTime = difficultTrack?16:14;
           const left = Math.max(0, (unit.chunks||10) - (p.nextChunk-1));
           if(left>0){
             const take = Math.min(left, Math.max(1, Math.floor((readBudget + 0.25*chunkTime)/chunkTime)));
             const s=p.nextChunk, e=s+take-1;
+
+            let pageNote = '';
+            const span = sectionPageSpan(unit, s, e);
+            if(span) pageNote = ` (pages ${span.from}–${span.to})`;
+
             const label = (s===e)?`Section ${s}`:`Sections ${s}–${e}`;
-            tasks.push({type:'reading', mins:Math.round(take*chunkTime), html:`📘 <b>${topic}</b>: ${unit.book}, ${unit.section} — ${label}`});
+            tasks.push({
+              type:'reading',
+              mins:Math.round(take*chunkTime),
+              html:`📘 <b>${topic}</b>: ${unit.book}, ${unit.section} — ${label}${pageNote}`
+            });
+
             p.nextChunk = e+1; if(p.nextChunk>(unit.chunks||10)) p.doneChunks=true;
             readBudget -= Math.round(take*chunkTime);
           }else{
@@ -469,16 +558,32 @@
         }
       }
 
-      // Exercises
+      // exercises
       if(exBudget>=6 && !p.doneExercises){
         const per = minutesPerExercise(unit.vol||V1);
-        const left = Math.max(0, (unit.ex||24) - (p.nextExercise-1));
+        const left = Math.max(0, (unit.exTotal||24) - (p.nextExercise-1));
         if(left>0){
           const cnt = Math.max(1, Math.min(left, Math.floor((exBudget+0.25*per)/per)));
           const s=p.nextExercise, e=s+cnt-1;
+
+          // page note for exercises
+          let exPagesNote = '';
+          if('chapter' in unit){
+            const exMap = (EX_PAGE_MAPS[unit.bookId] && EX_PAGE_MAPS[unit.bookId][unit.chapter]) ||
+                          (PAGE_MAPS[unit.bookId] && PAGE_MAPS[unit.bookId][unit.chapter] && PAGE_MAPS[unit.bookId][unit.chapter].exercises);
+            if(exMap && Number.isFinite(exMap.start) && Number.isFinite(exMap.end)){
+              exPagesNote = ` (see pages ${exMap.start}–${exMap.end})`;
+            }
+          }else{
+            const pm = PAGE_MAPS[unit.bookId] && PAGE_MAPS[unit.bookId][unit.section];
+            if(pm && pm.exercises && Number.isFinite(pm.exercises.start) && Number.isFinite(pm.exercises.end)){
+              exPagesNote = ` (see pages ${pm.exercises.start}–${pm.exercises.end})`;
+            }
+          }
+
           const where = ('chapter' in unit) ? `${unit.book}, ${unit.chapter}` : `${unit.book}, ${unit.section}`;
-          tasks.push({type:'bookex', mins:Math.round(cnt*per), html:`🧠 <b>Book exercises</b> (${where}): ${s===e?`Problem ${s}`:`Problems ${s}–${e}`}`});
-          p.nextExercise=e+1; if(p.nextExercise>(unit.ex||24)) p.doneExercises=true;
+          tasks.push({type:'bookex', mins:Math.round(cnt*per), html:`🧠 <b>Book exercises</b> (${where}): ${s===e?`Problem ${s}`:`Problems ${s}–${e}`}${exPagesNote}`});
+          p.nextExercise=e+1; if(p.nextExercise>(unit.exTotal||24)) p.doneExercises=true;
           exBudget -= Math.round(cnt*per);
         }else{
           p.doneExercises=true;
@@ -486,50 +591,54 @@
       }
     }
 
-    // If we still have significant leftover time, keep adding exercises from any available unit
+    // Fill leftover with more exercises from any available unit (books-first guarantee)
     let leftover = readBudget + exBudget;
     if(leftover >= 6){
-      // find any unit with exercises left
       outer:
       for(const T of ALL_TOPICS){
         const pool = unitsForTopic(T).filter(u=>!getProg(u).doneExercises);
         if(!pool.length) continue;
-        const unit = pool[randi(pool.length)];
+        const unit = pool[(Math.floor(SEED/17)+T.length) % pool.length];
         const p = getProg(unit);
         const per = minutesPerExercise(unit.vol||V1);
-        const cnt = Math.max(1, Math.floor((leftover+0.25*per)/per));
-        const left = Math.max(0, (unit.ex||24) - (p.nextExercise-1));
+        const left = Math.max(0, (unit.exTotal||24) - (p.nextExercise-1));
         if(left>0){
-          const take = Math.min(left, cnt);
-          const s=p.nextExercise, e=s+take-1;
+          const cnt = Math.max(1, Math.min(left, Math.floor((leftover+0.25*per)/per)));
+          const s=p.nextExercise, e=s+cnt-1;
+
+          let exPagesNote = '';
+          if('chapter' in unit){
+            const exMap = (EX_PAGE_MAPS[unit.bookId] && EX_PAGE_MAPS[unit.bookId][unit.chapter]) ||
+                          (PAGE_MAPS[unit.bookId] && PAGE_MAPS[unit.bookId][unit.chapter] && PAGE_MAPS[unit.bookId][unit.chapter].exercises);
+            if(exMap) exPagesNote = ` (see pages ${exMap.start}–${exMap.end})`;
+          }else{
+            const pm = PAGE_MAPS[unit.bookId] && PAGE_MAPS[unit.bookId][unit.section];
+            if(pm && pm.exercises) exPagesNote = ` (see pages ${pm.exercises.start}–${pm.exercises.end})`;
+          }
+
           const where = ('chapter' in unit) ? `${unit.book}, ${unit.chapter}` : `${unit.book}, ${unit.section}`;
-          tasks.push({type:'bookex', mins:Math.round(take*per), html:`🧠 <b>Book exercises</b> (${where}): ${s===e?`Problem ${s}`:`Problems ${s}–${e}`}`});
-          p.nextExercise=e+1; if(p.nextExercise>(unit.ex||24)) p.doneExercises=true;
-          leftover -= Math.round(take*per);
+          tasks.push({type:'bookex', mins:Math.round(cnt*per), html:`🧠 <b>Book exercises</b> (${where}): ${s===e?`Problem ${s}`:`Problems ${s}–${e}`}${exPagesNote}`});
+          p.nextExercise=e+1; if(p.nextExercise>(unit.exTotal||24)) p.doneExercises=true;
+          leftover -= Math.round(cnt*per);
           if(leftover < 4) break outer;
         }
       }
     }
 
-    // Balance to quota (±2 min)
+    // Balance to quota (±2)
     const target = targetMinutes;
     function balance(arr){
       let cur = totalMins(arr);
       if(Math.abs(cur-target) <= QUOTA_SLACK) return;
       if(cur < target){
-        // add small extra exercise from last bookex/reading unit if possible
         for(let i=arr.length-1;i>=0;i--){
           const t=arr[i];
-          if(t.type==='bookex'){
-            t.mins += (target-cur);
-            return;
-          }
+          if(t.type==='bookex'){ t.mins += (target-cur); return; }
         }
       }else{
-        // trim last practice if any, else trim last block slightly
         for(let i=arr.length-1;i>=0;i--){
           const t=arr[i];
-          if(t.type==='bookex' || t.type==='reading'){
+          if(t && (t.type==='bookex' || t.type==='reading')){
             const diff = Math.min(cur-target, Math.max(0, t.mins-4));
             t.mins -= diff; cur -= diff;
             if(Math.abs(cur-target)<=QUOTA_SLACK) return;
@@ -547,7 +656,7 @@
     tasks.push({type:'pod', mins:0, html:`🧩 <b>Problem of the day</b>: <a href="${pod.url}" target="_blank" rel="noopener">${pod.label}</a>`});
   }
 
-  // ---------- Compose full plan (deterministic) ----------
+  // ---------- Compose full plan ----------
   const minutesPerDay = Number(input.minutesPerDay||60);
   const days = spanDays;
   const tasksByDay = [];
@@ -555,38 +664,42 @@
   for(let i=0;i<days;i++){
     const dateObj = new Date(start.getTime()+i*86400000);
 
-    // Last 3 days → full mocks
     const daysLeftAll = Math.ceil((end - dateObj)/86400000);
     if(daysLeftAll <= 3){
       tasksByDay.push([ makeMockForDate() ]);
       continue;
     }
 
-    // Mocks 2–4×/week in last 30 days (level-correct)
     if(isMockDay(dateObj)){
       tasksByDay.push([ makeMockForDate(), ...(hasAnyBook ? scheduleFromBooks(Math.max(20, Math.round(minutesPerDay*0.35))) : []) ]);
       continue;
     }
 
-    // Regular study day (books first, always fill the day)
     let bookTasks=[];
     if(hasAnyBook){
       bookTasks = scheduleFromBooks(minutesPerDay);
     }else{
-      // No books selected (edge case) → fall back to practice links
       const p1 = pickPOD(), p2 = pickPOD();
       bookTasks = [
         {type:'timed', mins:Math.round(minutesPerDay*0.5), html:`⏱️ Timed practice: <a href="${p1.url}" target="_blank" rel="noopener">${p1.label}</a>, <a href="${p2.url}" target="_blank" rel="noopener">${p2.label}</a>`}
       ];
     }
 
-    // Add unique POD (link-only, no minutes, to keep calendar clean)
-    addProblemOfTheDay(bookTasks);
+    // Proof-writing sprinkle for USAMO/USAJMO (uses selected proof books only)
+    if((track==='USAMO'||track==='USAJMO') && proofIds.length){
+      const proofShare = 0.18; // deterministic proportion; keeps within daily quota logic above
+      const proofBudget = Math.round(minutesPerDay * proofShare);
+      const blocks = scheduleProofBlock(proofBudget);
+      // Note: these blocks add reading minutes; bookTasks are already quota-balanced.
+      // They come as extra items without minutes displayed in calendar cells.
+      blocks.forEach(b=>bookTasks.push(b));
+    }
 
+    addProblemOfTheDay(bookTasks);
     tasksByDay.push(bookTasks);
   }
 
-  // ---------- Calendar rendering (month pager) ----------
+  // ---------- Calendar rendering ----------
   const taskMap = new Map();
   for(let i=0;i<days;i++){
     const d = new Date(start.getTime()+i*86400000);
@@ -623,7 +736,7 @@
     wrap.innerHTML=`<h3>${header}</h3><div class="cal"></div>`; const grid=wrap.querySelector('.cal');
 
     ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d=>{
-      const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
+      const head=document.createElement('div'); head.className='day'; head.style.background:'#f8fafc';
       head.innerHTML=`<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
     });
 
