@@ -84,6 +84,23 @@
             </select>
           </div>
         </div>
+        <!-- NEW: upfront off-days (prefill for builder, can be changed later) -->
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="daysOff"><b>Days off per week</b></label>
+            <select id="daysOff" name="daysOff" style="width:100%">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+            <p class="hint" style="margin:.25rem 0 0">You can change this later before generating the plan.</p>
+          </div>
+        </div>
+
         <button type="submit" style="margin-top:10px">Start Diagnostic →</button>
         <p class="hint hintline">Mapping: AMC 10/12 → Test A, AIME → Test B, USAMO/USAJMO → Test C.</p>
       </form>
@@ -102,12 +119,26 @@
       <div id="levelAdvice" class="notice" style="display:none;margin-top:10px"></div>
     </section>
 
-    <!-- Builder: minutes/date + book recommendations/selection -->
+    <!-- Builder: minutes/date + book recommendations/selection + DAYS OFF -->
     <section id="timelineBuilder" class="card" style="display:none; margin-top:16px">
       <h3 style="margin:.2rem 0 .6rem">Generate Your Study Plan</h3>
       <div class="row">
         <label><b>Minutes per day</b><br><input id="minutesPerDay" type="number" min="15" step="5" style="width:100%" placeholder="e.g., 45"></label>
         <label><b>Test date</b><br><input id="testDate" type="date" style="width:100%"></label>
+      </div>
+      <!-- NEW: builder off-days (saved to payload) -->
+      <div class="row" style="margin-top:8px">
+        <label><b>Days off per week</b><br>
+          <select id="daysOffBuild" style="width:100%">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </label>
       </div>
 
       <div id="recBlock" style="margin-top:12px">
@@ -134,34 +165,15 @@
   const tests = {
     A: { title: "Diagnostic Test A (AMC 12 Readiness — Hard)", format: "10 multiple-choice (A–E)", time: 30,
       questions: [
-        // 1) Algebra (Vieta parameter) — harder AMC12 style
         { type:"mcq", topic:"Polynomials and Algebra", latex:"Let \\(r,s\\) be the roots of \\(x^2-(k+3)x+(2k+5)=0\\). If \\(r^2+s^2=29\\), find the sum of all possible values of \\(k\\).", choices:["\\(-11\\)","\\(-1\\)","1","11","30"], answerIndex:1 },
-
-        // 2) Number Theory (multiplicative order)
         { type:"mcq", topic:"Number Theory", latex:"The least positive integer \\(n\\) such that \\(3^n\\equiv1\\pmod{100}\\) is", choices:["10","20","40","50","100"], answerIndex:1 },
-
-        // 3) Geometry (r/R ratio for 13-14-15)
         { type:"mcq", topic:"Geometry", latex:"For a triangle with side lengths \\(13,14,15\\), compute \\(\\tfrac{r}{R}\\), the ratio of inradius to circumradius.", choices:["\\(\\tfrac{7}{15}\\)","\\(\\tfrac{4}{13}\\)","\\(\\tfrac{32}{65}\\)","\\(\\tfrac{16}{45}\\)","\\(\\tfrac{5}{16}\\)"], answerIndex:2 },
-
-        // 4) Combinatorics (digit sum stars & bars)
         { type:"mcq", topic:"Combinatorics", latex:"How many 8-digit positive integers (no leading zero) have digit sum \\(10\\)?", choices:["6435","8008","11440","12870","24310"], answerIndex:2 },
-
-        // 5) Probability (derangements, exactly one fixed point)
         { type:"mcq", topic:"Probability", latex:"A random permutation of \\(\\{1,2,\\dots,8\\}\\) is chosen. The probability that exactly one element is fixed (in its natural position) is", choices:["\\(\\tfrac{3}{8}\\)","\\(\\tfrac{11}{30}\\)","\\(\\tfrac{103}{280}\\)","\\(\\tfrac{1}{3}\\)","\\(\\tfrac{37}{100}\\)"], answerIndex:2 },
-
-        // 6) Functions & Equations (absolute value quadratic)
         { type:"mcq", topic:"Functions", latex:"How many real solutions does \\(|x^2-5x+6|=2x-5\\) have?", choices:["0","1","2","3","4"], answerIndex:2 },
-
-        // 7) Sequences/Series (binomial identity)
         { type:"mcq", topic:"Sequences and Series", latex:"Evaluate \\(\\displaystyle\\sum_{k=0}^{10} \\frac{(-1)^k}{k+1}\\binom{10}{k}\\).", choices:["\\(\\tfrac{1}{10}\\)","\\(\\tfrac{1}{11}\\)","\\(\\tfrac{1}{12}\\)","\\(\\tfrac{10}{121}\\)","\\(\\tfrac{11}{120}\\)"], answerIndex:1 },
-
-        // 8) Number Theory (solutions to x^2 ≡ 1 mod 24 up to 1000)
         { type:"mcq", topic:"Number Theory", latex:"How many integers \\(n\\) with \\(1\\le n\\le 1000\\) satisfy \\(n^2\\equiv1\\pmod{24}\\)?", choices:["250","333","334","375","500"], answerIndex:1 },
-
-        // 9) Functions (n-fold composition)
         { type:"mcq", topic:"Functions", latex:"Let \\(f(x)=\\dfrac{x}{x+1}\\). Compute \\(f^{(5)}(2)\\) (five-fold composition).", choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{2}{9}\\)","\\(\\tfrac{2}{11}\\)","\\(\\tfrac{1}{5}\\)","\\(\\tfrac{5}{11}\\)"], answerIndex:2 },
-
-        // 10) Combinatorics (non-adjacent vertices on a cycle)
         { type:"mcq", topic:"Combinatorics", latex:"How many 3-vertex subsets of a regular 12-gon have no two adjacent vertices?", choices:["96","108","112","120","132"], answerIndex:2 }
       ] },
 
@@ -220,10 +232,10 @@
     {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
     {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
     {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276'},
-    {id:'path-comb', title:'A Path to Combinatorics (Andreescu & Feng)', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'},
+    {id:'path-comb', title:'A Path to Combinatorics for Undergraduates', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'},
 
     // AoPS Competition Math (middle school — useful foundations)
-    {id:'cmms', title:'Competition Math for Middle School (Batteron)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Probability','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school'}
+    {id:'cmms', title:'Competition Math for Middle School (Batterson)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Probability','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school'}
   ];
 
   // ---------- Elements ----------
@@ -240,6 +252,8 @@
   const testDateEl = document.getElementById('testDate');
   const recBooksEl = document.getElementById('recBooks');
   const otherBooksEl = document.getElementById('otherBooks');
+  const daysOffTopEl = document.getElementById('daysOff');          // top (prefill only)
+  const daysOffBuildEl = document.getElementById('daysOffBuild');  // in builder (payload)
 
   // ---------- Submit (render test) ----------
   form.addEventListener('submit', (e) => {
@@ -402,6 +416,14 @@
     }
     minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
 
+    // Prefill builder off-days from the top selector
+    try{
+      if(daysOffBuildEl){
+        const picked = daysOffTopEl?.value ?? '0';
+        daysOffBuildEl.value = picked;
+      }
+    }catch{}
+
     // Book recs
     buildBookRecommendations(testId, agg);
 
@@ -412,8 +434,10 @@
       if(!minutes || minutes < 15){ alert('Please enter minutes/day (≥ 15).'); return; }
       if(!dateStr){ alert('Please choose your test date.'); return; }
 
-      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')]
-        .map(ch => ch.value);
+      const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
+
+      // NEW: days off value (prefer builder control, fallback to top)
+      const daysOffVal = Number((daysOffBuildEl?.value) ?? (daysOffTopEl?.value) ?? 0);
 
       const payload = {
         goal: goalSel.value,
@@ -422,6 +446,7 @@
         testDate: dateStr,
         subscores: agg,
         selectedBooks: selected,
+        daysOffPerWeek: daysOffVal,   // <-- ADDED
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('lastMinutes', String(minutes));
