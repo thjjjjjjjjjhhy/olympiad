@@ -1,0 +1,50 @@
+{
+  "book": "AoPS Volume 1: The Basics",
+  "edition": "7th Edition, 2006",
+  "canonical_topics": [
+    "Polynomials and Algebra",
+    "Number Theory",
+    "Geometry",
+    "Combinatorics",
+    "Probability",
+    "Functions",
+    "Sequences and Series",
+    "Logic & Proof"
+  ],
+  "sections": [
+    {"id":"v1-ch01","title":"Exponents and Logarithms","topic":"Polynomials and Algebra","pages":"1–12","problemRange":[1,16],"hardTail":4},
+    {"id":"v1-ch02","title":"Complex Numbers","topic":"Polynomials and Algebra","pages":"13–16","problemRange":[17,26],"hardTail":4},
+    {"id":"v1-ch03","title":"Linear Equations","topic":"Polynomials and Algebra","pages":"17–27","problemRange":[27,55],"hardTail":6},
+    {"id":"v1-ch04","title":"Proportions","topic":"Polynomials and Algebra","pages":"28–46","problemRange":[56,86],"hardTail":6},
+
+    {"id":"v1-ch05","title":"Primes","topic":"Number Theory","pages":"47–47","problemRange":[87,109],"hardTail":4},
+    {"id":"v1-ch06","title":"Quadratic Equations","topic":"Polynomials and Algebra","pages":"52–63","problemRange":[110,137],"hardTail":5},
+    {"id":"v1-ch07","title":"Special Factorizations and Manipulations","topic":"Polynomials and Algebra","pages":"67–74","problemRange":[138,161],"hardTail":4},
+    {"id":"v1-ch08","title":"What Numbers Really Are","topic":"Polynomials and Algebra","pages":"75–80","problemRange":[162,166],"hardTail":2},
+
+    {"id":"v1-ch09","title":"An Introduction to Circles","topic":"Geometry","pages":"81–83","problemRange":[]},
+    {"id":"v1-ch10","title":"Angles","topic":"Geometry","pages":"84–90","problemRange":[]},
+
+    {"id":"v1-ch11","title":"Area of a Triangle","topic":"Geometry","pages":"109–112","problemRange":[167,196],"hardTail":6},
+    {"id":"v1-ch12","title":"Quadrilaterals","topic":"Geometry","pages":"118–123","problemRange":[197,217],"hardTail":4},
+    {"id":"v1-ch13","title":"Polygons","topic":"Geometry","pages":"127–130","problemRange":[218,235],"hardTail":4},
+    {"id":"v1-ch14","title":"Advanced Angles","topic":"Geometry","pages":"131–140","problemRange":[236,251],"hardTail":4},
+    {"id":"v1-ch15","title":"More Geometry (similar triangles, etc.)","topic":"Geometry","pages":"141–155","problemRange":[252,277],"hardTail":6},
+    {"id":"v1-ch16","title":"Sequences I","topic":"Sequences and Series","pages":"156–160","problemRange":[278,293],"hardTail":4},
+    {"id":"v1-ch17","title":"Sequences II","topic":"Sequences and Series","pages":"161–164","problemRange":[294,302],"hardTail":3},
+    {"id":"v1-ch18","title":"3D Geometry (Prisms, Pyramids, Polyhedra)","topic":"Geometry","pages":"165–169","problemRange":[303,328],"hardTail":6},
+    {"id":"v1-ch19","title":"Transformations","topic":"Geometry","pages":"173–178","problemRange":[329,342],"hardTail":4},
+
+    {"id":"v1-ch20","title":"Potpourri of Geometry","topic":"Geometry","pages":"181–184","problemRange":[343,401],"hardTail":8},
+
+    {"id":"v1-ch21","title":"Functions","topic":"Functions","pages":"187–190","problemRange":[402,413],"hardTail":4},
+    {"id":"v1-ch22","title":"Advanced Algebra","topic":"Polynomials and Algebra","pages":"191–200","problemRange":[414,428],"hardTail":4},
+    {"id":"v1-ch23","title":"Relations","topic":"Number Theory","pages":"209–210","problemRange":[429,433],"hardTail":2},
+    {"id":"v1-ch24","title":"Sequences and Series (advanced)","topic":"Sequences and Series","pages":"211–217","problemRange":[434,456],"hardTail":5},
+    {"id":"v1-ch25","title":"Learning to Count","topic":"Combinatorics","pages":"221–229","problemRange":[457,477],"hardTail":5},
+    {"id":"v1-ch26","title":"Number Theory","topic":"Number Theory","pages":"230–240","problemRange":[478,499],"hardTail":5},
+    {"id":"v1-ch27","title":"Combinatorics II","topic":"Combinatorics","pages":"241–245","problemRange":[500,507],"hardTail":3},
+    {"id":"v1-ch28","title":"Logic and Proof (Induction, Pigeonhole)","topic":"Logic & Proof","pages":"252–258","problemRange":[508,525],"hardTail":4},
+    {"id":"v1-ch29","title":"Parting Shots","topic":"Mixed Review","pages":"262–270","problemRange":[526,588],"hardTail":8}
+  ]
+}
