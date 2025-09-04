@@ -44,6 +44,10 @@
     .more{font-size:.85rem;color:var(--accent);cursor:pointer;user-select:none}
     .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 75%);border-radius:0 0 10px 10px;pointer-events:none}
     .more-wrap{position:absolute;right:6px;bottom:6px;background:linear-gradient(90deg, rgba(255,255,255,0), #fff 35%);padding-left:18px}
+    /* Save status */
+    .save-row{display:flex;gap:10px;align-items:center}
+    .save-ok{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0}
+    .save-warn{color:#92400e;background:#fffbeb;border:1px solid #fed7aa}
     /* Modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
     .modal{max-width:760px;width:100%;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
@@ -91,6 +95,11 @@
         <input id="testDate" type="date">
       </label>
       <label>
+        <b>Study time</b>
+        <input id="studyTime" type="time" value="19:00" style="width:140px">
+        <span class="hint">Used for ICS export</span>
+      </label>
+      <label>
         <b>Days off</b>
         <select id="daysOff" multiple size="3" title="Hold Ctrl/Cmd to select multiple">
           <option value="0">Sunday</option>
@@ -101,22 +110,26 @@
           <option value="5">Friday</option>
           <option value="6">Saturday</option>
         </select>
-        <span class="hint">Select weekly off-days (optional).</span>
+        <span class="hint">Weekly off-days (optional)</span>
       </label>
-      <button id="rebuildBtn" class="secondary">Rebuild plan</button>
-      <button id="downloadIcs">Download calendar (.ics)</button>
-      <button class="secondary" onclick="window.print()">Print</button>
-      <span class="hint">Reading appears daily (unless off/mock). Book tasks come from your JSON packs.</span>
+      <div class="save-row">
+        <button id="rebuildBtn" class="secondary">Rebuild plan</button>
+        <button id="downloadIcs">Download calendar (.ics)</button>
+        <button id="savePlanBtn" class="secondary">Save to cloud</button>
+        <span id="saveStatus" class="badge">Not saved</span>
+        <button class="secondary" onclick="window.print()">Print</button>
+      </div>
+      <span class="hint">Reading always shows pages. Book problems and timed sets come from your JSON packs.</span>
     </div>
 
     <div class="legend">
-      <span>📘 Reading (selected books)</span>
-      <span>🧠 Book exercises (specific problems)</span>
-      <span>📗 Proof track (US(A)JMO only)</span>
+      <span>📘 Reading (with page ranges)</span>
+      <span>🧠 Book exercises (explicit problems)</span>
+      <span>📗 Proof track (US(A)JMO; AIME late-phase if strong)</span>
       <span>🧩 Problem of the day (AMC/AIME/USAMO)</span>
-      <span>⏱️ Timed set (chapter-based, explicit problems)</span>
+      <span>⏱️ Timed set (from book problems)</span>
       <span>📝 Full mock (year-specific) + review</span>
-      <span>🌿 Off day (optional)</span>
+      <span>🌿 Off day</span>
     </div>
 
     <section id="calendar" class="cal-wrap"></section>
@@ -147,11 +160,20 @@
 /* ============================================================================
    TIMELINE ENGINE  •  OlympiadPrep
    ----------------------------------------------------------------------------
-   This build preserves your original features (compact cells + "+N more"
-   modal, ICS export, goal-aware tasks, explicit timed sets and mocks) and
-   FIXES reading slices so page numbers are shown continuously. We only show
-   "(review)" after ALL sections in a topic are consumed; even then we still
-   show page ranges by resetting progress and cycling through pages again.
+   Updates based on your notes:
+   - Exercises: still time-based, but tuned to yield a “good amount” via
+     minutes-per-problem and minute mix (no hard minimums).
+   - Sections with no problemRange: no exercises from those sections; timed sets
+     pull from the nearest same-topic section that *does* have problems, else skip.
+   - Reading slices: new topic-level page sequencer prevents repeating the same
+     pages until the entire topic's pages are completed, then "(review)" with
+     *new* page ranges (we never show a bare "(review)" without pages).
+   - Book problems never “run out”: exercise/timed pickers advance across
+     sections within the topic if a chapter exhausts its range, avoiding repeats.
+   - AIME proof units: included *only* if the diagnostic is strong and after a
+     first-pass coverage across topics, and only if proof books were selected.
+   - ICS: added “Study time” selector (local time) used for export.
+   - Cloud: explicit “Save to cloud” button + “Last saved” badge; 1 plan/user.
    ========================================================================== */
 
 (function init(){
@@ -191,6 +213,7 @@
   }
   function pick(arr){ return arr[Math.floor(rand()*arr.length)] }
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
 
   // ---------- Input ----------
   function loadInput(){
@@ -210,6 +233,7 @@
   const minutesPerDay = Number(input.minutesPerDay||60);
   $('mPerDay').value = minutesPerDay;
   $('testDate').value = input.testDate || todayStr;
+  $('studyTime').value = (input.studyTime || '19:00');
 
   const daysOffSel = $('daysOff');
   const storedOff = Array.isArray(input.offDays) ? input.offDays : [];
@@ -277,25 +301,20 @@
   })();
   Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
-  function allAvailableTopics(fromCatalog){
-    const fromPacks = Object.keys(fromCatalog);
-    const base = new Set([...fromPacks, ...defaultCats.map(canonicalTopic)]);
-    return Array.from(base);
-  }
-
   function pickNextTopic(availableTopics, seenMap){
     const unseen = availableTopics.filter(t => (seenMap.get(t)||0)===0);
     const domain = unseen.length ? unseen : availableTopics;
     let best = domain[0], bestScore = -1;
     for(const t of domain){
-      const w = (weights[canonicalTopic(t)]||1);
-      const n = (seenMap.get(t)||0);
+      const can = canonicalTopic(t);
+      const w = (weights[can]||1);
+      const n = (seenMap.get(can)||0);
       const coverageBonus = 1 + 0.15*Math.max(0, 5-n);
       const score = w * coverageBonus;
-      if(score>bestScore){ bestScore=score; best=t; }
+      if(score>bestScore){ bestScore=score; best=can; }
     }
     seenMap.set(best, (seenMap.get(best)||0)+1);
-    return canonicalTopic(best);
+    return best;
   }
 
   // ---------- Edition packs ----------
@@ -337,31 +356,22 @@
     }
   }
 
-  function indexSectionsByTopic(packs){
-    const byTopic = {};
-    for(const pk of packs){
-      const sections = Array.isArray(pk?.sections)? pk.sections : [];
-      for(const s of sections){
-        const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
-        if(!byTopic[topic]) byTopic[topic]=[];
-        byTopic[topic].push({
-          bookId: pk.__bookId,
-          bookTitle: pk.book || pk.__bookId,
-          chapter: s.chapter || s.id || '?',
-          chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
-          pages: s.pages || '',
-          editionMeta: s,
-          topic
-        });
-      }
-    }
-    Object.values(byTopic).forEach(arr=>shuffle(arr));
-    return byTopic;
+  // Short labels
+  function shortBook(title){
+    if(!title) return '';
+    const t = title.replace(/Art of Problem Solving|AoPS/gi,'AoPS').replace(/\s+/g,' ').trim();
+    return t.replace(/Volume\s+1/,'Vol 1').replace(/Volume\s+2/,'Vol 2');
+  }
+  function shortChapter(ch){ if(!ch) return ''; return String(ch).replace(/Chapter\s*/i,'ch ').replace(/\s+/g,' ').trim(); }
+  function sectionKey(section){ return `${section.bookId}#${section.chapter}`; }
+  function parsePages(p){
+    const m=(p||'').match(/(\d+)\s*[–-]\s*(\d+)/);
+    if(m) return {from:+m[1],to:+m[2]};
+    const n=+(p||'').trim(); if(Number.isFinite(n)) return {from:n,to:n};
+    return null;
   }
 
-  function parsePages(p){ const m=(p||'').match(/(\d+)\s*[–-]\s*(\d+)/); if(m) return {from:+m[1],to:+m[2]}; const n=+(p||'').trim(); if(Number.isFinite(n)) return {from:n,to:n}; return null; }
-
-  // reading speed per book
+  // reading speed per book (tuned to yield a good amount of exercises given time)
   function mppFor(bookId){
     const light = ['aops-v1','prealgebra','intro-alg','intro-cp','intro-geo','intro-nt','cmms'];
     const heavy = ['aops-v2','int-alg','int-cp','precalc','egmo'];
@@ -372,342 +382,372 @@
     return 2.4;
   }
 
-  // goal-aware minutes/problem ⇒ more problems on AMC
+  // goal-aware minutes/problem ⇒ more problems on AMC, moderate on AIME, slower on US(A)JMO
   function minutesPerProblem(){
-    if(onUSAMO) return 9.5;   // proof-ish/problem-deepening pace
-    if(onAIME)  return 7.0;   // medium pace
-    return 4.5;               // AMC fast drills ⇒ more problems
+    if(onUSAMO) return 8.8;   // deep problems
+    if(onAIME)  return 5.8;   // moderate
+    return 3.8;               // AMC faster drills
   }
 
-  // Keep per-section progress
-  const sectionProgress = new Map(); // key: bookId#chapter -> {from, to}
-
-  function shortBook(title){
-    if(!title) return '';
-    const t = title.replace(/Art of Problem Solving|AoPS/gi,'AoPS').replace(/\s+/g,' ').trim();
-    return t.replace(/Volume\s+1/,'Vol 1').replace(/Volume\s+2/,'Vol 2');
-  }
-  function shortChapter(ch){ if(!ch) return ''; return String(ch).replace(/Chapter\s*/i,'ch ').replace(/\s+/g,' ').trim(); }
-
-  // ---- NEW: topic-level review mode + "consumable section" picking ----
-  const topicCursor = {};                         // topic -> round-robin index
-  const topicReviewMode = new Map();              // topic -> boolean (all sections consumed once)
-  function sectionKey(section){ return `${section.bookId}#${section.chapter}`; }
-
-  function hasRemainingPages(section){
-    const pg = parsePages(section.pages);
-    if(!pg) return false;
-    const cur = sectionProgress.get(sectionKey(section)) || {from: pg.from, to: pg.from-1};
-    return cur.to < pg.to;
-  }
-
-  function resetTopicProgress(topic, catalog){
-    const arr = catalog[topic] || [];
-    for(const s of arr){
-      const pg = parsePages(s.pages);
-      if(!pg) continue;
-      sectionProgress.set(sectionKey(s), {from: pg.from, to: pg.from-1});
-    }
-  }
-
-  function anyRemainingInTopic(topic, catalog){
-    const arr = catalog[topic] || [];
-    for(const s of arr){
-      if(hasRemainingPages(s)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Returns { section, review }.
-   * - Picks the next section that STILL HAS PAGES LEFT.
-   * - If none remain for that topic, we toggle reviewMode once:
-   *   reset all section cursors to the beginning and start cycling again,
-   *   with review=true so we label "(review)" but STILL show page ranges.
-   */
-  function nextConsumableSection(topic, catalog){
-    const arr = catalog[topic];
-    if(!arr || !arr.length) return {section: null, review:false};
-
-    let idx = topicCursor[topic] || 0;
-
-    // First pass: find one with remaining pages
-    for(let i=0;i<arr.length;i++){
-      const s = arr[(idx+i)%arr.length];
-      if(hasRemainingPages(s)){
-        topicCursor[topic] = (idx+i+1)%arr.length;
-        return {section:s, review:false};
-      }
-    }
-
-    // If we get here, everything is consumed once
-    if(!topicReviewMode.get(topic)){
-      topicReviewMode.set(topic, true);
-      resetTopicProgress(topic, catalog);
-    }
-
-    // After reset, pick the next (now fresh) section
-    const s = arr[idx%arr.length];
-    topicCursor[topic] = (idx+1)%arr.length;
-    return {section:s, review:true};
-  }
-
-  function sliceReading(section, minutesBudget, isReview){
-    const pg = parsePages(section.pages);
-    // If a pack lacked page metadata, still show a clear label.
-    if(!pg){
-      const baseShort = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
-      const lblS = isReview ? `${baseShort} (review)` : baseShort;
-      const lblL = isReview ? `${section.bookTitle}, ${section.chapterTitle} (review)` :
-                              `${section.bookTitle}, ${section.chapterTitle}`;
-      return { labelShort: lblS, labelLong: lblL, usedMin: Math.max(8, Math.round(minutesBudget*0.8)) };
-    }
-
-    const key = sectionKey(section);
-    const cur = sectionProgress.get(key) || {from: pg.from, to: pg.from-1};
-    const mpp = mppFor(section.bookId);
-
-    // Always slice forward; if somehow beyond, wrap to beginning (for review)
-    let from = Math.max(cur.to+1, pg.from);
-    if(from > pg.to){
-      // wrap for continuity (review mode ensures we only do this after finishing the topic once)
-      from = pg.from;
-    }
-
-    const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
-    let to = Math.min(pg.to, from + wantPages - 1);
-    const usedMin = Math.round((to - from + 1)*mpp);
-    sectionProgress.set(key, {from, to});
-
-    const range = `pp.${from}–${to}`;
-    const baseShort = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (${range})`;
-    const baseLong  = `${section.bookTitle}, ${section.chapterTitle} (${range})`;
-    return {
-      labelShort: isReview ? `${baseShort} (review)` : baseShort,
-      labelLong : isReview ? `${baseLong} (review)`  : baseLong,
-      usedMin, pageSlice:{from,to}
-    };
-  }
-
-  function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, bookTag){
-    const res = [];
-    if(!sectionMeta) return res;
-    const range = sectionMeta.problemRange;
-    if(!Array.isArray(range) || range.length<2) return res;
-    const L = Number(range[0]), R = Number(range[1]);
-    if(!(Number.isFinite(L) && Number.isFinite(R) && L<=R)) return res;
-
-    const span = R - L + 1;
-    const hardTail = Math.max(0, Number(sectionMeta.hardTail || 0));
-    const hardStart = Math.max(L, R - hardTail + 1);
-
-    const easy=[], mid=[], hard=[];
-    for(let n=L;n<=R;n++){
-      const id = `${bookTag||sectionMeta.bookTag||'BK'}-${sectionMeta.chapter||'?'}-${n}`;
-      if(usedSet.has(id)) continue;
-      if (hardTail>0 && n>=hardStart) { hard.push(n); continue; }
-      const pos = (n - L) / Math.max(1, span - hardTail);
-      if (pos <= 0.34) easy.push(n);
-      else if (pos <= 0.67) mid.push(n);
-      else hard.push(n);
-    }
-    function take(pool, k){
-      shuffle(pool);
-      while(pool.length && res.length<k){
-        const n = pool.pop();
-        const id = `${bookTag||sectionMeta.bookTag||'BK'}-${sectionMeta.chapter||'?'}-${n}`;
-        usedSet.add(id);
-        res.push(n);
-      }
-    }
-    const order = (target==='hard')? [hard,mid,easy] : (target==='easy')? [easy,mid,hard] : [mid,easy,hard];
-    for(const p of order){ if(res.length>=wantCount) break; take(p, wantCount); }
-    return res;
-  }
-
-  function makeExercisesFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
-    const topic = section.topic || 'Polynomials and Algebra';
-    const target = targetDifficultyFor(topic, dayIndex, totalDays);
-    const per = minutesPerProblem();
-    const want = Math.max(2, Math.floor((minutesBudget + 0.25*per)/per));
-    const nums = pickProblemsByHeuristic(section.editionMeta, want, target, usedSet, section.bookId.toUpperCase());
-    const base = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
-    if(!nums.length){
-      return {htmlShort:`🧠 Ex. ${base}`, htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`, mins: minutesBudget, type:'bookex', _topic: topic, _exCount: 0};
-    }
-    const text = (nums.length<=6) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
-    return {
-      htmlShort:`🧠 Ex. ${base}: ${text}`,
-      htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle}): ${text}`,
-      mins: minutesBudget, type:'bookex', _topic: topic, _exCount: nums.length, _exNums: nums
-    };
-  }
-
-  function makeTimedFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
-    const topic = section.topic || 'Polynomials and Algebra';
-    const target = targetDifficultyFor(topic, dayIndex, totalDays);
-    const per = minutesPerProblem(); // same pace
-    const want = Math.max(2, Math.floor((minutesBudget + 0.25*per)/per));
-    const nums = pickProblemsByHeuristic(section.editionMeta, want, target, usedSet, section.bookId.toUpperCase());
-    const base = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
-    if(!nums.length){
-      return {short:`⏱️ Timed — ${topic}`, long:`⏱️ ${topic} — topic-aligned timed set`, mins: minutesBudget, type:'timed', _topic: topic, _timedCount:0};
-    }
-    const text = (nums.length<=6) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
-    return {
-      short:`⏱️ Timed — ${base}: ${text}`,
-      long:`⏱️ <b>Timed set</b> — ${section.bookTitle}, ${section.chapterTitle}: ${text}`,
-      mins: minutesBudget, type:'timed', _topic: topic, _timedCount: nums.length, _timedNums: nums
-    };
-  }
-
-  function targetDifficultyFor(topicKey, dayIndex, totalDays){
-    const acc = (subs?.[topicKey]?.right || 0) / Math.max(1, (subs?.[topicKey]?.total || 1));
-    const early = dayIndex < Math.floor(totalDays*0.5);
-    if (acc < 0.35) return early ? 'easy' : 'mixed';
-    if (acc < 0.7)  return early ? 'mixed' : 'hard';
-    return early ? 'mixed' : 'hard';
-  }
-
-  // ---------- POTD ----------
-  function amcProbURL(year, level, variant, num){
-    const L=(level==='10')?'AMC_10':'AMC_12';
-    return `https://artofproblemsolving.com/wiki/index.php/${year}_${L}${variant}_Problems/Problem_${num}`;
-  }
-  function aimeProbURL(year, variant, num){
-    return `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${num}`;
-  }
-  function usamoProbURL(year, num){
-    return `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${num}`;
-  }
-  function usajmoProbURL(year, num){
-    return `https://artofproblemsolving.com/wiki/index.php/${year}_USAJMO_Problems/Problem_${num}`;
-  }
-  const usedContest = new Set();
-
-  function problemOfDay(){
-    const todayYear = new Date().getFullYear();
-    const years = []; for(let y=todayYear-20; y<=todayYear-1; y++) years.push(y);
-    let tries = 0;
-    while(tries<500){
-      tries++;
-      const y = pick(years);
-      if(onAIME){
-        const variant = pick(['I','II']);
-        const num = 1 + Math.floor(rand()*15);
-        const id = `AIME-${y}-${variant}-${num}`;
-        if(usedContest.has(id)) continue;
-        usedContest.add(id);
-        return {htmlShort:`🧩 ${y} AIME ${variant} • #${num}`, htmlLong:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type:'potd'};
-      } else if(onUSAMO){
-        if(/usajmo/.test(goalStr)){
-          const num = 1 + Math.floor(rand()*6);
-          const id = `USAJMO-${y}-${num}`; if(usedContest.has(id)) continue;
-          usedContest.add(id);
-          return {htmlShort:`🧩 ${y} USAJMO • #${num}`, htmlLong:`🧩 <a href="${usajmoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAJMO • Problem ${num}</a>`, mins: 12, type:'potd'};
-        } else {
-          const num = 1 + Math.floor(rand()*6);
-          const id = `USAMO-${y}-${num}`; if(usedContest.has(id)) continue;
-          usedContest.add(id);
-          return {htmlShort:`🧩 ${y} USAMO • #${num}`, htmlLong:`🧩 <a href="${usamoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAMO • Problem ${num}</a>`, mins: 15, type:'potd'};
-        }
-      } else {
-        const level = (/amc10/.test(goalStr))?'10':'12';
-        const variant = pick(['A','B']);
-        const num = 1 + Math.floor(rand()*20);
-        const id = `AMC${level}-${y}-${variant}-${num}`;
-        if(usedContest.has(id)) continue;
-        usedContest.add(id);
-        return {htmlShort:`🧩 ${y} AMC ${level}${variant} • #${num}`, htmlLong:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd'};
-      }
-    }
-    return {htmlShort:`🧩 Contest problem`, htmlLong:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd'};
-  }
-
-  // ---------- Mocks (year sequence) ----------
-  const currentYear = new Date().getFullYear();
-  const MOCK_YEARS = []; for(let y=currentYear-1; y>=2000; y--) MOCK_YEARS.push(y);
-  let mockYearIdx = 0;
-  function nextMockYear(){ const y = MOCK_YEARS[mockYearIdx % MOCK_YEARS.length]; mockYearIdx++; return y; }
-
-  function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
-  function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
-  function jmoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAJMO_Problems`; }
-  function usamoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAMO_Problems`; }
-
-  function makeMock(totalMinutes){
-    const y = nextMockYear();
-    if(onUSAMO){
-      if(/usajmo/.test(goalStr)){
-        return {htmlShort:`📝 USAJMO ${y} full mock`, htmlLong:`📝 <a href="${jmoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAJMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
-      } else {
-        return {htmlShort:`📝 USAMO ${y} full mock`, htmlLong:`📝 <a href="${usamoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
-      }
-    }
-    if(onAIME){
-      const variant = (mockYearIdx % 2 === 0) ? 'I' : 'II';
-      return {htmlShort:`📝 AIME ${variant} ${y} full mock`, htmlLong:`📝 <a href="${aimeSetURL(y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AIME ${variant} (15 problems)</a> • Review thoroughly.`, mins: totalMinutes, type:'mock'};
-    }
-    const level = (/amc10/.test(goalStr))?'10':'12';
-    const variant = (mockYearIdx % 2 === 0) ? 'A' : 'B';
-    return {htmlShort:`📝 AMC ${level}${variant} ${y} mock`, htmlLong:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
-  }
-
-  // ---------- Proof track (US(A)JMO only) ----------
-  const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
-  const proofEnabled = hasProofBooks && onUSAMO;
-
-  const proofUnits = [];
-  if(proofEnabled){
-    if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Direct & Contrapositive Proofs', mins:25});
-    if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Mathematical Induction', mins:25});
-    if(selectedBooks.has('zeitz'))    proofUnits.push({label:'Zeitz — Invariants & Extremal', mins:25});
-    if(selectedBooks.has('engel'))    proofUnits.push({label:'Engel — Combinatorial Strategies', mins:25});
-    if(selectedBooks.has('egmo'))     proofUnits.push({label:'EGMO — Power of a Point & Homothety', mins:25});
-    if(selectedBooks.has('egmo'))     proofUnits.push({label:'EGMO — Inversion Basics', mins:25});
-    shuffle(proofUnits);
-  }
-  let proofCursor=0;
-  function scheduleProof(blockMinutes){
-    if(!proofEnabled || blockMinutes<14) return [];
-    const out=[]; let used=0;
-    while(used+20<=blockMinutes && proofUnits.length){
-      const it = proofUnits[proofCursor++ % proofUnits.length];
-      out.push({htmlShort:`📗 Proof: ${it.label}`, htmlLong:`📗 <b>Proof track</b>: ${it.label}. Write at least one full proof.`, mins: it.mins, type:'proof'});
-      used += it.mins;
-    }
-    if(blockMinutes - used >= 14 && proofUnits.length){
-      const it = proofUnits[proofCursor % proofUnits.length];
-      out.push({htmlShort:`📗 Proof: ${it.label} (short)`, htmlLong:`📗 <b>Proof track</b>: ${it.label} (short set).`, mins: blockMinutes-used, type:'proof'});
-    }
-    return out;
-  }
-
-  // ---------- Build plan ----------
+  // ---------- Build plan data ----------
   (async function buildPlan(){
     const packs = (await Promise.all(selectedPackIds.map(id => tryFetchPack(id)))).filter(Boolean);
-    const catalogByTopic = indexSectionsByTopic(packs);
 
-    function fallbackSection(topic){
-      const pickBookId = selectedPackIds[0] || 'aops-v1';
-      return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic };
+    // Index sections by topic; keep order stable but deterministic (shuffle by seed)
+    const catalogByTopic = {};
+    for(const pk of packs){
+      const sections = Array.isArray(pk?.sections)? pk.sections : [];
+      for(const s of sections){
+        const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
+        if(!catalogByTopic[topic]) catalogByTopic[topic]=[];
+        catalogByTopic[topic].push({
+          bookId: pk.__bookId,
+          bookTitle: pk.book || pk.__bookId,
+          chapter: s.chapter || s.id || '?',
+          chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
+          pages: s.pages || '',
+          problemRange: Array.isArray(s.problemRange)? s.problemRange : [],
+          hardTail: Number(s.hardTail || 0),
+          topic
+        });
+      }
+    }
+    Object.values(catalogByTopic).forEach(arr=>shuffle(arr));
+
+    const availableTopics = Object.keys(catalogByTopic).length ? Object.keys(catalogByTopic) :
+      ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'];
+
+    // ---------- Topic-level PAGE sequencer (prevents repeated pages until full pass) ----------
+    // For each topic, flatten all sections' page ranges into an ordered list of "segments".
+    const topicPageIndex = {};   // topic -> [{section, from, to}]
+    const topicPageState = {};   // topic -> { segIdx, nextPage }
+    const topicFirstPassDone = new Map(); // topic -> bool
+
+    function buildPageSegmentsForTopic(topic){
+      const list = [];
+      const sections = catalogByTopic[topic] || [];
+      for(const s of sections){
+        const pg = parsePages(s.pages);
+        if(!pg) continue;
+        list.push({section:s, from:pg.from, to:pg.to});
+      }
+      return list;
+    }
+    for(const t of availableTopics){
+      topicPageIndex[t] = buildPageSegmentsForTopic(t);
+      topicPageState[t] = { segIdx:0, nextPage: (topicPageIndex[t][0]?.from ?? null) };
+      topicFirstPassDone.set(t, false);
     }
 
-    const TH = { readMin: 12, drillMin: 14, timedMin: 8 }; // a touch more drill baseline
+    function nextReadingSliceFromTopic(topic, minutesBudget){
+      const segs = topicPageIndex[topic] || [];
+      if(!segs.length){
+        // No page metadata anywhere for this topic
+        const fake = { bookId: 'aops-v1', bookTitle: topic, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', topic };
+        const usedMin = Math.max(8, Math.round(minutesBudget*0.8));
+        return { section: fake, review: topicFirstPassDone.get(topic), labelShort:`${shortBook(fake.bookTitle)} — ${shortChapter(fake.chapterTitle)}`, labelLong:`${fake.bookTitle}, ${fake.chapterTitle}`, usedMin, pageSlice:null };
+      }
+      let state = topicPageState[topic];
+      let { segIdx, nextPage } = state;
+      // If state is null (e.g., after full pass reset), re-init
+      if(nextPage==null){
+        segIdx = 0;
+        nextPage = segs[0].from;
+      }
+
+      const mpp = mppFor(segs[segIdx].section.bookId);
+      const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
+      let remaining = wantPages;
+      let slices = [];
+
+      // Accumulate across segments until budget filled
+      while(remaining>0 && segs.length){
+        const seg = segs[segIdx];
+        const from = nextPage;
+        const to = Math.min(seg.to, from + remaining - 1);
+        slices.push({seg, from, to});
+        remaining -= (to - from + 1);
+
+        // Advance state
+        if(to >= seg.to){
+          // move to next segment
+          segIdx = (segIdx + 1);
+          if(segIdx >= segs.length){
+            // finished first pass
+            topicFirstPassDone.set(topic, true);
+            segIdx = 0; // wrap
+          }
+          nextPage = segs[segIdx].from;
+        }else{
+          nextPage = to + 1;
+        }
+
+        // Safety
+        if(slices.length > 50) break;
+      }
+
+      // Persist
+      topicPageState[topic] = { segIdx, nextPage };
+
+      // Build label
+      const firstSeg = slices[0].seg;
+      const section = firstSeg.seg.section;
+      const fromTotal = slices[0].from;
+      const toTotal   = slices[slices.length-1].to;
+      const review = topicFirstPassDone.get(topic);
+      const range = `pp.${fromTotal}–${toTotal}`;
+      const baseShort = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (${range})`;
+      const baseLong  = `${section.bookTitle}, ${section.chapterTitle} (${range})`;
+      const usedMin   = Math.round((toTotal - fromTotal + 1)*mppFor(section.bookId)); // approx
+      return {
+        section, review,
+        labelShort: review ? `${baseShort} (review)` : baseShort,
+        labelLong : review ? `${baseLong} (review)`  : baseLong,
+        usedMin,
+        pageSlice:{from:fromTotal, to:toTotal}
+      };
+    }
+
+    // ---------- Topic-level PROBLEM sequencer (ensures continuity & no repeats) ----------
+    // For each topic, prepare ordered per-section problem arrays; track cursors.
+    const topicSections = {}; // topic -> sections[]
+    const problemPools = {};  // topic -> { sectionKey -> {nums:number[], cursor:number} }
+    for(const t of availableTopics){
+      const sections = (catalogByTopic[t]||[]).slice();
+      topicSections[t] = sections;
+      const pools = {};
+      for(const s of sections){
+        const key = sectionKey(s);
+        const range = s.problemRange;
+        if(Array.isArray(range) && range.length===2){
+          const L = Number(range[0]), R = Number(range[1]);
+          if(Number.isFinite(L)&&Number.isFinite(R)&&L<=R){
+            const nums = [];
+            for(let n=L;n<=R;n++) nums.push(n);
+            pools[key] = {nums, cursor:0, section:s};
+          }
+        }
+      }
+      problemPools[t] = pools;
+    }
+
+    function takeProblemsFromSectionPool(poolEntry, count, usedGlobal, excludeTodaySet, targetOrder){
+      if(!poolEntry) return [];
+      const out = [];
+      const total = poolEntry.nums.length;
+      // difficulty-aware order: split into easy/mid/hard buckets once per call
+      const Lidx = 0, Ridx = total - 1;
+      const hardTail = Math.max(0, Number(poolEntry.section.hardTail || 0));
+      const hardStartIndex = Math.max(0, total - hardTail);
+
+      const easyIdxs=[], midIdxs=[], hardIdxs=[];
+      for(let i=0;i<total;i++){
+        const n = poolEntry.nums[i];
+        if(usedGlobal.has(sectionKey(poolEntry.section)+'#'+n)) continue;
+        if(excludeTodaySet.has(sectionKey(poolEntry.section)+'#'+n)) continue;
+        if(i>=hardStartIndex) hardIdxs.push(i);
+        else{
+          const pos = (i - Lidx) / Math.max(1, (total - hardTail));
+          if (pos <= 0.34) easyIdxs.push(i);
+          else if (pos <= 0.67) midIdxs.push(i);
+          else hardIdxs.push(i);
+        }
+      }
+      function takeFrom(idxArray){
+        while(idxArray.length && out.length<count){
+          const i = idxArray.shift(); // stable order inside bucket
+          const n = poolEntry.nums[i];
+          const tag = sectionKey(poolEntry.section)+'#'+n;
+          if(usedGlobal.has(tag) || excludeTodaySet.has(tag)) continue;
+          out.push({n, section:poolEntry.section, tag});
+        }
+      }
+      // targetOrder: 'easy'|'mixed'|'hard' influences bucket order
+      const order = (targetOrder==='hard')? [hardIdxs,midIdxs,easyIdxs] : (targetOrder==='easy')? [easyIdxs,midIdxs,hardIdxs] : [midIdxs,easyIdxs,hardIdxs];
+      order.forEach(b=>takeFrom(b));
+      return out;
+    }
+
+    function targetDifficultyFor(topicKey, dayIndex, totalDays){
+      const acc = (subs?.[topicKey]?.right || 0) / Math.max(1, (subs?.[topicKey]?.total || 1));
+      const early = dayIndex < Math.floor(totalDays*0.5);
+      if (acc < 0.35) return early ? 'easy' : 'mixed';
+      if (acc < 0.7)  return early ? 'mixed' : 'hard';
+      return early ? 'mixed' : 'hard';
+    }
+
+    // Pull problems starting from the *current* section, spill over into next sections in topic.
+    function takeProblemsFromTopic(topic, startSection, want, usedGlobal, excludeTodaySet, targetOrder){
+      const sections = topicSections[topic] || [];
+      if(!sections.length || want<=0) return [];
+
+      // Find the index of start section; if not found, start at 0
+      let idx = Math.max(0, sections.findIndex(s=>sectionKey(s)===sectionKey(startSection)));
+      if(idx<0) idx=0;
+
+      const out = [];
+      let loops = 0;
+      while(out.length < want && loops < sections.length){
+        const s = sections[(idx + loops) % sections.length];
+        const pool = problemPools[topic][sectionKey(s)];
+        if(pool){
+          const need = want - out.length;
+          const chunk = takeProblemsFromSectionPool(pool, need, usedGlobal, excludeTodaySet, targetOrder);
+          out.push(...chunk);
+        }
+        loops++;
+      }
+      return out;
+    }
+
+    // ---------- AIME proof gating ----------
+    function overallAccuracy(){
+      const keys = Object.keys(subs);
+      if(!keys.length) return 0.0;
+      let R=0,T=0;
+      for(const k of keys){ R += (subs[k]?.right||0); T += (subs[k]?.total||0); }
+      return (T>0)? (R/T) : 0.0;
+    }
+    const aimeProofAllowedByDiagnostic = onAIME && overallAccuracy() >= 0.65 && (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
+    function allTopicsFirstPassCompleted(){
+      const topicsWithPages = Object.keys(topicPageIndex).filter(t=> (topicPageIndex[t]||[]).length>0);
+      if(!topicsWithPages.length) return false;
+      return topicsWithPages.every(t=> topicFirstPassDone.get(t)===true);
+    }
+
+    // ---------- Misc constants ----------
+    const TH = { readMin: 12, drillMin: 16, timedMin: 10 }; // slightly more drills
     const totalDays = days;
 
     const mockStartIdx = Math.max(0, totalDays - 30);
     const mockWeekdays = new Set([2,4,6]); // Tue, Thu, Sat
     const offDaySet = new Set(storedOff.map(Number));
 
-    const usedBookProblems = new Set(); // shared set to avoid duplicates across ex + timed
+    const usedBookProblems = new Set(); // global uniqueness across the whole plan
     const seenTopics = new Map();
-    const availableTopics = allAvailableTopics(catalogByTopic);
 
+    // ---------- POTD ----------
+    function amcProbURL(year, level, variant, num){
+      const L=(level==='10')?'AMC_10':'AMC_12';
+      return `https://artofproblemsolving.com/wiki/index.php/${year}_${L}${variant}_Problems/Problem_${num}`;
+    }
+    function aimeProbURL(year, variant, num){
+      return `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${num}`;
+    }
+    function usamoProbURL(year, num){
+      return `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${num}`;
+    }
+    function usajmoProbURL(year, num){
+      return `https://artofproblemsolving.com/wiki/index.php/${year}_USAJMO_Problems/Problem_${num}`;
+    }
+    const usedContest = new Set();
+
+    function problemOfDay(){
+      const todayYear = new Date().getFullYear();
+      const years = []; for(let y=todayYear-20; y<=todayYear-1; y++) years.push(y);
+      let tries = 0;
+      while(tries<500){
+        tries++;
+        const y = pick(years);
+        if(onAIME){
+          const variant = pick(['I','II']);
+          const num = 1 + Math.floor(rand()*15);
+          const id = `AIME-${y}-${variant}-${num}`;
+          if(usedContest.has(id)) continue;
+          usedContest.add(id);
+          return {htmlShort:`🧩 ${y} AIME ${variant} • #${num}`, htmlLong:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type:'potd'};
+        } else if(onUSAMO){
+          if(/usajmo/.test(goalStr)){
+            const num = 1 + Math.floor(rand()*6);
+            const id = `USAJMO-${y}-${num}`; if(usedContest.has(id)) continue;
+            usedContest.add(id);
+            return {htmlShort:`🧩 ${y} USAJMO • #${num}`, htmlLong:`🧩 <a href="${usajmoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAJMO • Problem ${num}</a>`, mins: 12, type:'potd'};
+          } else {
+            const num = 1 + Math.floor(rand()*6);
+            const id = `USAMO-${y}-${num}`; if(usedContest.has(id)) continue;
+            usedContest.add(id);
+            return {htmlShort:`🧩 ${y} USAMO • #${num}`, htmlLong:`🧩 <a href="${usamoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAMO • Problem ${num}</a>`, mins: 15, type:'potd'};
+          }
+        } else {
+          const level = (/amc10/.test(goalStr))?'10':'12';
+          const variant = pick(['A','B']);
+          const num = 1 + Math.floor(rand()*20);
+          const id = `AMC${level}-${y}-${variant}-${num}`;
+          if(usedContest.has(id)) continue;
+          usedContest.add(id);
+          return {htmlShort:`🧩 ${y} AMC ${level}${variant} • #${num}`, htmlLong:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd'};
+        }
+      }
+      return {htmlShort:`🧩 Contest problem`, htmlLong:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd'};
+    }
+
+    // ---------- Mocks (year sequence) ----------
+    const currentYear = new Date().getFullYear();
+    const MOCK_YEARS = []; for(let y=currentYear-1; y>=2000; y--) MOCK_YEARS.push(y);
+    let mockYearIdx = 0;
+    function nextMockYear(){ const y = MOCK_YEARS[mockYearIdx % MOCK_YEARS.length]; mockYearIdx++; return y; }
+
+    function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
+    function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
+    function jmoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAJMO_Problems`; }
+    function usamoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAMO_Problems`; }
+
+    function makeMock(totalMinutes){
+      const y = nextMockYear();
+      if(onUSAMO){
+        if(/usajmo/.test(goalStr)){
+          return {htmlShort:`📝 USAJMO ${y} full mock`, htmlLong:`📝 <a href="${jmoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAJMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+        } else {
+          return {htmlShort:`📝 USAMO ${y} full mock`, htmlLong:`📝 <a href="${usamoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+        }
+      }
+      if(onAIME){
+        const variant = (mockYearIdx % 2 === 0) ? 'I' : 'II';
+        return {htmlShort:`📝 AIME ${variant} ${y} full mock`, htmlLong:`📝 <a href="${aimeSetURL(y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AIME ${variant} (15 problems)</a> • Review thoroughly.`, mins: totalMinutes, type:'mock'};
+      }
+      const level = (/amc10/.test(goalStr))?'10':'12';
+      const variant = (mockYearIdx % 2 === 0) ? 'A' : 'B';
+      return {htmlShort:`📝 AMC ${level}${variant} ${y} mock`, htmlLong:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+    }
+
+    // ---------- Proof track ----------
+    const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
+    const proofEnabledUSAMO = hasProofBooks && onUSAMO;
+
+    const proofUnits = [];
+    function seedProofUnits(){
+      proofUnits.length = 0;
+      if(hasProofBooks){
+        if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Direct & Contrapositive Proofs', mins:25});
+        if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Mathematical Induction', mins:25});
+        if(selectedBooks.has('zeitz'))    proofUnits.push({label:'Zeitz — Invariants & Extremal', mins:25});
+        if(selectedBooks.has('engel'))    proofUnits.push({label:'Engel — Combinatorial Strategies', mins:25});
+        if(selectedBooks.has('egmo'))     proofUnits.push({label:'EGMO — Power of a Point & Homothety', mins:25});
+        if(selectedBooks.has('egmo'))     proofUnits.push({label:'EGMO — Inversion Basics', mins:25});
+        shuffle(proofUnits);
+      }
+    }
+    seedProofUnits();
+    let proofCursor=0;
+    function scheduleProof(blockMinutes){
+      const out=[]; let used=0;
+      while(used+20<=blockMinutes && proofUnits.length){
+        const it = proofUnits[proofCursor++ % proofUnits.length];
+        out.push({htmlShort:`📗 Proof: ${it.label}`, htmlLong:`📗 <b>Proof track</b>: ${it.label}. Write at least one full proof.`, mins: it.mins, type:'proof'});
+        used += it.mins;
+      }
+      if(blockMinutes - used >= 14 && proofUnits.length){
+        const it = proofUnits[proofCursor % proofUnits.length];
+        out.push({htmlShort:`📗 Proof: ${it.label} (short)`, htmlLong:`📗 <b>Proof track</b>: ${it.label} (short set).`, mins: blockMinutes-used, type:'proof'});
+      }
+      return out;
+    }
+
+    // ---------- Mix profiles ----------
     function baseMixForPhase(ph){
-      if(ph==='Foundation') return {read:0.58, drill:0.32, timed:0.10};
-      if(ph==='Mixed') return {read:0.46, drill:0.39, timed:0.15};
-      return {read:0.38, drill:0.42, timed:0.20}; // more drill late
+      if(ph==='Foundation') return {read:0.54, drill:0.36, timed:0.10};
+      if(ph==='Mixed') return {read:0.44, drill:0.41, timed:0.15};
+      return {read:0.36, drill:0.44, timed:0.20}; // more drill late
     }
     function phaseNameForDay(d){
       const f=Math.floor(totalDays*0.55), m=Math.floor(totalDays*0.85);
@@ -715,16 +755,19 @@
     }
     function adjustedMix(base, minutes){
       let r=base.read, d=base.drill, t=base.timed;
-      if(minutes<=30){ r+=0.10; d+=0.02; t-=0.12; } // keep drills present even on low minutes
+      if(minutes<=30){ r+=0.06; d+=0.04; t-=0.10; } // keep drills present on low minutes
       if(onUSAMO){ r+=0.02; d-=0.02; t+=0.00; }
       const s=r+d+t; r/=s; d/=s; t/=s; return {read:r,drill:d,timed:t};
     }
 
+    // ---------- Build one day ----------
     function buildDay(dayIndex, dateObj){
       const weekday = dateObj.getDay();
+      // Off day
       if(offDaySet.has(weekday)){
         return [{short:'🌿 Off day (rest / light review)', long:'🌿 Off day (rest / review errors lightly)', mins:0, type:'off'}];
       }
+      // Mock phase
       const inMockPhase = (dayIndex >= mockStartIdx);
       const isMockDay = inMockPhase && mockWeekdays.has(weekday);
       if(isMockDay){
@@ -749,67 +792,120 @@
 
       const tasks = [];
 
-      // Choose topic then pick a section that still has unread pages; only review after all done.
+      // Topic choice and reading slice from topic-level sequencer
       const topic = pickNextTopic(availableTopics, seenTopics);
-      let selection = nextConsumableSection(topic, catalogByTopic);
-      if(!selection.section){
-        // catalog might be empty for that topic (no pack) → fallback
-        selection = {section: fallbackSection(topic), review:false};
+      const readSlice = nextReadingSliceFromTopic(topic, mRead);
+      const sec = readSlice.section;
+      tasks.push({short:`📘 <span class="topic-chip">${topic}</span> ${readSlice.labelShort}`, long:`📘 <b>${topic}</b>: ${readSlice.labelLong}`, mins: readSlice.usedMin, type:'reading', _topic: topic, _sec: sec});
+
+      // Exercises from the current section, spilling into next sections if needed; skip if this topic has no problems at all
+      const excludeToday = new Set(); // to avoid duplication between ex and timed within the same day
+      const targetOrder = targetDifficultyFor(topic, dayIndex, totalDays);
+      const per = minutesPerProblem();
+      const wantEx = Math.max(2, Math.floor((mDrill + 0.25*per)/per)); // still time-based, no hard mins
+      let exProblems = [];
+      if(Object.keys(problemPools[topic]||{}).length){
+        // first, prefer current section (if has problems)
+        const pools = problemPools[topic];
+        const curPool = pools[sectionKey(sec)];
+        const fromCur = takeProblemsFromSectionPool(curPool, wantEx, usedBookProblems, excludeToday, targetOrder);
+        exProblems.push(...fromCur);
+        if(exProblems.length < wantEx){
+          // spill into subsequent sections in this topic
+          const spill = takeProblemsFromTopic(topic, sec, wantEx - exProblems.length, usedBookProblems, excludeToday, targetOrder);
+          exProblems.push(...spill);
+        }
+        // mark used
+        exProblems.forEach(p=>{ usedBookProblems.add(p.tag); excludeToday.add(p.tag); });
       }
-      const sec = selection.section;
-      const slice = sliceReading(sec, mRead, selection.review);
-      tasks.push({short:`📘 <span class="topic-chip">${topic}</span> ${slice.labelShort}`, long:`📘 <b>${topic}</b>: ${slice.labelLong}`, mins: slice.usedMin, type:'reading', _topic: topic, _sec: sec});
 
-      const ex = makeExercisesFromSection(sec, mDrill, dayIndex, totalDays, usedBookProblems);
-      tasks.push({short:`<span class="topic-chip">${topic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: topic, _exCount: ex._exCount});
+      if(exProblems.length){
+        const base = `${shortBook(exProblems[0].section.bookTitle)} — ${shortChapter(exProblems[0].section.chapterTitle)}`;
+        const nums = exProblems.map(p=>p.n);
+        const text = (nums.length<=10) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
+        tasks.push({
+          short:`<span class="topic-chip">${topic}</span> 🧠 Ex. ${base}: ${text}`,
+          long:`🧠 <b>Book exercises</b> (${exProblems[0].section.bookTitle}, ${exProblems[0].section.chapterTitle}): ${text}`,
+          mins: mDrill, type:'bookex', _topic: topic, _exCount: nums.length
+        });
+      }else{
+        // No problems in this topic → allocate that time to reading
+        const rd = tasks.find(t=>t.type==='reading'); if(rd) rd.mins += mDrill;
+      }
 
-      if(proofEnabled){
-        const proofShare = 0.16;
+      // Proof units:
+      // - Always for US(A)JMO when proof books selected.
+      // - For AIME: only if diagnostic strong AND after first-pass coverage across topics is done (late-phase feeling).
+      const allowAimeProofNow = aimeProofAllowedByDiagnostic && allTopicsFirstPassCompleted();
+      if(proofEnabledUSAMO || allowAimeProofNow){
+        const proofShare = onUSAMO ? 0.16 : 0.10; // AIME proof add-ons are lighter
         const proofBudget = Math.round(minutesPerDay*proofShare);
         scheduleProof(proofBudget).forEach(t=>tasks.push(t));
       }
 
-      const timedObj = makeTimedFromSection(sec, mTimed, dayIndex, totalDays, usedBookProblems);
-      const timedTask = {short:`<span class="topic-chip">${topic}</span> ${timedObj.short}`, long:timedObj.long, mins: timedObj.mins, type:'timed', _topic: topic};
-      tasks.push(timedTask);
+      // Timed set (from book problems, distinct from exercises; prefer same section, then spill)
+      let timedProblems = [];
+      if(Object.keys(problemPools[topic]||{}).length && mTimed>0){
+        const wantTimed = Math.max(2, Math.floor((mTimed + 0.25*per)/per));
+        const pools = problemPools[topic];
+        const curPool = pools[sectionKey(sec)];
+        const fromCur = takeProblemsFromSectionPool(curPool, wantTimed, usedBookProblems, excludeToday, targetOrder);
+        timedProblems.push(...fromCur);
+        if(timedProblems.length < wantTimed){
+          const spill = takeProblemsFromTopic(topic, sec, wantTimed - timedProblems.length, usedBookProblems, excludeToday, targetOrder);
+          timedProblems.push(...spill);
+        }
+        timedProblems.forEach(p=>{ usedBookProblems.add(p.tag); excludeToday.add(p.tag); });
+      }
+      if(timedProblems.length){
+        const base = `${shortBook(timedProblems[0].section.bookTitle)} — ${shortChapter(timedProblems[0].section.chapterTitle)}`;
+        const nums = timedProblems.map(p=>p.n);
+        const text = (nums.length<=10) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
+        tasks.push({
+          short:`<span class="topic-chip">${topic}</span> ⏱️ Timed — ${base}: ${text}`,
+          long:`⏱️ <b>Timed set</b> — ${timedProblems[0].section.bookTitle}, ${timedProblems[0].section.chapterTitle}: ${text}`,
+          mins: mTimed, type:'timed', _topic: topic
+        });
+      }else if(mTimed>0){
+        // If absolutely no problems exist in this topic, reallocate timed minutes to exercises (if any) or reading.
+        const ex = tasks.find(t=>t.type==='bookex'); if(ex) ex.mins += mTimed; else { const rd = tasks.find(t=>t.type==='reading'); if(rd) rd.mins += mTimed; }
+      }
 
+      // POTD
       const potd = problemOfDay();
       tasks.push({short:potd.htmlShort, long:potd.htmlLong, mins: potd.mins, type:'potd'});
 
-      // Balance toward MORE DRILLS first, then timed, then reading
-      balance(tasks, minutesPerDay, timedTask);
+      // Balance: if total differs from minutesPerDay by >2m, prefer adding to drills, then timed, then reading
+      balance(tasks, minutesPerDay);
       return tasks;
     }
 
     function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
-
-    function balance(arr, target, timedRef){
+    function balance(arr, target){
       let cur = totalMin(arr);
       if(Math.abs(cur-target)<=2) return;
       if(cur<target){
         let need = target - cur;
-        const ex = arr.find(t=>t.type==='bookex');
-        if(ex){ const inc = Math.min(need, 30); ex.mins += inc; need -= inc; }
-        if(need>0 && timedRef){ const inc = Math.min(need, 20); timedRef.mins += inc; need -= inc; }
-        if(need>0){
-          const rd = arr.find(t=>t.type==='reading'); if(rd){ rd.mins += need; }
-        }
+        const ex = arr.find(t=>t.type==='bookex'); if(ex){ const inc = Math.min(need, 30); ex.mins += inc; need -= inc; }
+        const tm = arr.find(t=>t.type==='timed');  if(need>0 && tm){ const inc = Math.min(need, 20); tm.mins += inc; need -= inc; }
+        const rd = arr.find(t=>t.type==='reading'); if(need>0 && rd){ rd.mins += need; }
         return;
       }
       let over = cur - target;
       function trim(t, minKeep){ const cut = Math.min(over, Math.max(0, t.mins - minKeep)); t.mins -= cut; over -= cut; }
       const ex = arr.find(t=>t.type==='bookex'); if(ex) trim(ex, 10);
-      if(timedRef && over>0) trim(timedRef, 8);
+      const tm = arr.find(t=>t.type==='timed');  if(tm && over>0) trim(tm, 8);
       const rd = arr.find(t=>t.type==='reading'); if(rd && over>0) trim(rd, 10);
     }
 
-    // Build days
+    // ---------- Build days ----------
     const tasksByDay = [];
     for(let d=0; d<totalDays; d++){
       const dateObj = new Date(start.getTime()+d*86400000);
       tasksByDay.push( buildDay(d, dateObj) );
     }
 
+    // ---------- Map for rendering ----------
     const taskMap = new Map();
     for(let i=0;i<days;i++){
       const d = new Date(start.getTime()+i*86400000);
@@ -904,8 +1000,10 @@
     }
     function closeModal(){ modalBackdrop.style.display='none'; document.body.style.overflow=''; }
 
-    // ---------- ICS export ----------
+    // ---------- ICS export (uses Study time selector in LOCAL time) ----------
     $('downloadIcs').onclick = ()=>{
+      // persist studyTime into the input model so it’s saved if user clicks Save
+      input.studyTime = $('studyTime').value || '19:00';
       const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
       const blob = new Blob([ics], {type:'text/calendar'});
       const url = URL.createObjectURL(blob);
@@ -913,15 +1011,31 @@
     };
 
     function buildICS(startDate, spanDays, tasks, minutes, meta){
-      function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
+      function pad2(n){ return String(n).padStart(2,'0'); }
+      function toUTCString(dt){
+        return dt.getUTCFullYear().toString() + pad2(dt.getUTCMonth()+1) + pad2(dt.getUTCDate()) +
+               'T' + pad2(dt.getUTCHours()) + pad2(dt.getUTCMinutes()) + '00Z';
+      }
       const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
       const planId = (meta.generatedAt ? hash32(meta.generatedAt) : hash32(seedStr));
+      const [hh,mm] = (meta.studyTime||'19:00').split(':').map(x=>parseInt(x,10));
       for(let i=0;i<spanDays;i++){
-        const day=new Date(startDate.getTime()+i*86400000); const items=tasks[i]||[]; if(!items.length) continue;
-        const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),21,0,0)); const endUTC=new Date(startUTC.getTime()+minutes*60000);
+        const day=new Date(startDate.getTime()+i*86400000);
+        const localStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), isNaN(hh)?19:hh, isNaN(mm)?0:mm, 0);
+        const localEnd   = new Date(localStart.getTime()+minutes*60000);
+        const items=tasks[i]||[]; if(!items.length) continue;
         const desc=escapeICSText(items.map(t=>(t.long||t.html||'').replace(/<[^>]+>/g,'')).join('\n'));
         const uid = `olympiadprep-${planId}-${i}@studyplan`;
-        lines.push('BEGIN:VEVENT',`UID:${uid}`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${(meta.goal||'').toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
+        lines.push(
+          'BEGIN:VEVENT',
+          `UID:${uid}`,
+          `DTSTAMP:${toUTCString(new Date())}`,
+          `DTSTART:${toUTCString(localStart)}`,
+          `DTEND:${toUTCString(localEnd)}`,
+          `SUMMARY:Study • ${(meta.goal||'').toUpperCase()}`,
+          `DESCRIPTION:${desc}`,
+          'END:VEVENT'
+        );
       }
       lines.push('END:VCALENDAR'); return lines.join('\r\n');
     }
@@ -932,37 +1046,121 @@
       if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
       const offs=[]; for(const opt of daysOffSel.options){ if(opt.selected) offs.push(Number(opt.value)); }
       input.minutesPerDay=m; input.testDate=t; input.offDays = offs;
+      input.studyTime = $('studyTime').value || '19:00';
       input.generatedAt = new Date().toISOString();
-      localStorage.setItem('studyPlanInput', JSON.stringify(input)); location.href = 'timeline.html?v=rebuild';
+      localStorage.setItem('studyPlanInput', JSON.stringify(input));
+      location.href = 'timeline.html?v=rebuild';
     };
 
-  })();
-})();
+    // ---------- Cloud save (explicit button + status) ----------
+    const saveBtn = $('savePlanBtn');
+    const saveStatus = $('saveStatus');
+
+    function fmtTime(ts){
+      try{
+        const d = new Date(ts);
+        return d.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'});
+      }catch{ return '—'; }
+    }
+
+    function setSaveStatus(state, whenTs){
+      if(state==='ok'){
+        saveStatus.textContent = `Saved ${fmtTime(whenTs)}`;
+        saveStatus.classList.remove('save-warn'); saveStatus.classList.add('save-ok');
+      }else if(state==='warn'){
+        saveStatus.textContent = 'Sign in to save';
+        saveStatus.classList.remove('save-ok'); saveStatus.classList.add('save-warn');
+      }else{
+        saveStatus.textContent = 'Not saved';
+        saveStatus.classList.remove('save-ok','save-warn');
+      }
+    }
+
+    // Initialize Save UI visibility based on auth presence
+    function authAvailable(){ return !!(window.olympAuth && typeof window.olympAuth.getUser==='function'); }
+    function currentUser(){ return authAvailable() ? window.olympAuth.getUser() : null; }
+
+    if(!authAvailable()){
+      saveBtn.style.display='none';
+      setSaveStatus('warn');
+    }else{
+      // live reflect auth state via mutation observer on auth-slot (simple)
+      const observer = new MutationObserver(()=> {
+        if(currentUser()){ saveBtn.style.display='inline-block'; setSaveStatus('ok', Date.now()); }
+        else { saveBtn.style.display='inline-block'; setSaveStatus('warn'); }
+      });
+      const slot = document.getElementById('auth-slot');
+      if(slot) observer.observe(slot, {childList:true, subtree:true});
+      // set initial
+      if(currentUser()){ setSaveStatus('ok', Date.now()); } else { setSaveStatus('warn'); }
+    }
+
+    saveBtn.onclick = async ()=>{
+      try{
+        input.minutesPerDay = Number($('mPerDay').value||minutesPerDay);
+        input.testDate = $('testDate').value || todayStr;
+        input.offDays = Array.from(daysOffSel.options).filter(o=>o.selected).map(o=>Number(o.value));
+        input.studyTime = $('studyTime').value || '19:00';
+        input.generatedAt = input.generatedAt || new Date().toISOString();
+        localStorage.setItem('studyPlanInput', JSON.stringify(input));
+        if(currentUser() && window.olympAuth && typeof window.olympAuth.savePlan === 'function'){
+          await window.olympAuth.savePlan(input); // overwrites users/{uid}/plans/default (1 plan per user)
+          setSaveStatus('ok', Date.now());
+        }else{
+          setSaveStatus('warn');
+          alert('Please sign in (top-right) to save this plan to your account.');
+        }
+      }catch(e){
+        console.warn('Save failed', e);
+        setSaveStatus('warn');
+        alert('Could not save the plan. Check your connection and try again.');
+      }
+    };
+
+  })(); // end buildPlan IIFE
+})(); // end init
 </script>
 
 <!--
 ================================================================================
-EDITION PACKS — expected format (per-book JSON)
-- sections[].pages and sections[].problemRange drive which pages/problems appear
-- When problemRange is [], timed/exercise blocks show generic labels
+NOTES & IMPLEMENTATION DETAILS
+--------------------------------------------------------------------------------
+1) Exercises volume: still time-based. We tuned minutes-per-problem + minute mix
+   so AMC yields many problems, AIME moderate, US(A)JMO fewer but deeper.
 
-Goal-aware behavior in this build:
-- AMC: no proof track; more problems/day (≈4.5 min/problem baseline); proof topics de-weighted
-- AIME: no proof track; moderate problems/day (≈7.0 min/problem baseline)
-- US(A)JMO: proof track included; problems slower (≈9.5 min/problem) + proof units
+2) Sections with no problemRange: we do *not* fabricate problems. Exercises from
+   that section are skipped; for timed sets we try a same-topic section that has
+   problems; if none exist, those minutes are reallocated.
 
-Timed sets:
-- Pulled from the SAME chapter as reading (no duplicates with book exercises), with explicit numbers.
-- If no problemRange, a generic topic-aligned timed set is used.
+3) Timed sets: built from book problems (prefer same section as reading, then
+   spill to next sections in the topic). Numbers never duplicate with exercises
+   on the same day.
 
-Mocks:
-- Years sequenced descending from last year (2023, 2022, …) with direct AoPS links.
+4) Mocks: Tue/Thu/Sat in the last 30 days; descending years; direct AoPS links.
 
-Reading slices (IMPORTANT fix):
-- We never show a plain "(review)" without page numbers mid-course.
-- For each topic, we consume every section’s pages first.
-- Only after ALL sections in that topic are done do we flip to REVIEW mode,
-  reset page cursors, and continue showing page ranges with “(review)”.
+5) Reading slices: topic-level page sequencer spans *all* sections pages before
+   ever repeating; only after a full pass do we label "(review)" — and still
+   include page ranges.
+
+   Why repeats happened before:
+   - per-section cursor could wrap early if a chapter had few pages and the
+     topic was revisited soon → fixed by topic-level flattening.
+
+   Why exercises “stopped” before:
+   - single-chapter picking exhausted a range → fixed by spilling across
+     subsequent sections within the topic while preventing duplicates.
+
+6) Single plan per user: saving always overwrites users/{uid}/plans/default.
+
+7) Save button + status: a “Save to cloud” button with a subtle status badge.
+   It blends with your toolbar and updates on auth changes.
+
+8) ICS time selector: toolbar “Study time” input; ICS events are created in local
+   time and converted to UTC inside the file.
+
+10) AIME proof: allowed only when diagnostic is strong (≥ 0.65 overall) *and*
+    after a first-pass across topic pages is completed (late-phase), and only if
+    user selected proof books.
 ================================================================================
 -->
 <script type="module" src="/olympiad/auth.js"></script>
