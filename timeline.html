@@ -468,7 +468,17 @@
         return byTopic;
       }
 
-      function parsePages(p){ const m=(p||'').match(/(\d+)\s*[–-]\s*(\d+)/); if(m) return {from:+m[1],to:+m[2]}; const n=+(p||'').trim(); if(Number.isFinite(n)) return {from:n,to:n}; return null; }
+      function parsePages(p){
+        const t=String(p||'').trim(); if(!t) return null;
+        const m=t.match(/(\d+)\s*[–-]\s*(\d+)/);
+        if(m){
+          const a=+m[1], b=+m[2];
+          if(Number.isFinite(a)&&Number.isFinite(b)&&a>=1&&b>=a) return {from:a,to:b};
+          return null;
+        }
+        const n=+t; if(Number.isFinite(n)&&n>=1) return {from:n,to:n};
+        return null;
+      }
 
       /* reading speed per book */
       function mppFor(bookId){
@@ -526,33 +536,45 @@
 
       function sliceReading(section, minutesBudget, finalPhase){
         const pg = parsePages(section.pages);
+        const minFloor = Math.max(12, Math.round(minutesBudget*0.5)); // keep reading meaningful
         if(!pg){
-          return { labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`, labelLong: `${section.bookTitle}, ${section.chapterTitle}`, usedMin: Math.max(8, Math.round(minutesBudget*0.8)) };
+          return {
+            labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`,
+            labelLong:  `${section.bookTitle}, ${section.chapterTitle}`,
+            usedMin: Math.max(minFloor, Math.round(minutesBudget*0.8)),
+            _section: section
+          };
         }
         const key = `${section.bookId}#${section.chapter}`;
         const cur = sectionProgress.get(key) || {from: pg.from, to: pg.from-1};
 
-        /* If fully consumed and not in final review, indicate to move to another section */
+        /* Fully consumed? */
         if(cur.to >= pg.to){
           consumedSections.add(key);
           if(!finalPhase){
             return null; // caller will pick a different section
           }
-          // Final review: allow a skim label, still show pages for clarity (tail pages)
-          const skimFrom = Math.max(pg.from, pg.to - Math.min(4, (pg.to-pg.from)) );
+          // Final review: allow a skim with *valid* page range tail
+          const tail = Math.min(4, Math.max(1,(pg.to-pg.from+1)));
+          const skimFrom = Math.max(pg.from, pg.to - tail + 1);
           const skimTo   = pg.to;
-          return { labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (review pp.${skimFrom}–${skimTo})`, labelLong: `${section.bookTitle}, ${section.chapterTitle} (review pp.${skimFrom}–${skimTo})`, usedMin: Math.max(6, Math.round(minutesBudget*0.6)) };
+          return {
+            labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (review pp.${skimFrom}–${skimTo})`,
+            labelLong:  `${section.bookTitle}, ${section.chapterTitle} (review pp.${skimFrom}–${skimTo})`,
+            usedMin: Math.max(10, Math.round(minutesBudget*0.6)),
+            _section: section
+          };
         }
 
         const mpp = mppFor(section.bookId);
         const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
         let from = Math.max(cur.to+1, pg.from);
-        let to = Math.min(pg.to, from + wantPages - 1);
         if(from>pg.to){
           consumedSections.add(key);
-          return null; // caller will choose another section
+          return null;
         }
-        const usedMin = Math.round((to - from + 1)*mpp);
+        let to = Math.min(pg.to, from + wantPages - 1);
+        const usedMin = Math.max(minFloor, Math.round((to - from + 1)*mpp));
         sectionProgress.set(key, {from, to});
         const range = `pp.${from}–${to}`;
         return {
@@ -562,13 +584,43 @@
         };
       }
 
+      /* NEW: Guaranteed reading slice provider (prevents null access) */
+      function getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics){
+        // try the requested topic first
+        let sec = nextUnconsumedSection(topic, catalogByTopic);
+        while(sec){
+          const sl = sliceReading(sec, mRead, finalPhase);
+          if(sl) return {slice: sl, actualTopic: topic};
+          sec = nextUnconsumedSection(topic, catalogByTopic);
+        }
+        // then try other topics
+        for(const t of availableTopics){
+          if(t===topic) continue;
+          let s = nextUnconsumedSection(t, catalogByTopic);
+          while(s){
+            const sl = sliceReading(s, mRead, finalPhase);
+            if(sl) return {slice: sl, actualTopic: t};
+            s = nextUnconsumedSection(t, catalogByTopic);
+          }
+        }
+        // if absolutely everything is consumed, return a clean review (no bogus pp.0–0)
+        return {
+          slice: {
+            labelShort: `${topic} — cumulative review`,
+            labelLong:  `${topic} — cumulative review`,
+            usedMin: Math.max(12, Math.round(mRead*0.7))
+          },
+          actualTopic: topic
+        };
+      }
+
       function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, bookTag){
         const res = [];
         if(!sectionMeta) return res;
         const range = sectionMeta.problemRange;
         if(!Array.isArray(range) || range.length<2) return res;
         const L = Number(range[0]), R = Number(range[1]);
-        if(!(Number.isFinite(L) && Number.isFinite(R) && L<=R)) return res;
+        if(!(Number.isFinite(L) && Number.isFinite(R) && L<=R && L>=1)) return res;
 
         const span = R - L + 1;
         const hardTail = Math.max(0, Number(sectionMeta.hardTail || 0));
@@ -815,6 +867,27 @@
             const s=r+d+t; r/=s; d/=s; t/=s; return {read:r,drill:d,timed:t};
           }
 
+          function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
+          function balance(arr, target, timedRef){
+            let cur = totalMin(arr);
+            if(Math.abs(cur-target)<=2) return;
+            if(cur<target){
+              let need = target - cur;
+              const ex = arr.find(t=>t.type==='bookex');
+              if(ex){ const inc = Math.min(need, 40); ex.mins += inc; need -= inc; }
+              if(need>0 && timedRef){ const inc = Math.min(need, 20); timedRef.mins += inc; need -= inc; }
+              if(need>0){
+                const rd = arr.find(t=>t.type==='reading'); if(rd){ rd.mins += need; }
+              }
+              return;
+            }
+            let over = cur - target;
+            function trim(t, minKeep){ const cut = Math.min(over, Math.max(0, t.mins - minKeep)); t.mins -= cut; over -= cut; }
+            const ex = arr.find(t=>t.type==='bookex'); if(ex) trim(ex, 12);
+            if(timedRef && over>0) trim(timedRef, 10);
+            const rd = arr.find(t=>t.type==='reading'); if(rd && over>0) trim(rd, 12);
+          }
+
           function buildDay(dayIndex, dateObj){
             const weekday = dateObj.getDay();
             const phase = phaseNameForDay(dayIndex);
@@ -846,41 +919,20 @@
             const tasks = [];
 
             const topic = pickNextTopic();
-            // choose a section that still has unread pages; if the current one is consumed, pick another
-            let sec = nextUnconsumedSection(topic, catalogByTopic) || fallbackSection(topic);
-            // slice reading; if that section turns out consumed right now, keep moving
-            let slice = sliceReading(sec, mRead, finalPhase);
-            if(!slice){
-              let tries = 0;
-              while(tries < (catalogByTopic[topic]?.length||0)){
-                sec = nextUnconsumedSection(topic, catalogByTopic);
-                if(!sec) break;
-                slice = sliceReading(sec, mRead, finalPhase);
-                if(slice) break;
-                tries++;
-              }
-              if(!slice){
-                // completely exhausted topic; fallback to any other topic with unread sections
-                const altTopics = availableTopics.filter(t => t!==topic);
-                let found=null;
-                for(const t of altTopics){
-                  const candidate = nextUnconsumedSection(t, catalogByTopic);
-                  if(candidate){ found = {t, candidate}; break; }
-                }
-                if(found){
-                  sec = found.candidate;
-                  slice = sliceReading(sec, mRead, finalPhase);
-                } else {
-                  // All consumed: show short review with explicit pages (tail of last known)
-                  slice = { labelShort:`${topic} — cumulative review`, labelLong:`${topic} — cumulative review`, usedMin: Math.max(8, Math.round(mRead*0.7)) };
-                }
-              }
-            }
-            tasks.push({short:`📘 <span class="topic-chip">${topic}</span> ${slice.labelShort}`, long:`📘 <b>${topic}</b>: ${slice.labelLong}`, mins: slice.usedMin, type:'reading', _topic: topic, _sec: (slice._section||sec)});
+            // guaranteed reading slice (prevents null.labelShort)
+            const {slice, actualTopic} = getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics);
+            const chosenTopic = actualTopic;
+            const chosenSection = slice._section || fallbackSection(chosenTopic);
+
+            tasks.push({
+              short:`📘 <span class="topic-chip">${chosenTopic}</span> ${slice.labelShort}`,
+              long: `📘 <b>${chosenTopic}</b>: ${slice.labelLong}`,
+              mins: slice.usedMin, type:'reading', _topic: chosenTopic, _sec: chosenSection
+            });
 
             // Exercises aligned with reading
-            const ex = makeExercisesFromSection((slice._section||sec), mDrill, dayIndex, totalDays, usedBookProblems);
-            tasks.push({short:`<span class="topic-chip">${topic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: topic, _exCount: ex._exCount});
+            const ex = makeExercisesFromSection(chosenSection, mDrill, dayIndex, totalDays, usedBookProblems);
+            tasks.push({short:`<span class="topic-chip">${chosenTopic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: chosenTopic, _exCount: ex._exCount});
 
             // Proof (US(A)JMO always if books; AIME only in Final phase if allowed)
             if( (proofEnabledUSAMO) || (proofEnabledAIME && finalPhase) ){
@@ -890,10 +942,10 @@
             }
 
             // Timed set from the SAME chapter if possible
-            const timedObj = makeTimedFromSection((slice._section||sec), mTimed, dayIndex, totalDays, usedBookProblems);
+            const timedObj = makeTimedFromSection(chosenSection, mTimed, dayIndex, totalDays, usedBookProblems);
             let timedTask = null;
             if(timedObj){
-              timedTask = {short:`<span class="topic-chip">${topic}</span> ${timedObj.short}`, long:timedObj.long, mins: timedObj.mins, type:'timed', _topic: topic};
+              timedTask = {short:`<span class="topic-chip">${chosenTopic}</span> ${timedObj.short}`, long:timedObj.long, mins: timedObj.mins, type:'timed', _topic: chosenTopic};
               tasks.push(timedTask);
             } else {
               // If no problem range, shift minutes into exercises
@@ -907,27 +959,6 @@
             // Balance: favor more drills first, then timed, then reading
             balance(tasks, minutesPerDay, timedTask);
             return tasks;
-          }
-
-          function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
-          function balance(arr, target, timedRef){
-            let cur = totalMin(arr);
-            if(Math.abs(cur-target)<=2) return;
-            if(cur<target){
-              let need = target - cur;
-              const ex = arr.find(t=>t.type==='bookex');
-              if(ex){ const inc = Math.min(need, 40); ex.mins += inc; need -= inc; }
-              if(need>0 && timedRef){ const inc = Math.min(need, 20); timedRef.mins += inc; need -= inc; }
-              if(need>0){
-                const rd = arr.find(t=>t.type==='reading'); if(rd){ rd.mins += need; }
-              }
-              return;
-            }
-            let over = cur - target;
-            function trim(t, minKeep){ const cut = Math.min(over, Math.max(0, t.mins - minKeep)); t.mins -= cut; over -= cut; }
-            const ex = arr.find(t=>t.type==='bookex'); if(ex) trim(ex, 12);
-            if(timedRef && over>0) trim(timedRef, 10);
-            const rd = arr.find(t=>t.type==='reading'); if(rd && over>0) trim(rd, 12);
           }
 
           /* Build days */
