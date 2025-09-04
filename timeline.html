@@ -178,10 +178,21 @@
 
 (function init(){
   const errBox = document.getElementById('errBox');
-  window.addEventListener('error', (e)=>{
-    errBox.style.display='block';
-    errBox.textContent = 'Runtime error: ' + (e.message||'Unknown');
-  });
+  // Surface any async errors on the page (not just in console)
+window.addEventListener('unhandledrejection', (e) => {
+  const msg = (e.reason && (e.reason.message || e.reason)) || 'Unknown async error';
+  errBox.style.display = 'block';
+  errBox.textContent = 'Plan build error: ' + msg;
+  console.error('[unhandledrejection]', e.reason);
+});
+
+// Also catch normal errors
+window.addEventListener('error', (e) => {
+  errBox.style.display = 'block';
+  errBox.textContent = 'Runtime error: ' + (e.message || 'Unknown');
+  console.error('[error]', e.error || e.message);
+});
+
 
   // ---------- Helpers ----------
   function $(id){ return document.getElementById(id); }
@@ -390,26 +401,44 @@
   }
 
   // ---------- Build plan data ----------
-  (async function buildPlan(){
+ (async function buildPlan(){
+  try {
     const packs = (await Promise.all(selectedPackIds.map(id => tryFetchPack(id)))).filter(Boolean);
+  
+      // Index sections by topic; keep order stable but deterministic (shuffle by seed)
+      const catalogByTopic = {};
+      for(const pk of packs){
+        const sections = Array.isArray(pk?.sections)? pk.sections : [];
+        for(const s of sections){
+          const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
+          if(!catalogByTopic[topic]) catalogByTopic[topic]=[];
+          catalogByTopic[topic].push({
+            bookId: pk.__bookId,
+            bookTitle: pk.book || pk.__bookId,
+            chapter: s.chapter || s.id || '?',
+            chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
+            pages: s.pages || '',
+            problemRange: Array.isArray(s.problemRange)? s.problemRange : [],
+            hardTail: Number(s.hardTail || 0),
+            topic
+  } catch (e) {
+    console.error('[buildPlan failed]', e);
+    errBox.style.display = 'block';
+    errBox.textContent = 'Plan build failed: ' + (e.message || e);
 
-    // Index sections by topic; keep order stable but deterministic (shuffle by seed)
-    const catalogByTopic = {};
-    for(const pk of packs){
-      const sections = Array.isArray(pk?.sections)? pk.sections : [];
-      for(const s of sections){
-        const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
-        if(!catalogByTopic[topic]) catalogByTopic[topic]=[];
-        catalogByTopic[topic].push({
-          bookId: pk.__bookId,
-          bookTitle: pk.book || pk.__bookId,
-          chapter: s.chapter || s.id || '?',
-          chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
-          pages: s.pages || '',
-          problemRange: Array.isArray(s.problemRange)? s.problemRange : [],
-          hardTail: Number(s.hardTail || 0),
-          topic
-        });
+    // Safe fallback: render an empty month so the grid appears
+    const months = buildMonthList(start, end);
+    if (!months.length) {
+      // worst case, at least show the current month
+      months.push({year:start.getFullYear(), month:start.getMonth()});
+    }
+    renderOneMonth(months[0]);
+    document.getElementById('monthLabel').innerText =
+      `Month 1 of ${months.length || 1} • ` +
+      new Date(months[0].year, months[0].month, 1)
+        .toLocaleString(undefined, {month:'long',year:'numeric'});
+  }
+})();
       }
     }
     Object.values(catalogByTopic).forEach(arr=>shuffle(arr));
