@@ -103,57 +103,62 @@
       .day{min-height:auto}
       .task{font-size:.92rem}
     }
-    /* --- Header overrides to match tutor.html --- */
+    /* ==== Force timeline header to match tutor header ==== */
 .site-header{
-  position: static;
-  background: #fff;
-  color: inherit;
-  padding: 12px 0;
-  margin-bottom: 18px;
-  border-bottom: 1px solid #e5e7eb;
+  position: static !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  padding: 12px 0 !important;
+  margin-bottom: 18px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
 }
 .site-header .container{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  max-width: 1100px;               /* same width as page */
 }
 .brand-nav{
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  flex-wrap: wrap !important;
 }
+.logo{ font-weight: 800 !important; letter-spacing: .2px; }
 .site-nav{
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
 }
 .site-nav a{
-  color: inherit;
-  text-decoration: none;
-  font-weight: 600;
-  opacity: .95;
+  color: #0f172a !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  opacity: .95 !important;
+  display: inline-block !important;
 }
-.site-nav a:hover{ opacity: 1; text-decoration: underline; }
-.site-nav a.active{ font-weight: 700; text-decoration: underline; }
+.site-nav a:hover{ opacity: 1 !important; text-decoration: underline !important; }
+.site-nav a.active{ font-weight: 700 !important; text-decoration: underline !important; }
 
-/* Auth slot look aligned with tutor page */
+/* Auth slot like tutor page */
 #auth-slot{
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 32px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-height: 32px !important;
 }
 #auth-slot button{
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #111;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-weight: 600;
+  border: 1px solid #e5e7eb !important;
+  background: #fff !important;
+  color: #111 !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
 }
+
 
   </style>
 </head>
