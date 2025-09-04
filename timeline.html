@@ -103,6 +103,58 @@
       .day{min-height:auto}
       .task{font-size:.92rem}
     }
+    /* --- Header overrides to match tutor.html --- */
+.site-header{
+  position: static;
+  background: #fff;
+  color: inherit;
+  padding: 12px 0;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.site-header .container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.brand-nav{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-nav{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.site-nav a{
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  opacity: .95;
+}
+.site-nav a:hover{ opacity: 1; text-decoration: underline; }
+.site-nav a.active{ font-weight: 700; text-decoration: underline; }
+
+/* Auth slot look aligned with tutor page */
+#auth-slot{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 32px;
+}
+#auth-slot button{
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
   </style>
 </head>
 
@@ -110,17 +162,20 @@
   <!-- =========================================================
        Header / Navigation
        ========================================================= -->
-  <header class="site-header">
-    <div class="container">
+<header class="site-header">
+  <div class="container">
+    <div class="brand-nav">
       <h1 class="logo">OlympiadPrep</h1>
       <nav class="site-nav">
         <a href="index.html">Home</a>
         <a href="timeline.html" class="active">Timeline</a>
         <a href="books.html">Books</a>
       </nav>
-      <div id="auth-slot"></div>
     </div>
-  </header>
+    <div id="auth-slot"></div>
+  </div>
+</header>
+
 
   <!-- =========================================================
        Main
