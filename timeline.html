@@ -103,61 +103,73 @@
       .day{min-height:auto}
       .task{font-size:.92rem}
     }
-    /* ==== Force timeline header to match tutor header ==== */
+    /* === Tutor gradient header (exact colors) === */
 .site-header{
-  position: static !important;
-  background: #fff !important;
-  color: #0f172a !important;
+  position: sticky !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #0ea5e9 0%, #22c1c3 100%) !important;
+  color: #fff !important;
   padding: 12px 0 !important;
   margin-bottom: 18px !important;
-  border-bottom: 1px solid #e5e7eb !important;
+  border-bottom: none !important;
   box-shadow: none !important;
+  z-index: 10 !important;
 }
+
 .site-header .container{
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
   flex-wrap: wrap !important;
-  max-width: 1100px;               /* same width as page */
+  max-width: 1100px;
 }
+
 .brand-nav{
   display: flex !important;
   align-items: center !important;
   gap: 16px !important;
   flex-wrap: wrap !important;
 }
-.logo{ font-weight: 800 !important; letter-spacing: .2px; }
+
 .site-nav{
   display: flex !important;
-  gap: 12px !important;
+  gap: 16px !important;
   flex-wrap: wrap !important;
 }
+
 .site-nav a{
-  color: #0f172a !important;
+  color: #fff !important;
   text-decoration: none !important;
   font-weight: 600 !important;
   opacity: .95 !important;
   display: inline-block !important;
 }
-.site-nav a:hover{ opacity: 1 !important; text-decoration: underline !important; }
-.site-nav a.active{ font-weight: 700 !important; text-decoration: underline !important; }
+.site-nav a:hover{
+  opacity: 1 !important;
+  text-decoration: underline !important;
+}
+.site-nav a.active{
+  border-bottom: 2px solid rgba(255,255,255,.9) !important;
+  padding-bottom: 2px !important;
+}
 
-/* Auth slot like tutor page */
 #auth-slot{
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  gap: 10px !important;
   min-height: 32px !important;
 }
 #auth-slot button{
-  border: 1px solid #e5e7eb !important;
-  background: #fff !important;
-  color: #111 !important;
+  border: 1px solid rgba(255,255,255,.6) !important;
+  background: rgba(255,255,255,.15) !important;
+  color: #fff !important;
   padding: 7px 12px !important;
   border-radius: 999px !important;
   font-weight: 600 !important;
+  backdrop-filter: blur(6px);
 }
+
 
 
   </style>
