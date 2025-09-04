@@ -147,12 +147,11 @@
 /* ============================================================================
    TIMELINE ENGINE  •  OlympiadPrep
    ----------------------------------------------------------------------------
-   This build implements:
-   - More book exercises via goal-aware minutes/problem
-   - Specific timed sets from the same chapter with explicit problem numbers
-   - Mock years chosen in descending order (2023, 2022, 2021, 2020, …)
-   - Goal-aware prioritization: proof track only for US(A)JMO; AMC/AIME de-emphasize
-   - Compact cells (2 items + “+N more” modal), sanitizer, ICS escape/UID, etc.
+   This build preserves your original features (compact cells + "+N more"
+   modal, ICS export, goal-aware tasks, explicit timed sets and mocks) and
+   FIXES reading slices so page numbers are shown continuously. We only show
+   "(review)" after ALL sections in a topic are consumed; even then we still
+   show page ranges by resetting progress and cycling through pages again.
    ========================================================================== */
 
 (function init(){
@@ -390,26 +389,102 @@
   }
   function shortChapter(ch){ if(!ch) return ''; return String(ch).replace(/Chapter\s*/i,'ch ').replace(/\s+/g,' ').trim(); }
 
-  function sliceReading(section, minutesBudget){
+  // ---- NEW: topic-level review mode + "consumable section" picking ----
+  const topicCursor = {};                         // topic -> round-robin index
+  const topicReviewMode = new Map();              // topic -> boolean (all sections consumed once)
+  function sectionKey(section){ return `${section.bookId}#${section.chapter}`; }
+
+  function hasRemainingPages(section){
     const pg = parsePages(section.pages);
-    if(!pg){
-      return { labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`, labelLong: `${section.bookTitle}, ${section.chapterTitle}`, usedMin: Math.max(8, Math.round(minutesPerDay*0.3)) };
+    if(!pg) return false;
+    const cur = sectionProgress.get(sectionKey(section)) || {from: pg.from, to: pg.from-1};
+    return cur.to < pg.to;
+  }
+
+  function resetTopicProgress(topic, catalog){
+    const arr = catalog[topic] || [];
+    for(const s of arr){
+      const pg = parsePages(s.pages);
+      if(!pg) continue;
+      sectionProgress.set(sectionKey(s), {from: pg.from, to: pg.from-1});
     }
-    const key = `${section.bookId}#${section.chapter}`;
+  }
+
+  function anyRemainingInTopic(topic, catalog){
+    const arr = catalog[topic] || [];
+    for(const s of arr){
+      if(hasRemainingPages(s)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns { section, review }.
+   * - Picks the next section that STILL HAS PAGES LEFT.
+   * - If none remain for that topic, we toggle reviewMode once:
+   *   reset all section cursors to the beginning and start cycling again,
+   *   with review=true so we label "(review)" but STILL show page ranges.
+   */
+  function nextConsumableSection(topic, catalog){
+    const arr = catalog[topic];
+    if(!arr || !arr.length) return {section: null, review:false};
+
+    let idx = topicCursor[topic] || 0;
+
+    // First pass: find one with remaining pages
+    for(let i=0;i<arr.length;i++){
+      const s = arr[(idx+i)%arr.length];
+      if(hasRemainingPages(s)){
+        topicCursor[topic] = (idx+i+1)%arr.length;
+        return {section:s, review:false};
+      }
+    }
+
+    // If we get here, everything is consumed once
+    if(!topicReviewMode.get(topic)){
+      topicReviewMode.set(topic, true);
+      resetTopicProgress(topic, catalog);
+    }
+
+    // After reset, pick the next (now fresh) section
+    const s = arr[idx%arr.length];
+    topicCursor[topic] = (idx+1)%arr.length;
+    return {section:s, review:true};
+  }
+
+  function sliceReading(section, minutesBudget, isReview){
+    const pg = parsePages(section.pages);
+    // If a pack lacked page metadata, still show a clear label.
+    if(!pg){
+      const baseShort = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
+      const lblS = isReview ? `${baseShort} (review)` : baseShort;
+      const lblL = isReview ? `${section.bookTitle}, ${section.chapterTitle} (review)` :
+                              `${section.bookTitle}, ${section.chapterTitle}`;
+      return { labelShort: lblS, labelLong: lblL, usedMin: Math.max(8, Math.round(minutesBudget*0.8)) };
+    }
+
+    const key = sectionKey(section);
     const cur = sectionProgress.get(key) || {from: pg.from, to: pg.from-1};
     const mpp = mppFor(section.bookId);
-    const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
+
+    // Always slice forward; if somehow beyond, wrap to beginning (for review)
     let from = Math.max(cur.to+1, pg.from);
-    if(from > pg.to) {
-      return { labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (review)`, labelLong: `${section.bookTitle}, ${section.chapterTitle} (review)`, usedMin: Math.max(6, Math.round(minutesBudget*0.6)) };
+    if(from > pg.to){
+      // wrap for continuity (review mode ensures we only do this after finishing the topic once)
+      from = pg.from;
     }
+
+    const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
     let to = Math.min(pg.to, from + wantPages - 1);
     const usedMin = Math.round((to - from + 1)*mpp);
     sectionProgress.set(key, {from, to});
+
     const range = `pp.${from}–${to}`;
+    const baseShort = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (${range})`;
+    const baseLong  = `${section.bookTitle}, ${section.chapterTitle} (${range})`;
     return {
-      labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (${range})`,
-      labelLong: `${section.bookTitle}, ${section.chapterTitle} (${range})`,
+      labelShort: isReview ? `${baseShort} (review)` : baseShort,
+      labelLong : isReview ? `${baseLong} (review)`  : baseLong,
       usedMin, pageSlice:{from,to}
     };
   }
@@ -628,7 +703,6 @@
     const usedBookProblems = new Set(); // shared set to avoid duplicates across ex + timed
     const seenTopics = new Map();
     const availableTopics = allAvailableTopics(catalogByTopic);
-    const catalogCursor = {}; // topic -> idx
 
     function baseMixForPhase(ph){
       if(ph==='Foundation') return {read:0.58, drill:0.32, timed:0.10};
@@ -644,16 +718,6 @@
       if(minutes<=30){ r+=0.10; d+=0.02; t-=0.12; } // keep drills present even on low minutes
       if(onUSAMO){ r+=0.02; d-=0.02; t+=0.00; }
       const s=r+d+t; r/=s; d/=s; t/=s; return {read:r,drill:d,timed:t};
-    }
-
-    function nextSection(topic){
-      const arr = catalogByTopic[topic];
-      if(arr && arr.length){
-        const i = (catalogCursor[topic]||0)%arr.length;
-        catalogCursor[topic] = i+1;
-        return arr[i];
-      }
-      return fallbackSection(topic);
     }
 
     function buildDay(dayIndex, dateObj){
@@ -685,9 +749,15 @@
 
       const tasks = [];
 
+      // Choose topic then pick a section that still has unread pages; only review after all done.
       const topic = pickNextTopic(availableTopics, seenTopics);
-      const sec = nextSection(topic);
-      const slice = sliceReading(sec, mRead);
+      let selection = nextConsumableSection(topic, catalogByTopic);
+      if(!selection.section){
+        // catalog might be empty for that topic (no pack) → fallback
+        selection = {section: fallbackSection(topic), review:false};
+      }
+      const sec = selection.section;
+      const slice = sliceReading(sec, mRead, selection.review);
       tasks.push({short:`📘 <span class="topic-chip">${topic}</span> ${slice.labelShort}`, long:`📘 <b>${topic}</b>: ${slice.labelLong}`, mins: slice.usedMin, type:'reading', _topic: topic, _sec: sec});
 
       const ex = makeExercisesFromSection(sec, mDrill, dayIndex, totalDays, usedBookProblems);
@@ -887,8 +957,14 @@ Timed sets:
 
 Mocks:
 - Years sequenced descending from last year (2023, 2022, …) with direct AoPS links.
+
+Reading slices (IMPORTANT fix):
+- We never show a plain "(review)" without page numbers mid-course.
+- For each topic, we consume every section’s pages first.
+- Only after ALL sections in that topic are done do we flip to REVIEW mode,
+  reset page cursors, and continue showing page ranges with “(review)”.
 ================================================================================
 -->
-<script type="module" src="./auth.js"></script>
+<script type="module" src="/olympiad/auth.js"></script>
 </body>
 </html>
