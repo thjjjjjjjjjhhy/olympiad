@@ -146,9 +146,7 @@
         <label>
           <b>Study time</b>
           <div style="display:flex;gap:6px">
-            <select id="studyHour" aria-label="Hour">
-              <!-- filled by JS -->
-            </select>
+            <select id="studyHour" aria-label="Hour"></select>
             <select id="studyMin" aria-label="Minute">
               <option>00</option>
               <option>15</option>
@@ -259,7 +257,7 @@
     })();
 
     /* =======================================================================
-       UTILITIES
+       UTILITIES (no RNG here; RNG lives inside main())
        ======================================================================= */
     function $(id){ return document.getElementById(id); }
     function hash32(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
@@ -288,8 +286,6 @@
               .replace(/,/g,'\\,')
               .replace(/;/g,'\\;');
     }
-    function pick(arr){ return arr[Math.floor(rand()*arr.length)] }
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
     /* Hour select */
     (function fillHours(){
@@ -366,10 +362,12 @@
         `Minutes/day: <b>${minutesPerDay}</b> ` +
         `<span class="badge" id="booksBadge">Books: ${(input.selectedBooks||[]).length||0}</span>`;
 
-      /* RNG */
+      /* RNG — define here AND define pick/shuffle with this RNG */
       const seedStr = (input.generatedAt || input.testDate || todayStr) + '|' + (input.goal||'');
       let _seed = hash32(seedStr);
       function rand(){ _seed ^= _seed << 13; _seed ^= _seed >>> 17; _seed ^= _seed << 5; return ((_seed>>>0) / 4294967296); }
+      function pick(arr){ return arr[Math.floor(rand()*arr.length)] }
+      function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
       /* Topics & emphasis */
       const subs = input.subscores||{};
@@ -1131,7 +1129,7 @@
             const lead = first.getDay(); for(let i=0;i<lead;i++) grid.insertAdjacentHTML('beforeend', `<div class="day out-of-range"></div>`);
             const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
             for (let d=1; d<=dim; d++) grid.insertAdjacentHTML('beforeend', `<div class="day"><div class="date">${d}</div><div class="task hint">Loading…</div></div>`);
-            cal.appendChild(wrap);
+            $('calendar').appendChild(wrap);
             const monthLabel = $('monthLabel'); if(monthLabel) monthLabel.textContent = `Month 1 of 1 • ${today.toLocaleString(undefined,{month:'long',year:'numeric'})}`;
           }
         }
