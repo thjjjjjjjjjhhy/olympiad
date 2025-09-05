@@ -103,11 +103,11 @@
       .day{min-height:auto}
       .task{font-size:.92rem}
     }
-    /* === Tutor gradient header (exact colors) === */
-.site-header{
+    /* === Force EXACT Tutor header gradient + layout === */
+.site-header.is-tutor{
   position: sticky !important;
   top: 0 !important;
-  background: linear-gradient(180deg, #0ea5e9 0%, #22c1c3 100%) !important;
+  background: linear-gradient(180deg, #0ea5e9 0%, #22c1c3 100%) !important; /* same as tutor */
   color: #fff !important;
   padding: 12px 0 !important;
   margin-bottom: 18px !important;
@@ -143,7 +143,6 @@
   text-decoration: none !important;
   font-weight: 600 !important;
   opacity: .95 !important;
-  display: inline-block !important;
 }
 .site-nav a:hover{
   opacity: 1 !important;
@@ -154,6 +153,7 @@
   padding-bottom: 2px !important;
 }
 
+/* Auth button styling to match Tutor header */
 #auth-slot{
   display: flex !important;
   align-items: center !important;
@@ -170,8 +170,6 @@
   backdrop-filter: blur(6px);
 }
 
-
-
   </style>
 </head>
 
@@ -179,19 +177,21 @@
   <!-- =========================================================
        Header / Navigation
        ========================================================= -->
-<header class="site-header">
+<header class="site-header is-tutor">
   <div class="container">
     <div class="brand-nav">
       <h1 class="logo">OlympiadPrep</h1>
       <nav class="site-nav">
         <a href="index.html">Home</a>
         <a href="timeline.html" class="active">Timeline</a>
+        <a href="tutor.html">Need a Tutor</a>
         <a href="books.html">Books</a>
       </nav>
     </div>
     <div id="auth-slot"></div>
   </div>
 </header>
+
 
 
   <!-- =========================================================
