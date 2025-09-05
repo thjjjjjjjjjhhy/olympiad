@@ -6,45 +6,36 @@
   <title>Need a Tutor - OlympiadPrep</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* Keep the header content centered and aligned */
+    /* Header layout */
     .site-header .container{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
     }
-    .brand-nav{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-    .site-nav{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    /* Ensure the auth slot is visible and not pushed to a corner */
-    #auth-slot{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      min-height:32px;
-    }
-    /* Optional: make the active nav link stand out if your CSS doesn't already */
+    .brand-nav{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .site-nav{ display:flex; gap:12px; flex-wrap:wrap; }
     .site-nav a.active{ font-weight:700; text-decoration:underline; }
-    /* Simple form styles in case styles.css doesn't include them */
-    .tutor-form{ display:grid; gap:12px; max-width:560px; margin-top:12px; }
+    #auth-slot{ display:flex; align-items:center; justify-content:flex-end; min-height:32px; }
+
+    /* Form */
+    .tutor-form{ display:grid; gap:12px; max-width:720px; margin-top:12px; }
+    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:700px){ .two-col{ grid-template-columns:1fr; } }
     .form-group{ display:grid; gap:6px; }
-    .tutor-form input, .tutor-form textarea{
-      border:1px solid #e5e7eb; border-radius:10px; padding:10px;
+    .tutor-form input, .tutor-form select, .tutor-form textarea{
+      border:1px solid #e5e7eb; border-radius:10px; padding:10px; background:#fff;
     }
     .tutor-form button{
       cursor:pointer; border:0; background:#0ea5e9; color:#fff;
-      padding:10px 16px; border-radius:12px; font-weight:600;
-      width:fit-content;
+      padding:10px 16px; border-radius:12px; font-weight:700; width:fit-content;
     }
+    .note{ color:#64748b; font-size:.92rem; }
+    .success, .error{
+      margin-top:10px; padding:10px 12px; border-radius:10px; display:none;
+    }
+    .success{ background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+    .error{ background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d; }
+    /* Honeypot (hidden anti-bot field) */
+    .hp-wrap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   </style>
 </head>
 <body>
@@ -59,28 +50,88 @@
           <a href="books.html">Books</a>
         </nav>
       </div>
-      <!-- Auth slot is inside the flex container so it sits on the right, centered vertically -->
       <div id="auth-slot"></div>
     </div>
   </header>
 
   <main class="container">
     <h2>👩‍🏫 Need a Tutor?</h2>
-    <p>Connect with experienced mentors for personalized guidance. Fill out the form below and we'll be in touch.</p>
-    <form class="tutor-form" onsubmit="handleTutorSubmit(event)">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" required />
+    <p>Connect with experienced mentors for personalized guidance. Fill out the form and we’ll reach out.</p>
+
+    <form id="tutor-form" class="tutor-form">
+      <!-- Required -->
+      <div class="two-col">
+        <div class="form-group">
+          <label for="name">Name <span class="note">(required)</span></label>
+          <input type="text" id="name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email <span class="note">(required)</span></label>
+          <input type="email" id="email" name="email" required />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" required />
+
+      <!-- Optional extras -->
+      <div class="two-col">
+        <div class="form-group">
+          <label for="gradeLevel">Grade level <span class="note">(optional)</span></label>
+          <select id="gradeLevel" name="gradeLevel">
+            <option value="">Select…</option>
+            <option>Middle school</option>
+            <option>9th grade</option>
+            <option>10th grade</option>
+            <option>11th grade</option>
+            <option>12th grade</option>
+            <option>Gap year</option>
+            <option>College</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="state">State <span class="note">(optional)</span></label>
+          <select id="state" name="state">
+            <option value="">Select…</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option>
+            <option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option>
+            <option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option>
+            <option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+            <option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option>
+            <option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option>
+            <option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option>
+            <option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option>
+            <option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option>
+            <option>WY</option><option>Outside US</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="needs">What do you need help with?</label>
-        <textarea id="needs" rows="4" required></textarea>
+
+      <div class="two-col">
+        <div class="form-group">
+          <label for="school">School <span class="note">(optional)</span></label>
+          <input type="text" id="school" name="school" placeholder="e.g., Lincoln High School" />
+        </div>
+        <div class="form-group">
+          <label for="classes">Previous / Current math classes <span class="note">(optional)</span></label>
+          <input type="text" id="classes" name="classes" placeholder="e.g., Algebra II, Precalculus, AoPS Intro NT" />
+        </div>
       </div>
+
+      <div class="form-group">
+        <label for="needs">What do you need help with? <span class="note">(required)</span></label>
+        <textarea id="needs" name="needs" rows="4" required placeholder="Topics, contests, goals, schedule…"></textarea>
+      </div>
+
+      <!-- Honeypot to reduce spam -->
+      <div class="hp-wrap">
+        <label>Leave this field empty:
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
+        </label>
+      </div>
+
       <button type="submit">Submit</button>
+      <div id="okMsg" class="success">Thank you! We’ve received your request. We’ll email you soon.</div>
+      <div id="errMsg" class="error">Submission failed — please try again in a moment.</div>
     </form>
   </main>
 
@@ -88,13 +139,84 @@
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
 
-  <script>
-    function handleTutorSubmit(e) {
+  <!-- Email + optional cloud save -->
+  <script type="module">
+    // 1) Replace with your Formspree endpoint:
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/mldwopzp";
+
+    // Optional: if you want to attach the signed-in user id/email to the payload
+    // we'll read from your existing auth (firebase-init.js + auth.js you already have)
+    // and include it when present.
+    let currentUser = null;
+    window.addEventListener("olympAuthReady", () => {
+      try { currentUser = window.olympAuth?.getUser?.() || null; } catch {}
+    });
+
+    const form = document.getElementById('tutor-form');
+    const okMsg = document.getElementById('okMsg');
+    const errMsg = document.getElementById('errMsg');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      alert('Thanks! Our tutors will reach out soon.');
-      e.target.reset();
-    }
+      okMsg.style.display = 'none';
+      errMsg.style.display = 'none';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      // Basic client validation
+      if(!data.name || !data.email || !data.needs){
+        errMsg.textContent = "Please fill out name, email, and what you need help with.";
+        errMsg.style.display = 'block';
+        return;
+      }
+
+      // Compose payload for email
+      const payload = {
+        name: data.name,
+        email: data.email,
+        gradeLevel: data.gradeLevel || '',
+        state: data.state || '',
+        school: data.school || '',
+        classes: data.classes || '',
+        needs: data.needs,
+        // Extra metadata
+        page: location.href,
+        userUid: currentUser?.uid || '',
+        userDisplay: currentUser?.displayName || '',
+        userEmail: currentUser?.email || ''
+      };
+
+      try {
+        // 2) Send email via Formspree
+        const r = await fetch(FORMSPREE_ENDPOINT, {
+          method: "POST",
+          headers: { "Accept":"application/json", "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!r.ok) throw new Error("Email service returned " + r.status);
+
+        // Optional: also save to Firestore if you want (uncomment block below)
+        /*
+        const { db } = await import("./firebase-init.js");
+        const { addDoc, collection, serverTimestamp } =
+          await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        await addDoc(collection(db, "tutorRequests"), {
+          ...payload,
+          createdAt: serverTimestamp()
+        });
+        */
+
+        okMsg.style.display = 'block';
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        errMsg.style.display = 'block';
+        errMsg.textContent = "Submission failed — please try again.";
+      }
+    });
   </script>
-  <script type="module" src="/olympiad/auth.js"></script>
+
+  <!-- Keep this relative path consistent with your other pages -->
+  <script type="module" src="./auth.js"></script>
 </body>
 </html>
