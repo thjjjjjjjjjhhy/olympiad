@@ -186,6 +186,40 @@
   font-weight: 600 !important;
   backdrop-filter: blur(6px);
 }
+/* Kill any overlay gradients and force Tutor look */
+#topbar::before,
+#topbar::after{
+  content: none !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+/* Ensure white nav text like Tutor */
+#topbar .site-nav a{
+  color:#fff !important;
+  text-decoration:none;
+  font-weight:600;
+  opacity:.95;
+}
+#topbar .site-nav a:hover{ opacity:1; text-decoration:underline; }
+#topbar .site-nav a.active{
+  border-bottom:2px solid rgba(255,255,255,.9);
+  padding-bottom:2px;
+}
+
+/* Match Tutor auth button treatment */
+#topbar #auth-slot{
+  display:flex; align-items:center; gap:10px; min-height:32px;
+}
+#topbar #auth-slot button{
+  border:1px solid rgba(255,255,255,.6);
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:600;
+  backdrop-filter:blur(6px);
+}
 
   </style>
 </head>
@@ -195,6 +229,7 @@
        Header / Navigation
        ========================================================= -->
 <header class="site-header is-tutor">
+  <header id="topbar" class="site-header is-tutor" style="background:linear-gradient(180deg,#0ea5e9 0%,#22c1c3 100%);">
   <div class="container">
     <div class="brand-nav">
       <h1 class="logo">OlympiadPrep</h1>
