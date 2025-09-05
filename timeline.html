@@ -186,6 +186,72 @@
   font-weight: 600 !important;
   backdrop-filter: blur(6px);
 }
+/* Kill any overlay gradients and force Tutor look */
+#topbar::before,
+#topbar::after{
+  content: none !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+/* Ensure white nav text like Tutor */
+#topbar .site-nav a{
+  color:#fff !important;
+  text-decoration:none;
+  font-weight:600;
+  opacity:.95;
+}
+#topbar .site-nav a:hover{ opacity:1; text-decoration:underline; }
+#topbar .site-nav a.active{
+  border-bottom:2px solid rgba(255,255,255,.9);
+  padding-bottom:2px;
+}
+
+/* Match Tutor auth button treatment */
+#topbar #auth-slot{
+  display:flex; align-items:center; gap:10px; min-height:32px;
+}
+#topbar #auth-slot button{
+  border:1px solid rgba(255,255,255,.6);
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:600;
+  backdrop-filter:blur(6px);
+}
+/* --- Keep body white; apply tutor header gradient only --- */
+html, body {
+  background: #fff !important;          /* fixes whole-page teal */
+}
+
+/* Exact tutor gradient on the header bar */
+#topbar.site-header {
+  background: linear-gradient(180deg, #0ea5e9 0%, #22c1c3 100%) !important;
+  color: #fff;
+}
+
+/* Nix any pseudo overlays some pages add */
+#topbar::before,
+#topbar::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* Header link styling to match tutor */
+#topbar .site-nav a { color:#fff !important; opacity:.95; }
+#topbar .site-nav a:hover { opacity:1; text-decoration:underline; }
+#topbar .site-nav a.active { border-bottom:2px solid rgba(255,255,255,.9); padding-bottom:2px; }
+
+/* Auth button look (same as tutor) */
+#auth-slot button{
+  border:1px solid rgba(255,255,255,.6);
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  border-radius:999px;
+}
+#auth-slot .secondary{ background:#fff; color:#111; border-color:#e5e7eb; }
 
 
   </style>
@@ -196,6 +262,7 @@
        Header / Navigation
        ========================================================= -->
 <header class="site-header is-tutor">
+  <header id="topbar" class="site-header is-tutor" style="background:linear-gradient(180deg,#0ea5e9 0%,#22c1c3 100%);">
   <div class="container">
     <div class="brand-nav">
       <h1 class="logo">OlympiadPrep</h1>
