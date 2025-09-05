@@ -51,16 +51,18 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="container">
-      <h1 class="logo">OlympiadPrep</h1>
-      <nav class="site-nav">
-        <a href="index.html">Home</a>
-        <a href="timeline.html">Timeline</a>
-        <a href="tutor.html">Need a Tutor</a>
-        <a href="books.html">Books</a>
-      </nav>
+    <div class="container" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <h1 class="logo">OlympiadPrep</h1>
+        <nav class="site-nav" style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="index.html">Home</a>
+          <a href="timeline.html">Timeline</a>
+          <a href="tutor.html">Need a Tutor</a>
+          <a href="books.html">Books</a>
+        </nav>
+      </div>
+      <div id="auth-slot"></div>
     </div>
-    <div id="auth-slot"></div>
   </header>
 
   <main class="container">
@@ -90,7 +92,7 @@
           </div>
         </div>
 
-        <!-- NEW: upfront weekday off picker (prefill for builder; can be changed later) -->
+        <!-- upfront weekday off picker (prefill for builder; can be changed later) -->
         <div style="margin-top:10px">
           <label><b>Weekly off days (choose specific weekdays)</b></label>
           <div id="topOffDays" class="wkgrid"></div>
@@ -123,7 +125,7 @@
         <label><b>Test date</b><br><input id="testDate" type="date" style="width:100%"></label>
       </div>
 
-      <!-- NEW: builder weekday off picker (this drives payload) -->
+      <!-- builder weekday off picker (this drives payload) -->
       <div style="margin-top:8px">
         <label><b>Weekly off days</b></label>
         <div id="buildOffDays" class="wkgrid"></div>
@@ -194,27 +196,57 @@
       ] }
   };
 
+  // --- Extra, easier AMC questions (same topics, more approachable) ---
+  const AMC_EASY_QUESTIONS = [
+    { type:"mcq", topic:"Polynomials and Algebra",
+      latex:"For \\(x^2-5x+6=0\\), what is the sum of the roots?",
+      choices:["1","3","5","6","8"], answerIndex:2 },
+    { type:"mcq", topic:"Number Theory",
+      latex:"How many multiples of 3 are there from 1 to 100 inclusive?",
+      choices:["32","33","34","35","36"], answerIndex:1 },
+    { type:"mcq", topic:"Geometry",
+      latex:"A right triangle has legs 6 and 8. What is its area?",
+      choices:["20","24","26","30","32"], answerIndex:1 },
+    { type:"mcq", topic:"Combinatorics",
+      latex:"How many ways to choose 2 students from a group of 6?",
+      choices:["10","12","15","20","30"], answerIndex:2 },
+    { type:"mcq", topic:"Probability",
+      latex:"A fair die is rolled once. Probability of an even number?",
+      choices:["\\(\\tfrac{1}{3}\\)","\\(\\tfrac{1}{2}\\)","\\(\\tfrac{2}{3}\\)","\\(\\tfrac{3}{4}\\)","\\(\\tfrac{5}{6}\\)"], answerIndex:1 },
+    { type:"mcq", topic:"Functions",
+      latex:"If \\(f(x)=2x+1\\), find \\(f(3)\\).",
+      choices:["5","6","7","8","9"], answerIndex:2 },
+    { type:"mcq", topic:"Sequences and Series",
+      latex:"Arithmetic sequence with \\(a_1=3\\) and common difference \\(2\\). Compute \\(a_5\\).",
+      choices:["9","11","13","15","17"], answerIndex:1 },
+    { type:"mcq", topic:"Number Theory",
+      latex:"Compute the sum of the digits of \\(2^5\\).",
+      choices:["3","4","5","6","7"], answerIndex:2 },
+    { type:"mcq", topic:"Geometry",
+      latex:"Sum of interior angles of a pentagon equals",
+      choices:["360","450","540","600","720"], answerIndex:2 },
+    { type:"mcq", topic:"Combinatorics",
+      latex:"How many three-digit numbers are there?",
+      choices:["800","810","900","901","999"], answerIndex:2 }
+  ];
+
   const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
   // ---------- BIGGER Book catalog ----------
   const BOOKS = [
-    // Core AoPS
     {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
     {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
 
-    // AoPS Intro series
     {id:'prealgebra', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/prealgebra'},
     {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-algebra'},
     {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-counting-and-probability'},
     {id:'intro-geo', title:'AoPS Introduction to Geometry', level:['AMC'], topics:['Geometry'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-geometry'},
     {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
 
-    // AoPS Intermediate/advanced
     {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
     {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
     {id:'precalc', title:'AoPS Precalculus', level:['AIME','USAMO'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
 
-    // Other common texts
     {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
     {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
     {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
@@ -222,7 +254,6 @@
     {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276'},
     {id:'path-comb', title:'A Path to Combinatorics for Undergraduates', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'},
 
-    // AoPS Competition Math (middle school — useful foundations)
     {id:'cmms', title:'Competition Math for Middle School (Batterson)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Probability','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school'}
   ];
 
@@ -240,8 +271,8 @@
   const testDateEl = document.getElementById('testDate');
   const recBooksEl = document.getElementById('recBooks');
   const otherBooksEl = document.getElementById('otherBooks');
-  const topOffDaysWrap = document.getElementById('topOffDays');      // top (prefill only)
-  const buildOffDaysWrap = document.getElementById('buildOffDays');  // builder (payload)
+  const topOffDaysWrap = document.getElementById('topOffDays');
+  const buildOffDaysWrap = document.getElementById('buildOffDays');
 
   const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -288,46 +319,6 @@
       renderTest(goalToTest[g]);
     }
   })();
-
-  function renderTest(testId){
-    const t = tests[testId];
-    diagSection.style.display = 'block';
-    brk.style.display = 'none';
-    brkWrap.innerHTML = '';
-    levelAdvice.style.display='none';
-    builder.style.display = 'none';
-    recBooksEl.innerHTML='';
-    otherBooksEl.innerHTML='';
-
-    meta.innerHTML = `
-      <h3 style="margin:.2rem 0">${t.title}</h3>
-      <div class="hint">${t.format} • Time: ${t.time} minutes • Calculator: No</div>
-    `;
-
-    quiz.innerHTML = '';
-    const formEl = document.createElement('form');
-    formEl.id = 'quizForm';
-    t.questions.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
-
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.innerHTML = `
-      <button type="button" id="gradeBtn">Grade</button>
-      <button type="button" class="secondary" onclick="window.print()">Print / PDF</button>
-      <span class="hint">MC: select A–E. AIME-style: enter an integer (0–999).</span>
-    `;
-    const result = document.createElement('div');
-    result.className = 'result';
-
-    quiz.appendChild(formEl);
-    quiz.appendChild(actions);
-    quiz.appendChild(result);
-
-    document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result, testId));
-
-    MathJax.typesetPromise?.();
-    window.scrollTo({ top: diagSection.offsetTop - 8, behavior: 'smooth' });
-  }
 
   function renderQ(q, idx){
     const wrap = document.createElement('section');
@@ -376,9 +367,61 @@
     return s;
   }
 
-  function grade(t, resultBox, testId){
-    const byTopic = new Map(); let correct = 0, total = t.questions.length;
-    t.questions.forEach((q, i) => {
+  // ---- Render Test (AMC gets 10 easier add-ons) ----
+  function renderTest(testId){
+    const t = tests[testId];
+
+    // For AMC (Test A), append easier questions to make 20 total
+    const qset = (testId === 'A')
+      ? [...t.questions, ...AMC_EASY_QUESTIONS]
+      : t.questions;
+
+    diagSection.style.display = 'block';
+    brk.style.display = 'none';
+    brkWrap.innerHTML = '';
+    levelAdvice.style.display='none';
+    builder.style.display = 'none';
+    recBooksEl.innerHTML='';
+    otherBooksEl.innerHTML='';
+
+    const displayFormat = (testId==='A') ? '20 multiple-choice (A–E)' : t.format;
+    const displayTime   = (testId==='A') ? 40 : t.time;
+
+    meta.innerHTML = `
+      <h3 style="margin:.2rem 0">${t.title}</h3>
+      <div class="hint">${displayFormat} • Time: ${displayTime} minutes • Calculator: No</div>
+    `;
+
+    quiz.innerHTML = '';
+    const formEl = document.createElement('form');
+    formEl.id = 'quizForm';
+    qset.forEach((q, idx) => formEl.appendChild(renderQ(q, idx)));
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = `
+      <button type="button" id="gradeBtn">Grade</button>
+      <button type="button" class="secondary" onclick="window.print()">Print / PDF</button>
+      <span class="hint">MC: select A–E. AIME-style: enter an integer (0–999).</span>
+    `;
+    const result = document.createElement('div');
+    result.className = 'result';
+
+    quiz.appendChild(formEl);
+    quiz.appendChild(actions);
+    quiz.appendChild(result);
+
+    document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result, testId, qset));
+
+    MathJax.typesetPromise?.();
+    window.scrollTo({ top: diagSection.offsetTop - 8, behavior: 'smooth' });
+  }
+
+  function grade(t, resultBox, testId, qset){
+    const questions = qset || t.questions;
+    const byTopic = new Map(); let correct = 0, total = questions.length;
+
+    questions.forEach((q, i) => {
       const num = i+1;
       let ok = false;
       if(q.type === 'mcq'){
@@ -435,7 +478,7 @@
     const topOff = getCheckedWeekdays('top');
     setCheckedWeekdays('build', topOff);
 
-    // Book recs
+    // Book recs (capped to ≤3 pre-selected)
     buildBookRecommendations(testId, agg);
 
     // Generate
@@ -447,7 +490,7 @@
 
       const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
 
-      // NEW: specific weekday off choices from builder
+      // specific weekday off choices from builder
       const offDays = getCheckedWeekdays('build'); // array of 0..6
 
       const payload = {
@@ -457,7 +500,7 @@
         testDate: dateStr,
         subscores: agg,
         selectedBooks: selected,
-        offDays,                    // <-- pass exact weekdays off
+        offDays,
         generatedAt: new Date().toISOString()
       };
       localStorage.setItem('lastMinutes', String(minutes));
@@ -484,33 +527,61 @@
     `;
   }
 
+  // ---- Book recs capped to 1–3 preselected; others shown unchecked ----
   function buildBookRecommendations(testId, agg){
-    const weakTopics = Object.entries(agg).map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
-      .sort((a,b)=>a.score-b.score).slice(0,3).map(x=>x.k);
+    // Rank weakest topics
+    const ranked = Object.entries(agg)
+      .map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
+      .sort((a,b)=>a.score-b.score)
+      .map(x=>x.k);
 
-    let base = [];
+    // Topic -> book helpers
+    const byTopicAMC = (t) => {
+      if(/Number Theory/.test(t)) return 'intro-nt';
+      if(/Geometry/.test(t)) return 'intro-geo';
+      if(/Combinatorics|Probability/.test(t)) return 'intro-cp';
+      if(/Polynomials|Algebra|Functions|Sequences/.test(t)) return 'intro-alg';
+      return 'intro-alg';
+    };
+    const byTopicAIME = (t) => {
+      if(/Number Theory/.test(t)) return '104nt';
+      if(/Geometry/.test(t)) return 'egmo';
+      if(/Combinatorics|Probability/.test(t)) return 'int-cp';
+      if(/Polynomials|Algebra|Functions|Sequences/.test(t)) return 'int-alg';
+      return 'int-alg';
+    };
+
+    const chosen = new Set();
+
     if(testId==='A'){ // AMC
-      base.push('aops-v1','intro-alg','intro-cp');
-      if(weakTopics.includes('Number Theory')) base.push('intro-nt');
-      if(weakTopics.includes('Geometry')) base.push('intro-geo');
-      base.push('cmms');
+      chosen.add('aops-v1');
+      for(const t of ranked){
+        chosen.add(byTopicAMC(t));
+        if(chosen.size>=3) break;
+      }
     } else if(testId==='B'){ // AIME
-      base.push('aops-v2','int-alg','int-cp','precalc');
-      if(weakTopics.includes('Geometry')) base.push('egmo');
-      if(weakTopics.includes('Number Theory')) base.push('104nt');
-      base.push('zeitz');
+      chosen.add('aops-v2');
+      if(ranked.length) chosen.add(byTopicAIME(ranked[0]));
+      if(chosen.size<3){
+        const next = ranked[1] ? byTopicAIME(ranked[1]) : 'precalc';
+        chosen.add(next);
+      }
+      while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
     } else { // USAMO/USAJMO
-      base.push('aops-v2','int-alg','int-cp','precalc','egmo','velleman','zeitz','engel');
-      if(weakTopics.includes('Number Theory')) base.push('104nt');
-      if(weakTopics.includes('Combinatorics')) base.push('path-comb');
+      chosen.add('aops-v2');
+      chosen.add('velleman');
+      if(ranked.some(t=>/Geometry/.test(t))) chosen.add('egmo');
+      else if(ranked.some(t=>/Combinatorics/.test(t))) chosen.add('engel');
+      else chosen.add('int-alg');
+      while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
     }
 
-    const baseSet = new Set(base);
-    const recs = BOOKS.filter(b => baseSet.has(b.id)).sort((a,b)=>b.priority-a.priority);
-    const others = BOOKS.filter(b => !baseSet.has(b.id));
+    const chosenIds = new Set(chosen);
+    const recs   = BOOKS.filter(b => chosenIds.has(b.id));
+    const others = BOOKS.filter(b => !chosenIds.has(b.id));
 
-    recBooksEl.innerHTML = recs.map(b=>pillHTML(b,true)).join('');
-    otherBooksEl.innerHTML = others.map(b=>pillHTML(b,false)).join('');
+    recBooksEl.innerHTML  = recs.map(b=>pillHTML(b,true)).join('');
+    otherBooksEl.innerHTML= others.map(b=>pillHTML(b,false)).join('');
   }
 
   function pillHTML(b, checked){
@@ -523,5 +594,8 @@
     `;
   }
   </script>
+
+  <!-- Auth (header sign-in) -->
+  <script type="module" src="./auth.js"></script>
 </body>
 </html>
