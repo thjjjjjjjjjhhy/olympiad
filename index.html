@@ -6,6 +6,70 @@
   <title>OlympiadPrep - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    :root{
+      --fg:#0f172a; --muted:#64748b; --grid:#e5e7eb; --card:#fff; --accent:#0ea5e9; --accent-2:#2563eb; --shadow:0 1px 4px rgba(0,0,0,.06);
+    }
+    html,body{background:#fff;color:var(--fg);font-family:"Source Sans Pro",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+
+    /* Header: match other pages (purple/indigo gradient) */
+    .site-header{
+      position:sticky; top:0; z-index:10;
+      background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%) !important;
+      color:#fff; padding:12px 0; margin-bottom:0;
+    }
+    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    .logo{font-weight:800; letter-spacing:.2px; color:#fff; margin:0}
+    .site-nav{display:flex; gap:14px; flex-wrap:wrap}
+    .site-nav a{ color:#fff; text-decoration:none; font-weight:600; opacity:.95 }
+    .site-nav a:hover{ opacity:1; text-decoration:underline }
+    .site-nav a.active{ border-bottom:2px solid rgba(255,255,255,.9); padding-bottom:2px }
+    #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
+
+    /* Hero: two-column, search + planning CTA highlighted */
+    .hero{
+      background:linear-gradient(180deg, rgba(99,102,241,.08), rgba(99,102,241,0));
+      padding:28px 0 22px;
+      border-bottom:1px solid var(--grid);
+    }
+    .hero-wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:center}
+    @media (max-width:900px){ .hero-wrap{grid-template-columns:1fr} }
+
+    .hero h2{font-size:2rem;margin:.25rem 0}
+    .subtitle{color:var(--muted);margin:.25rem 0 1rem}
+
+    .lookup-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .lookup-form input{
+      flex:1; min-width:260px; border:1px solid var(--grid); border-radius:12px; padding:12px 14px; font-size:1rem;
+      box-shadow: var(--shadow);
+    }
+    .lookup-form button{
+      border:0; background:var(--accent-2); color:#fff; padding:12px 16px; border-radius:12px; font-weight:700; cursor:pointer;
+    }
+    .examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--grid);background:#f8fafc;color:#334155;font-size:.9rem;cursor:pointer}
+    .chip:hover{background:#eef2ff}
+
+    .plan-card{
+      background:#fff;border:1px solid var(--grid);border-radius:16px;padding:16px;box-shadow:var(--shadow)
+    }
+    .plan-card h3{margin:.25rem 0}
+    .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .cta-primary{background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:800;text-decoration:none}
+    .quick-goals{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .quick-goals a{border:1px solid var(--grid);border-radius:999px;padding:6px 10px;text-decoration:none;color:#0f172a;background:#fff}
+    .quick-goals a:hover{background:#f1f5f9}
+
+    /* Feature cards */
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px auto}
+    @media (max-width:900px){ .features{grid-template-columns:1fr} }
+    .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;border:1px solid var(--grid)}
+    .card a{font-weight:700;color:#0ea5e9;text-decoration:none}
+    .card a:hover{text-decoration:underline}
+
+    footer{border-top:1px solid var(--grid);padding:18px 0;text-align:center;color:#64748b;margin-top:8px}
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -20,30 +84,63 @@
       <div id="auth-slot"></div>
     </div>
   </header>
+
+  <!-- HERO -->
   <section class="hero">
-    <div class="container">
-      <h2>Find any contest problem instantly</h2>
-      <p class="subtitle">Your companion for Olympiad success.</p>
-      <form class="lookup-form" onsubmit="handleSearch(event)">
-        <input type="text" id="lookup-query" placeholder="e.g. AMC 12B 2023 Problem 14 or AIME I 2022" required>
-        <button type="submit">Search</button>
-      </form>
+    <div class="container hero-wrap">
+      <!-- Left: Search -->
+      <div>
+        <h2>Find any contest problem instantly</h2>
+        <p class="subtitle">Fast links to AMC 8/10/12, AIME, USAMO — and year sets.</p>
+        <form class="lookup-form" onsubmit="handleSearch(event)">
+          <input type="text" id="lookup-query" placeholder="e.g. AMC 8 2021 Problem 12 • AMC 12B 2023 P14 • AIME I 2022 #3" required>
+          <button type="submit">Search</button>
+        </form>
+        <div class="examples">
+          <span class="chip" onclick="preset('AMC 8 2019 Problem 9')">AMC 8 2019 Problem 9</span>
+          <span class="chip" onclick="preset('AMC 12B 2023 Problem 14')">AMC 12B 2023 P14</span>
+          <span class="chip" onclick="preset('AIME I 2022 Problem 3')">AIME I 2022 #3</span>
+          <span class="chip" onclick="preset('USAMO 2015 Problem 1')">USAMO 2015 #1</span>
+          <span class="chip" onclick="preset('AMC 10A 2020')">AMC 10A 2020 (set)</span>
+        </div>
+      </div>
+
+      <!-- Right: Planning CTA -->
+      <div class="plan-card">
+        <h3>📅 Build your study timeline</h3>
+        <p class="subtitle" style="margin:0 0 .5rem">Personalized daily plan from your diagnostic — readings, drills, and mocks.</p>
+        <div class="cta-row">
+          <a class="cta-primary" href="planning.html">Start Planning →</a>
+          <a class="cta-primary" href="timeline.html" style="background:#111827">View My Timeline</a>
+        </div>
+        <div class="quick-goals">
+          <!-- goal params: if unknown, planning still loads normally -->
+          <a href="planning.html?goal=amc8">Quick start: AMC 8</a>
+          <a href="planning.html?goal=amc10">AMC 10</a>
+          <a href="planning.html?goal=amc12">AMC 12</a>
+          <a href="planning.html?goal=aime">AIME</a>
+          <a href="planning.html?goal=usajmo">USAJMO</a>
+          <a href="planning.html?goal=usamo">USAMO</a>
+        </div>
+      </div>
     </div>
   </section>
+
+  <!-- Feature tiles -->
   <main class="features container">
     <div class="card">
-      <h3>📅 Build a Timeline</h3>
-      <p>Plan your preparation with a clear schedule.</p>
-      <a href="planning.html">Start Planning →</a>
+      <h3>🧭 What’s inside the plan?</h3>
+      <p>Daily reading with page ranges, calibrated drills, gentle timed sets (AMC 8), and full mocks as your test approaches.</p>
+      <a href="planning.html">Take the diagnostic →</a>
     </div>
     <div class="card">
       <h3>👩‍🏫 Need a Tutor?</h3>
-      <p>Connect with experienced mentors for one-on-one help.</p>
+      <p>Get 1:1 guidance from experienced contest coaches.</p>
       <a href="tutor.html">Find a Tutor →</a>
     </div>
     <div class="card">
       <h3>📚 Recommended Books</h3>
-      <p>Explore curated reading to sharpen your skills.</p>
+      <p>Same curated book list across AMC 8–12 so you can grow smoothly.</p>
       <a href="books.html">Browse Books →</a>
     </div>
   </main>
@@ -52,121 +149,131 @@
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
 
-  <!-- Existing script -->
+  <!-- Search logic (AMC 8 fix + small parsing niceties) -->
   <script>
+    function preset(s){ const el = document.getElementById('lookup-query'); el.value = s; el.focus(); }
+
     function handleSearch(event) {
       event.preventDefault();
-      const q = document.getElementById('lookup-query').value.toUpperCase();
-      const tokens = q.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean);
+      const raw = document.getElementById('lookup-query').value.trim();
+      const q = raw.toUpperCase();
 
-      let year, problem, contest, level, variant;
+      // Accept things like "P14", "PROB 14", "#14"
+      const normalized = q.replace(/#\s*(\d{1,2})/g, ' PROBLEM $1').replace(/\bP(\d{1,2})\b/g, ' PROBLEM $1');
+
+      const tokens = normalized.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean);
+
+      let year=null, problem=null, contest=null, level=null, variant=null;
 
       tokens.forEach(t => {
-        if (!year && /^\d{4}$/.test(t)) {
-          year = t;
-          return;
-        }
-        if (t === 'USAMO') {
-          contest = 'USAMO';
-          return;
-        }
+        if (!year && /^\d{4}$/.test(t)) { year = t; return; }
+
+        if (t === 'USAMO') { contest = 'USAMO'; return; }
+
         if (t.startsWith('AIME')) {
           contest = 'AIME';
-          const m = t.match(/AIME(.*)/);
+          const m = t.match(/^AIME([I12]{0,2})$/);
           if (m && m[1]) variant = m[1];
           return;
         }
-        if (t === 'AIME') {
-          contest = 'AIME';
-          return;
-        }
+        if (t === 'AIME') { contest = 'AIME'; return; }
+
         if (t.startsWith('AMC')) {
           contest = 'AMC';
-          const m = t.match(/AMC(\d*)([AB])?/);
+          // AMC8 has no A/B; AMC10/12 may have
+          const m = t.match(/^AMC(\d{0,2})([AB])?$/);
           if (m) {
-            if (m[1]) level = m[1];
-            if (m[2]) variant = m[2];
+            if (m[1]) level = m[1];      // "AMC8", "AMC10A"
+            if (m[2]) variant = m[2];    // "A" or "B"
           }
           return;
         }
+
+        // If we already saw "AMC", a following token might be "8" or "10A"
         if (contest === 'AMC' && !level) {
-          const m = t.match(/(8|10|12)([AB])?/);
-          if (m) {
-            level = m[1];
-            if (m[2]) variant = m[2];
-            return;
-          }
+          const m = t.match(/^(8|10|12)([AB])?$/);
+          if (m) { level = m[1]; if (m[2]) variant = m[2]; return; }
         }
-        if (contest === 'AMC' && !variant && /^[AB]$/.test(t)) {
-          variant = t;
-          return;
-        }
+
+        // Standalone variant for AMC10/12
+        if (contest === 'AMC' && !variant && /^[AB]$/.test(t)) { variant = t; return; }
+
+        // AIME variant
         if (contest === 'AIME' && !variant && /^(I|II|1|2)$/.test(t)) {
-          variant = t.replace('1', 'I').replace('2', 'II');
+          variant = t.replace('1','I').replace('2','II').toUpperCase();
           return;
         }
-        if (!problem && /^\d{1,2}$/.test(t)) {
-          problem = t;
-        }
+
+        // "PROBLEM 14" or "PROB 14"
+        const pm = t.match(/^PROB(?:LEM)?(\d{1,2})$/);
+        if (!problem && pm) { problem = pm[1]; return; }
+
+        if (!problem && /^\d{1,2}$/.test(t)) { problem = t; }
       });
 
       if (contest === 'AIME' && variant) {
-        variant = variant.replace('1', 'I').replace('2', 'II').toUpperCase();
+        variant = variant.replace('1','I').replace('2','II').toUpperCase();
       }
 
+      // Build URL
+      if (!year || !contest) { alert('Please include a YEAR and CONTEST (e.g., "AMC 8 2021 Problem 12").'); return; }
+
       let url = null;
-      if (!year || !contest) {
-        alert('Please include a year and contest');
-        return;
-      }
+      const Y = parseInt(year, 10);
 
       if (problem) {
         if (contest === 'AMC') {
-          if (!level) {
-            alert('Please specify AMC level (8, 10, or 12)');
-            return;
-          }
-          if (parseInt(year) >= 2002) {
-            if (!variant) {
-              alert('Please specify A or B');
-              return;
-            }
-            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
+          if (!level) { alert('Please specify AMC level (8, 10, or 12).'); return; }
+
+          if (level === '8') {
+            // AMC 8 never uses A/B variants
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_8_Problems/Problem_${problem}`;
           } else {
-            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
+            // AMC 10/12: variants from 2002 onward
+            if (Y >= 2002) {
+              if (!variant) { alert('Please specify A or B (e.g., AMC 10A).'); return; }
+              url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems/Problem_${problem}`;
+            } else {
+              url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems/Problem_${problem}`;
+            }
           }
+
         } else if (contest === 'AIME') {
-          if (parseInt(year) >= 2000) {
+          if (Y >= 2000) {
             variant = variant || 'I';
             url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${problem}`;
           } else {
             url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems/Problem_${problem}`;
           }
+
         } else if (contest === 'USAMO') {
           url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems/Problem_${problem}`;
         }
+
       } else {
+        // Year set (no specific problem)
         if (contest === 'AMC') {
-          if (!level) {
-            alert('Please specify AMC level (8, 10, or 12)');
-            return;
-          }
-          if (parseInt(year) >= 2002) {
-            if (!variant) {
-              alert('Please specify A or B');
-              return;
-            }
-            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems`;
+          if (!level) { alert('Please specify AMC level (8, 10, or 12).'); return; }
+
+          if (level === '8') {
+            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_8_Problems`;
           } else {
-            url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems`;
+            if (Y >= 2002) {
+              if (!variant) { alert('Please specify A or B (e.g., AMC 12B).'); return; }
+              url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}${variant}_Problems`;
+            } else {
+              url = `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_${level}_Problems`;
+            }
           }
+
         } else if (contest === 'AIME') {
-          if (parseInt(year) >= 2000) {
+          if (Y >= 2000) {
             variant = variant || 'I';
             url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems`;
           } else {
             url = `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_Problems`;
           }
+
         } else if (contest === 'USAMO') {
           url = `https://artofproblemsolving.com/wiki/index.php/${year}_USAMO_Problems`;
         }
@@ -175,11 +282,12 @@
       if (url) {
         window.open(url, '_blank');
       } else {
-        alert('Unable to construct a link for that query');
+        alert('Unable to construct a link for that query.');
       }
     }
   </script>
 
-<script type="module" src="./auth.js"></script> 
+  <!-- Auth (header sign-in) -->
+  <script type="module" src="./auth.js"></script>
 </body>
 </html>
