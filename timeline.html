@@ -6,41 +6,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* =========================================================
-       TIMELINE — local styles that complement styles.css
-       (header now matches tutor page: same order + purple gradient)
-       ========================================================= */
     :root{
-      --fg:#0f172a;
-      --muted:#64748b;
-      --grid:#e5e7eb;
-      --card:#ffffff;
-      --accent:#0ea5e9;
-      --accent-2:#2563eb;
-      --chip-bg:#f8fafc;
-      --chip-fg:#334155;
-      --soft:#f1f5f9;
-      --danger:#ef4444;
-      --danger-fg:#991b1b;
-      --ok:#059669;
-      --warn:#d97706;
-      --shadow:0 1px 4px rgba(0,0,0,.06);
+      --fg:#0f172a; --muted:#64748b; --grid:#e5e7eb; --card:#ffffff; --accent:#0ea5e9; --accent-2:#2563eb;
+      --chip-bg:#f8fafc; --chip-fg:#334155; --soft:#f1f5f9; --danger:#ef4444; --danger-fg:#991b1b;
+      --ok:#059669; --warn:#d97706; --shadow:0 1px 4px rgba(0,0,0,.06);
     }
-
-    /* Keep page background white; header supplies the gradient */
     html,body{background:#fff;color:var(--fg)}
     .container{max-width:1100px;margin:0 auto;padding:0 16px}
 
-    /* ===== Tutor-style header ===== */
+    /* Header (match other pages) */
     .site-header{
       position:sticky; top:0; z-index:10;
-      /* exact purple/indigo gradient like tutor */
       background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%) !important;
       color:#fff; padding:12px 0; margin-bottom:18px;
     }
-    .site-header .container{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-    }
+    .site-header .container{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     .brand-nav{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
     .logo{ font-weight:800; letter-spacing:.2px; color:#fff; }
     .site-nav{ display:flex; gap:14px; flex-wrap:wrap; }
@@ -106,7 +86,6 @@
     .modal .content{padding:14px 16px;max-height:70vh;overflow:auto}
     .pill{display:inline-flex;gap:6px;align-items:center;background:#f0f9ff;border:1px solid var(--grid);padding:4px 8px;border-radius:999px;font-size:.82rem;color:#0c4a6e;margin-right:8px}
 
-    /* Print-friendly */
     @media print{
       .site-header,.toolbar,.pager,.more-wrap,.fade-bottom,.modal-backdrop{display:none!important}
       .month{break-inside:avoid}
@@ -119,9 +98,6 @@
 </head>
 
 <body>
-  <!-- =========================================================
-       Header / Navigation  (order: Home • Timeline • Need a Tutor • Books)
-       ========================================================= -->
   <header class="site-header">
     <div class="container">
       <div class="brand-nav">
@@ -137,9 +113,6 @@
     </div>
   </header>
 
-  <!-- =========================================================
-       Main
-       ========================================================= -->
   <main class="container">
     <h2><span class="emoji">📅</span> Your Study Timeline</h2>
 
@@ -168,14 +141,10 @@
           <div style="display:flex;gap:6px">
             <select id="studyHour" aria-label="Hour"></select>
             <select id="studyMin" aria-label="Minute">
-              <option>00</option>
-              <option>15</option>
-              <option>30</option>
-              <option>45</option>
+              <option>00</option><option>15</option><option>30</option><option>45</option>
             </select>
             <select id="studyAmpm" aria-label="AM/PM">
-              <option>AM</option>
-              <option selected>PM</option>
+              <option>AM</option><option selected>PM</option>
             </select>
           </div>
         </label>
@@ -186,13 +155,8 @@
         <label>
           <b>Days off</b>
           <select id="daysOff" multiple size="3" title="Hold Ctrl/Cmd to select multiple" style="width:100%">
-            <option value="0">Sunday</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
+            <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+            <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
           </select>
         </label>
         <div class="hint">Weekly off-days (optional)</div>
@@ -201,22 +165,19 @@
       <div class="group">
         <button id="rebuildBtn" class="secondary">Rebuild plan</button>
       </div>
-
       <div class="group">
         <button id="downloadIcs">Download calendar (.ics)</button>
       </div>
-
       <div class="group">
         <button id="saveCloudBtn" class="secondary">Save to cloud</button>
         <span id="saveStatus" class="chip" style="display:none">Saved</span>
       </div>
-
       <div class="group">
         <button class="secondary" onclick="window.print()">Print</button>
       </div>
 
       <div style="grid-column:1/-1" class="hint">
-        Reading always shows page ranges. Book problems & timed sets come from your JSON packs (explicit problem numbers).
+        Reading shows page ranges from your selected books. Exercises & timed sets use book problems or AMC contest problems (AMC 8 uses easier contest sets).
       </div>
     </div>
 
@@ -224,17 +185,15 @@
     <div class="legend">
       <span class="lg"><span class="dot"></span> Reading (with page ranges)</span>
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
-      <span class="lg"><span class="dot"></span> Timed set (from book problems)</span>
-      <span class="lg"><span class="dot"></span> Problem of the day (AMC/AIME/US(A)MO)</span>
+      <span class="lg"><span class="dot"></span> Timed set (book or AMC contest)</span>
+      <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
       <span class="lg"><span class="dot"></span> Proof track (US(A)JMO; AIME late-phase if strong)</span>
       <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
       <span class="lg"><span class="dot"></span> Off day</span>
     </div>
 
-    <!-- Calendar -->
     <section id="calendar" class="cal-wrap"></section>
 
-    <!-- Pager -->
     <div class="pager">
       <button id="prevMonth">← Previous month</button>
       <span id="monthLabel" class="hint"></span>
@@ -244,7 +203,7 @@
 
   <footer class="container" style="text-align:center;margin:20px 0;color:#64748b">© 2025 OlympiadPrep.</footer>
 
-  <!-- Modal (day details) -->
+  <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modal" role="document">
       <header>
@@ -258,13 +217,9 @@
     </div>
   </div>
 
-  <!-- =========================================================
-       Timeline engine
-       ========================================================= -->
+  <!-- Timeline engine -->
   <script>
-    /* =======================================================================
-       SAFETY: surface errors so we never end up with a blank page silently
-       ======================================================================= */
+    /* Safety */
     (function safetyHooks(){
       const errBox = document.getElementById('errBox');
       function show(msg){
@@ -276,9 +231,7 @@
       window.addEventListener('unhandledrejection', (e)=>{ show('Plan build error: ' + ((e.reason&&e.reason.message)||e.reason||'Unknown')); console.error('[unhandledrejection]', e); });
     })();
 
-    /* =======================================================================
-       UTILITIES (no RNG here; RNG lives inside main())
-       ======================================================================= */
+    /* Utils */
     function $(id){ return document.getElementById(id); }
     function hash32(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
     function sanitizeHTML(input) {
@@ -313,14 +266,10 @@
       for(let h=1; h<=12; h++){
         const opt = document.createElement('option'); opt.textContent = String(h).padStart(2,'0'); opt.value = String(h).padStart(2,'0'); sel.appendChild(opt);
       }
-      sel.value = '07'; // default 7 PM
-      $('studyMin').value = '00';
-      $('studyAmpm').value = 'PM';
+      sel.value = '07'; $('studyMin').value = '00'; $('studyAmpm').value = 'PM';
     })();
 
-    /* =======================================================================
-       INPUT / CONTEXT
-       ======================================================================= */
+    /* Load input */
     function loadInput(){
       try{ return JSON.parse(localStorage.getItem('studyPlanInput')||'null'); }
       catch(e){ console.error('Invalid studyPlanInput JSON:', e); return null; }
@@ -328,7 +277,6 @@
 
     (function main(){
       const errBox = $('errBox');
-
       const input = loadInput();
       const planSummary = $('planSummary');
       if(!input){
@@ -337,7 +285,6 @@
         return;
       }
 
-      /* Bring UI in sync */
       const today = new Date(); today.setHours(0,0,0,0);
       const todayStr = today.toISOString().slice(0,10);
       $('testDate').min = todayStr;
@@ -364,15 +311,14 @@
       const rawDays = Math.ceil((end - start)/86400000);
       const days = (Number.isFinite(rawDays) && rawDays>0) ? rawDays : 14;
 
-      /* Goal detection */
+      /* Goal flags */
       const goalStr = String(input.goal||'').toLowerCase();
-      let onAIME = /aime/.test(goalStr);
-      let onUSAMO = /usamo|usajmo/.test(goalStr);
-      let onAMC = /amc/.test(goalStr) || (!onAIME && !onUSAMO);
-      if(!onAIME && !onUSAMO && !onAMC){
-        const id = String(input.testId||'').toUpperCase();
-        if(id==='B') onAIME=true; else if(id==='C') onUSAMO=true; else onAMC=true;
-      }
+      const onAIME  = /aime/.test(goalStr) || String(input.testId||'').toUpperCase()==='B';
+      const onUSAMO = /usamo|usajmo/.test(goalStr) || String(input.testId||'').toUpperCase()==='C';
+      const onAMC8  = /amc8/.test(goalStr) || String(input.testId||'').toUpperCase()==='A8';
+      const onAMC10 = /amc10/.test(goalStr);
+      const onAMC12 = /amc12/.test(goalStr);
+      const onAMC   = (!onAIME && !onUSAMO) || onAMC8 || onAMC10 || onAMC12;
 
       planSummary.innerHTML =
         `Start: <b>${start.toLocaleDateString()}</b> → ` +
@@ -382,28 +328,24 @@
         `Minutes/day: <b>${minutesPerDay}</b> ` +
         `<span class="badge" id="booksBadge">Books: ${(input.selectedBooks||[]).length||0}</span>`;
 
-      /* RNG — define here AND define pick/shuffle with this RNG */
+      /* RNG */
       const seedStr = (input.generatedAt || input.testDate || todayStr) + '|' + (input.goal||'');
       let _seed = hash32(seedStr);
       function rand(){ _seed ^= _seed << 13; _seed ^= _seed >>> 17; _seed ^= _seed << 5; return ((_seed>>>0) / 4294967296); }
       function pick(arr){ return arr[Math.floor(rand()*arr.length)] }
       function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-      /* Topics & emphasis */
+      /* Topics & weights */
       const subs = input.subscores||{};
       const defaultCats = ['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series','Proof Techniques','Mixed Review'];
       const subsCats = Object.keys(subs);
       const cats = subsCats.length ? subsCats.slice() : defaultCats.slice();
 
       const TOPIC_ALIASES = {
-        'Logic & Proof':'Proof Techniques',
-        'Logic and Proof':'Proof Techniques',
-        'Transformations':'Geometry',
-        '3D Geometry':'Geometry',
-        'Polynomials':'Polynomials and Algebra',
-        'Algebra':'Polynomials and Algebra',
-        'Counting':'Combinatorics',
-        'Mixed':'Mixed Review'
+        'Logic & Proof':'Proof Techniques','Logic and Proof':'Proof Techniques',
+        'Transformations':'Geometry','3D Geometry':'Geometry',
+        'Polynomials':'Polynomials and Algebra','Algebra':'Polynomials and Algebra',
+        'Counting':'Combinatorics','Mixed':'Mixed Review'
       };
       function canonicalTopic(t){ return TOPIC_ALIASES[t] || t; }
 
@@ -413,7 +355,6 @@
         weights[k]=(1-acc)+0.05;
       });
 
-      /* Contest emphasis — proof is deprioritized for AMC & AIME (AIME may get late proof if strong) */
       const EMPHASIS = (()=>{
         if(onUSAMO) return {'Geometry':1.3,'Number Theory':1.25,'Polynomials and Algebra':1.2,'Combinatorics':1.12,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':1.35,'Mixed Review':1.0};
         if(onAIME)  return {'Number Theory':1.25,'Polynomials and Algebra':1.2,'Combinatorics':1.15,'Geometry':1.05,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':0.7,'Mixed Review':0.95};
@@ -421,13 +362,13 @@
       })();
       Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
-      /* Determine AIME proof allowance (late-phase only, if diagnostic strong overall) */
+      /* Allow AIME late-phase proof only if strong */
       const overallAttempted = Object.values(subs).reduce((s,v)=>s+(v?.total||0),0);
       const overallCorrect   = Object.values(subs).reduce((s,v)=>s+(v?.right||0),0);
       const overallAcc = overallAttempted ? (overallCorrect/overallAttempted) : 0;
-      const allowAIMEProofLate = onAIME && overallAcc >= 0.70; // only if capable
+      const allowAIMEProofLate = onAIME && overallAcc >= 0.70;
 
-      /* Edition packs */
+      /* Edition packs (same set as AMC 10 — AMC 8 shares these) */
       const BOOK_PACK_PATH = {
         'aops-v1': 'data/editions/aops-vol1.json',
         'aops-v2': 'data/editions/aops-vol2.json',
@@ -500,7 +441,7 @@
         return null;
       }
 
-      /* reading speed per book */
+      /* Reading speed per book */
       function mppFor(bookId){
         const light = ['aops-v1','prealgebra','intro-alg','intro-cp','intro-geo','intro-nt','cmms'];
         const heavy = ['aops-v2','int-alg','int-cp','precalc','egmo'];
@@ -511,22 +452,24 @@
         return 2.4;
       }
 
-      /* goal-aware minutes/problem ⇒ more problems on AMC */
+      /* Minutes/problem & floors (AMC 8 = gentler) */
       function minutesPerProblem(){
         if(onUSAMO) return 9.0;
         if(onAIME)  return 6.5;
+        if(onAMC8)  return 3.5;
         return 4.0;
       }
       function minProblemsFloor(){
         if(onUSAMO) return 2;
         if(onAIME)  return 3;
+        if(onAMC8)  return 4;
         return 5;
       }
 
-      /* Section progression & no-repeat logic */
-      const sectionProgress = new Map(); // key: bookId#chapter -> {from, to}
-      const consumedSections = new Set(); // fully consumed chapters (won't reappear until final review)
-      const catalogCursor = {}; // topic -> idx
+      /* Section progression */
+      const sectionProgress = new Map();
+      const consumedSections = new Set();
+      const catalogCursor = {};
 
       function shortBook(title){
         if(!title) return '';
@@ -535,7 +478,6 @@
       }
       function shortChapter(ch){ if(!ch) return ''; return String(ch).replace(/Chapter\s*/i,'ch ').replace(/\s+/g,' ').trim(); }
 
-      /* Get next section for a topic that is not fully consumed; if all consumed, return null */
       function nextUnconsumedSection(topic, catalogByTopic){
         const arr = catalogByTopic[topic] || [];
         if(!arr.length) return null;
@@ -556,7 +498,7 @@
 
       function sliceReading(section, minutesBudget, finalPhase){
         const pg = parsePages(section.pages);
-        const minFloor = Math.max(12, Math.round(minutesBudget*0.5)); // keep reading meaningful
+        const minFloor = Math.max(12, Math.round(minutesBudget*0.5));
         if(!pg){
           return {
             labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`,
@@ -568,13 +510,11 @@
         const key = `${section.bookId}#${section.chapter}`;
         const cur = sectionProgress.get(key) || {from: pg.from, to: pg.from-1};
 
-        /* Fully consumed? */
         if(cur.to >= pg.to){
           consumedSections.add(key);
           if(!finalPhase){
-            return null; // caller will pick a different section
+            return null;
           }
-          // Final review: allow a skim with *valid* page range tail
           const tail = Math.min(4, Math.max(1,(pg.to-pg.from+1)));
           const skimFrom = Math.max(pg.from, pg.to - tail + 1);
           const skimTo   = pg.to;
@@ -604,16 +544,13 @@
         };
       }
 
-      /* NEW: Guaranteed reading slice provider (prevents null access) */
       function getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics){
-        // try the requested topic first
         let sec = nextUnconsumedSection(topic, catalogByTopic);
         while(sec){
           const sl = sliceReading(sec, mRead, finalPhase);
           if(sl) return {slice: sl, actualTopic: topic};
           sec = nextUnconsumedSection(topic, catalogByTopic);
         }
-        // then try other topics
         for(const t of availableTopics){
           if(t===topic) continue;
           let s = nextUnconsumedSection(t, catalogByTopic);
@@ -623,17 +560,13 @@
             s = nextUnconsumedSection(t, catalogByTopic);
           }
         }
-        // if absolutely everything is consumed, return a clean review (no bogus pp.0–0)
         return {
-          slice: {
-            labelShort: `${topic} — cumulative review`,
-            labelLong:  `${topic} — cumulative review`,
-            usedMin: Math.max(12, Math.round(mRead*0.7))
-          },
+          slice: { labelShort: `${topic} — cumulative review`, labelLong: `${topic} — cumulative review`, usedMin: Math.max(12, Math.round(mRead*0.7)) },
           actualTopic: topic
         };
       }
 
+      /* Exercise/timed from book sections */
       function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, bookTag){
         const res = [];
         if(!sectionMeta) return res;
@@ -671,6 +604,14 @@
       }
 
       function difficultyTarget(topicKey, dayIndex, totalDays){
+        if(onAMC8){
+          // Intentionally easier: start easy, move to mixed; hard only very late if strong
+          const early = dayIndex < Math.floor(totalDays*0.55);
+          const acc = (subs?.[topicKey]?.right || 0) / Math.max(1, (subs?.[topicKey]?.total || 1));
+          if(early) return 'easy';
+          if(acc < 0.5) return 'mixed';
+          return 'mixed';
+        }
         const acc = (subs?.[topicKey]?.right || 0) / Math.max(1, (subs?.[topicKey]?.total || 1));
         const early = dayIndex < Math.floor(totalDays*0.5);
         if (acc < 0.35) return early ? 'easy' : 'mixed';
@@ -703,9 +644,7 @@
         const want = Math.max(minProblemsFloor(), Math.floor((minutesBudget + 0.25*per)/per));
         const nums = pickProblemsByHeuristic(section.editionMeta, want, target, usedSet, section.bookId.toUpperCase());
         const base = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
-        if(!nums.length){
-          return null; // no problem range → skip timed set, minutes will be redistributed
-        }
+        if(!nums.length) return null;
         const text = (nums.length<=10) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
         return {
           short:`⏱️ Timed — ${base}: ${text}`,
@@ -714,10 +653,13 @@
         };
       }
 
-      /* POTD */
+      /* Contest links */
       function amcProbURL(year, level, variant, num){
         const L=(level==='10')?'AMC_10':'AMC_12';
         return `https://artofproblemsolving.com/wiki/index.php/${year}_${L}${variant}_Problems/Problem_${num}`;
+      }
+      function amc8ProbURL(year, num){
+        return `https://artofproblemsolving.com/wiki/index.php/${year}_AMC_8_Problems/Problem_${num}`;
       }
       function aimeProbURL(year, variant, num){
         return `https://artofproblemsolving.com/wiki/index.php/${year}_AIME_${variant}_Problems/Problem_${num}`;
@@ -728,6 +670,7 @@
       function usajmoProbURL(year, num){
         return `https://artofproblemsolving.com/wiki/index.php/${year}_USAJMO_Problems/Problem_${num}`;
       }
+
       const usedContest = new Set();
       function problemOfDay(){
         const todayYear = new Date().getFullYear();
@@ -756,26 +699,50 @@
               return {htmlShort:`🧩 ${y} USAMO • #${num}`, htmlLong:`🧩 <a href="${usamoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAMO • Problem ${num}</a>`, mins: 15, type:'potd'};
             }
           } else {
-            const level = (/amc10/.test(goalStr))?'10':'12';
-            const variant = pick(['A','B']);
-            const num = 1 + Math.floor(rand()*20);
-            const id = `AMC${level}-${y}-${variant}-${num}`;
-            if(usedContest.has(id)) continue;
-            usedContest.add(id);
-            return {htmlShort:`🧩 ${y} AMC ${level}${variant} • #${num}`, htmlLong:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd'};
+            if(onAMC8){
+              const num = 1 + Math.floor(rand()*25);
+              const id = `AMC8-${y}-${num}`;
+              if(usedContest.has(id)) continue;
+              usedContest.add(id);
+              return {htmlShort:`🧩 ${y} AMC 8 • #${num}`, htmlLong:`🧩 <a href="${amc8ProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC 8 • Problem ${num}</a>`, mins: 6, type:'potd'};
+            } else {
+              const level = (onAMC10)?'10':'12';
+              const variant = pick(['A','B']);
+              const num = 1 + Math.floor(rand()*20);
+              const id = `AMC${level}-${y}-${variant}-${num}`;
+              if(usedContest.has(id)) continue;
+              usedContest.add(id);
+              return {htmlShort:`🧩 ${y} AMC ${level}${variant} • #${num}`, htmlLong:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd'};
+            }
           }
         }
         return {htmlShort:`🧩 Contest problem`, htmlLong:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd'};
       }
 
-      /* Mocks (years descending) */
+      /* AMC 8 mini timed set (gentle practice) */
+      function makeAMC8MiniSet(minutesBudget){
+        const todayYear = new Date().getFullYear();
+        const y = pick(Array.from({length:18},(_,i)=>todayYear-1-i)); // last ~18 years
+        const k = Math.max(5, Math.min(10, Math.floor(minutesBudget/3))); // # problems
+        const pool = Array.from({length:25},(_,i)=>i+1);
+        shuffle(pool);
+        const nums = pool.slice(0,k).sort((a,b)=>a-b);
+        const links = nums.map(n=>`<a href="${amc8ProbURL(y,n)}">#${n}</a>`).join(', ');
+        return {
+          short:`⏱️ Timed — AMC 8 mini set (${y}): ${nums.join(', ')}`,
+          long:`⏱️ <b>Timed set — AMC 8 mini</b> (${y}): ${links}`,
+          mins: minutesBudget, type:'timed'
+        };
+      }
+
+      /* Mocks */
       const currentYear = new Date().getFullYear();
       const MOCK_YEARS = []; for(let y=currentYear-1; y>=2000; y--) MOCK_YEARS.push(y);
       let mockYearIdx = 0;
       function nextMockYear(){ const y = MOCK_YEARS[mockYearIdx % MOCK_YEARS.length]; mockYearIdx++; return y; }
-
       function aimeSetURL(y,v){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AIME_${v}_Problems`; }
       function amcSetURL(level,y,v){ const L=(level==='10')?'AMC_10':'AMC_12'; return `https://artofproblemsolving.com/wiki/index.php/${y}_${L}${v}_Problems`; }
+      function amc8SetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_AMC_8_Problems`; }
       function jmoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAJMO_Problems`; }
       function usamoSetURL(y){ return `https://artofproblemsolving.com/wiki/index.php/${y}_USAMO_Problems`; }
 
@@ -792,15 +759,18 @@
           const variant = (mockYearIdx % 2 === 0) ? 'I' : 'II';
           return {htmlShort:`📝 AIME ${variant} ${y} full mock`, htmlLong:`📝 <a href="${aimeSetURL(y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AIME ${variant} (15 problems)</a> • Review thoroughly.`, mins: totalMinutes, type:'mock'};
         }
-        const level = (/amc10/.test(goalStr))?'10':'12';
+        if(onAMC8){
+          return {htmlShort:`📝 AMC 8 ${y} mock`, htmlLong:`📝 <a href="${amc8SetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} AMC 8</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+        }
+        const level = (onAMC10)?'10':'12';
         const variant = (mockYearIdx % 2 === 0) ? 'A' : 'B';
         return {htmlShort:`📝 AMC ${level}${variant} ${y} mock`, htmlLong:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
       }
 
-      /* Proof track */
+      /* Proof track (unchanged) */
       const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
       const proofEnabledUSAMO = hasProofBooks && onUSAMO;
-      const proofEnabledAIME = hasProofBooks && allowAIMEProofLate; // only late-phase, we’ll gate below
+      const proofEnabledAIME = hasProofBooks && allowAIMEProofLate;
 
       const proofUnits = [];
       if(hasProofBooks){
@@ -839,14 +809,15 @@
             return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic };
           }
 
-          const TH = { readMin: 14, drillMin: 16, timedMin: 10 }; // a touch more drill baseline
+          /* Softer thresholds for AMC 8 */
+          const TH = onAMC8 ? { readMin: 12, drillMin: 14, timedMin: 8 } : { readMin: 14, drillMin: 16, timedMin: 10 };
           const totalDays = days;
 
-          const mockStartIdx = Math.max(0, totalDays - 30);
+          const mockStartIdx = onAMC8 ? Math.max(0, totalDays - 21) : Math.max(0, totalDays - 30);
           const mockWeekdays = new Set([2,4,6]); // Tue, Thu, Sat
           const offDaySet = new Set(storedOff.map(Number));
 
-          const usedBookProblems = new Set(); // shared across ex & timed
+          const usedBookProblems = new Set();
           const seenTopics = new Map();
 
           function allAvailableTopics(fromCatalog){
@@ -872,9 +843,14 @@
           }
 
           function baseMixForPhase(ph){
+            if(onAMC8){
+              if(ph==='Foundation') return {read:0.60, drill:0.34, timed:0.06};
+              if(ph==='Mixed')      return {read:0.50, drill:0.38, timed:0.12};
+              return                 {read:0.40, drill:0.42, timed:0.18};
+            }
             if(ph==='Foundation') return {read:0.56, drill:0.34, timed:0.10};
-            if(ph==='Mixed') return {read:0.46, drill:0.38, timed:0.16};
-            return {read:0.36, drill:0.42, timed:0.22};
+            if(ph==='Mixed')      return {read:0.46, drill:0.38, timed:0.16};
+            return                 {read:0.36, drill:0.42, timed:0.22};
           }
           function phaseNameForDay(d){
             const f=Math.floor(totalDays*0.55), m=Math.floor(totalDays*0.85);
@@ -939,7 +915,6 @@
             const tasks = [];
 
             const topic = pickNextTopic();
-            // guaranteed reading slice (prevents null.labelShort)
             const {slice, actualTopic} = getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics);
             const chosenTopic = actualTopic;
             const chosenSection = slice._section || fallbackSection(chosenTopic);
@@ -950,38 +925,38 @@
               mins: slice.usedMin, type:'reading', _topic: chosenTopic, _sec: chosenSection
             });
 
-            // Exercises aligned with reading
             const ex = makeExercisesFromSection(chosenSection, mDrill, dayIndex, totalDays, usedBookProblems);
             tasks.push({short:`<span class="topic-chip">${chosenTopic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: chosenTopic, _exCount: ex._exCount});
 
-            // Proof (US(A)JMO always if books; AIME only in Final phase if allowed)
             if( (proofEnabledUSAMO) || (proofEnabledAIME && finalPhase) ){
               const proofShare = 0.16;
               const proofBudget = Math.round(minutesPerDay*proofShare);
               scheduleProof(proofBudget).forEach(t=>tasks.push(t));
             }
 
-            // Timed set from the SAME chapter if possible
-            const timedObj = makeTimedFromSection(chosenSection, mTimed, dayIndex, totalDays, usedBookProblems);
             let timedTask = null;
-            if(timedObj){
-              timedTask = {short:`<span class="topic-chip">${chosenTopic}</span> ${timedObj.short}`, long:timedObj.long, mins: timedObj.mins, type:'timed', _topic: chosenTopic};
+            if(onAMC8){
+              const mini = makeAMC8MiniSet(mTimed);
+              timedTask = {short: mini.short, long: mini.long, mins: mini.mins, type:'timed', _topic: 'Mixed (AMC 8)'}
               tasks.push(timedTask);
             } else {
-              // If no problem range, shift minutes into exercises
-              const exT = tasks.find(t=>t.type==='bookex'); if(exT) exT.mins += mTimed;
+              const timedObj = makeTimedFromSection(chosenSection, mTimed, dayIndex, totalDays, usedBookProblems);
+              if(timedObj){
+                timedTask = {short:`<span class="topic-chip">${chosenTopic}</span> ${timedObj.short}`, long:timedObj.long, mins: timedObj.mins, type:'timed', _topic: chosenTopic};
+                tasks.push(timedTask);
+              } else {
+                const exT = tasks.find(t=>t.type==='bookex'); if(exT) exT.mins += mTimed;
+              }
             }
 
-            // Problem of the day
             const potd = problemOfDay();
             tasks.push({short:potd.htmlShort, long:potd.htmlLong, mins: potd.mins, type:'potd'});
 
-            // Balance: favor more drills first, then timed, then reading
             balance(tasks, minutesPerDay, timedTask);
             return tasks;
           }
 
-          /* Build days */
+          /* Build all days */
           const tasksByDay = [];
           for(let d=0; d<totalDays; d++){
             const dateObj = new Date(start.getTime()+d*86400000);
@@ -995,7 +970,7 @@
             taskMap.set(key, tasksByDay[i]);
           }
 
-          /* Render */
+          /* Render calendar */
           const months = buildMonthList(start, end);
           if(!months.length){
             console.warn('Empty month list; falling back to start month');
@@ -1093,7 +1068,7 @@
           }
           function closeModal(){ modalBackdrop.style.display='none'; document.body.style.overflow=''; }
 
-          /* ICS export (uses study time) */
+          /* ICS export */
           $('downloadIcs').onclick = ()=>{
             const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
             const blob = new Blob([ics], {type:'text/calendar'});
@@ -1104,14 +1079,13 @@
           function buildICS(startDate, spanDays, tasks, minutes, meta){
             function fmtUTC(x){ const y=x.getUTCFullYear(), m=String(x.getUTCMonth()+1).padStart(2,'0'), d=String(x.getUTCDate()).padStart(2,'0'), H=String(x.getUTCHours()).padStart(2,'0'), M=String(x.getUTCMinutes()).padStart(2,'0'); return `${y}${m}${d}T${H}${M}00Z`; }
 
-            /* get time from toolbar */
             const hSel = $('studyHour')?.value || '07';
             const mSel = $('studyMin')?.value || '00';
             const ampm = $('studyAmpm')?.value || 'PM';
             const startHour12 = parseInt(hSel,10); const startMin = parseInt(mSel,10);
             let startHour = startHour12%12 + (ampm==='PM'?12:0);
-            if(startHour===24) startHour = 12; // 12PM -> 12
-            if(startHour===12 && ampm==='AM') startHour = 0; // 12AM -> 0
+            if(startHour===24) startHour = 12;
+            if(startHour===12 && ampm==='AM') startHour = 0;
 
             const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//OlympiadPrep//StudyPlan//EN'];
             const planId = (meta.generatedAt ? hash32(meta.generatedAt) : hash32(seedStr));
@@ -1129,7 +1103,7 @@
             lines.push('END:VCALENDAR'); return lines.join('\r\n');
           }
 
-          /* Rebuild + Save hooks */
+          /* Rebuild + Save */
           $('rebuildBtn').onclick = ()=>{
             const m = Number($('mPerDay').value||0), t = $('testDate').value;
             if(m<15 || !t){ alert('Enter minutes per day (15 or more) and a future test date.'); return; }
@@ -1140,24 +1114,16 @@
             location.href = 'timeline.html?v=' + encodeURIComponent(input.generatedAt);
           };
 
-          /* Cloud save (1 plan per user) */
           const saveBtn = $('saveCloudBtn'), saveStatus = $('saveStatus');
-          function markSaved(msg){
-            if(saveStatus){ saveStatus.style.display='inline-flex'; saveStatus.textContent = msg||'Saved'; }
-          }
+          function markSaved(msg){ if(saveStatus){ saveStatus.style.display='inline-flex'; saveStatus.textContent = msg||'Saved'; } }
           async function savePlanToCloud(){
             if(!window.olympAuth || !window.olympAuth.getUser || !window.olympAuth.savePlan){
               alert('Please sign in first (top-right).'); return;
             }
             const u = window.olympAuth.getUser();
             if(!u){ alert('Please sign in first.'); return; }
-            try{
-              await window.olympAuth.savePlan(input);
-              markSaved('Saved ✓');
-            }catch(e){
-              console.error('Cloud save failed', e);
-              alert('Cloud save failed: ' + (e.message||e));
-            }
+            try{ await window.olympAuth.savePlan(input); markSaved('Saved ✓'); }
+            catch(e){ console.error('Cloud save failed', e); alert('Cloud save failed: ' + (e.message||e)); }
           }
           if(saveBtn){ saveBtn.onclick = savePlanToCloud; }
 
@@ -1166,7 +1132,6 @@
           errBox.style.display = 'block';
           errBox.textContent = 'Plan build failed: ' + (e.message || e);
 
-          // Fail-safe: draw a skeleton month so page is not empty
           const cal = $('calendar');
           if(cal && cal.children.length===0){
             const today = new Date(); today.setHours(0,0,0,0);
@@ -1188,7 +1153,7 @@
     })();
   </script>
 
-  <!-- Cloud auth/plan glue (already working in your repo) -->
+  <!-- Auth glue -->
   <script type="module" src="./auth.js"></script>
 </body>
 </html>
