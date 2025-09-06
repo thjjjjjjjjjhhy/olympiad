@@ -5,40 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Need a Tutor - OlympiadPrep</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* Header layout */
-    .site-header .container{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; flex-wrap:wrap;
+    :root{
+      --fg:#0f172a; --muted:#64748b; --grid:#e5e7eb; --card:#fff;
+      --accent:#0ea5e9; --accent-2:#2563eb; --ok:#059669; --danger:#b91c1c;
+      --shadow:0 8px 24px rgba(2,6,23,.08);
     }
-    .brand-nav{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .site-nav{ display:flex; gap:12px; flex-wrap:wrap; }
-    .site-nav a.active{ font-weight:700; text-decoration:underline; }
-    #auth-slot{ display:flex; align-items:center; justify-content:flex-end; min-height:32px; }
+    html,body{background:#fff;color:var(--fg);font-family:"Source Sans Pro",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+
+    /* Header (site-wide look) */
+    .site-header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,#3b82f6 0%, #6366f1 100%)!important;color:#fff;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.15)}
+    .site-header .container{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand-nav{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .logo{font-weight:800;color:#fff;margin:0}
+    .site-nav{display:flex;gap:14px;flex-wrap:wrap}
+    .site-nav a{color:#fff;text-decoration:none;font-weight:700;opacity:.95}
+    .site-nav a:hover{text-decoration:underline;opacity:1}
+    .site-nav a.active{border-bottom:2px solid rgba(255,255,255,.9);padding-bottom:2px}
+    #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
+
+    /* Hero */
+    .hero{padding:22px 0 8px;background:linear-gradient(180deg,rgba(99,102,241,.06),rgba(99,102,241,0))}
+    .hero h2{margin:6px 0 6px;font-size:1.9rem}
+    .sub{color:var(--muted)}
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:10px}
+    @media (max-width:900px){ .hero-grid{grid-template-columns:1fr} }
+
+    /* Cards */
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+
+    .bullet{display:flex;gap:10px;align-items:flex-start;margin:6px 0;color:#334155}
+    .bullet .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;position:relative;top:.5rem}
 
     /* Form */
-    .tutor-form{ display:grid; gap:12px; max-width:720px; margin-top:12px; }
-    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media (max-width:700px){ .two-col{ grid-template-columns:1fr; } }
-    .form-group{ display:grid; gap:6px; }
-    .tutor-form input, .tutor-form select, .tutor-form textarea{
-      border:1px solid #e5e7eb; border-radius:10px; padding:10px; background:#fff;
+    .tutor-form{display:grid;gap:12px}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:760px){ .two-col{grid-template-columns:1fr} }
+    .form-group{display:grid;gap:6px}
+    .tutor-form input,.tutor-form select,.tutor-form textarea{
+      border:1px solid var(--grid);border-radius:12px;padding:10px 12px;background:#fff;outline:none;
+      transition:border .15s, box-shadow .15s;
     }
-    .tutor-form button{
-      cursor:pointer; border:0; background:#0ea5e9; color:#fff;
-      padding:10px 16px; border-radius:12px; font-weight:700; width:fit-content;
+    .tutor-form input:focus,.tutor-form select:focus,.tutor-form textarea:focus{
+      border-color:#93c5fd; box-shadow:0 0 0 4px rgba(59,130,246,.15);
     }
-    .note{ color:#64748b; font-size:.92rem; }
-    .success, .error{
-      margin-top:10px; padding:10px 12px; border-radius:10px; display:none;
-    }
-    .success{ background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
-    .error{ background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d; }
-    /* Honeypot (hidden anti-bot field) */
-    .hp-wrap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    .note{color:var(--muted);font-size:.92rem}
+
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;text-decoration:none}
+    .btn.primary{background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;border:0}
+    .btn.secondary{background:#fff;border:1px solid var(--grid);color:#0f172a}
+
+    .status{margin-top:8px;padding:10px 12px;border-radius:10px;display:none}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+    .err{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+
+    /* Honeypot */
+    .hp-wrap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+    footer{border-top:1px solid var(--grid);padding:18px 0;text-align:center;color:#64748b;margin-top:18px}
   </style>
 </head>
 <body>
+  <!-- Header -->
   <header class="site-header">
     <div class="container">
       <div class="brand-nav">
@@ -54,105 +84,132 @@
     </div>
   </header>
 
-  <main class="container">
-    <h2>👩‍🏫 Need a Tutor?</h2>
-    <p>Connect with experienced mentors for personalized guidance. Fill out the form and we’ll reach out.</p>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h2>👩‍🏫 Need a Tutor?</h2>
+      <p class="sub">Contest-savvy mentors for AMC 8/10/12, AIME, and US(A)JMO. Tell us what you need— we’ll introduce the best fit.</p>
 
-    <form id="tutor-form" class="tutor-form">
-      <!-- Required -->
-      <div class="two-col">
-        <div class="form-group">
-          <label for="name">Name <span class="note">(required)</span></label>
-          <input type="text" id="name" name="name" required />
+      <div class="hero-grid">
+        <!-- Form card -->
+        <div class="card">
+          <form id="tutor-form" class="tutor-form" aria-describedby="form-help">
+            <div class="two-col">
+              <div class="form-group">
+                <label for="name">Name <span class="note">(required)</span></label>
+                <input id="name" name="name" type="text" required autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email <span class="note">(required)</span></label>
+                <input id="email" name="email" type="email" required autocomplete="email" />
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="form-group">
+                <label for="gradeLevel">Grade level <span class="note">(optional)</span></label>
+                <select id="gradeLevel" name="gradeLevel">
+                  <option value="">Select…</option>
+                  <option>Middle school</option><option>9th grade</option><option>10th grade</option>
+                  <option>11th grade</option><option>12th grade</option><option>Gap year</option>
+                  <option>College</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="state">State <span class="note">(optional)</span></label>
+                <select id="state" name="state">
+                  <option value="">Select…</option>
+                  <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+                  <option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option>
+                  <option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option>
+                  <option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option>
+                  <option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+                  <option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option>
+                  <option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option>
+                  <option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option>
+                  <option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option>
+                  <option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option>
+                  <option>WY</option><option>Outside US</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="form-group">
+                <label for="school">School <span class="note">(optional)</span></label>
+                <input id="school" name="school" type="text" placeholder="e.g., Lincoln High School" />
+              </div>
+              <div class="form-group">
+                <label for="classes">Previous / current math classes <span class="note">(optional)</span></label>
+                <input id="classes" name="classes" type="text" placeholder="e.g., Algebra II, Precalculus, AoPS Intro NT" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="needs">What do you need help with? <span class="note">(required)</span></label>
+              <textarea id="needs" name="needs" rows="4" required placeholder="Topics, contests, goals, meeting times…"></textarea>
+            </div>
+
+            <!-- Honeypot -->
+            <div class="hp-wrap" aria-hidden="true">
+              <label>Leave this field empty:
+                <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
+              </label>
+            </div>
+
+            <div class="actions">
+              <button id="submitBtn" type="submit" class="btn primary">Submit</button>
+              <span id="form-help" class="note">We’ll email you within 1–2 business days.</span>
+            </div>
+
+            <div id="okMsg" class="status ok" role="status" aria-live="polite">
+              Thank you! We’ve received your request and will reach out soon.
+            </div>
+            <div id="errMsg" class="status err" role="alert">
+              Submission failed — please try again.
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="email">Email <span class="note">(required)</span></label>
-          <input type="email" id="email" name="email" required />
-        </div>
+
+        <!-- Info card -->
+        <aside class="card">
+          <h3 style="margin:0 0 8px">What to expect</h3>
+          <div class="bullet"><span class="dot"></span><div><b>Tailored match.</b> We pair you with a mentor experienced in your goal (AMC 8 → US(A)JMO).</div></div>
+          <div class="bullet"><span class="dot"></span><div><b>Clear plan.</b> Tutors align sessions with your <a href="timeline.html">study timeline</a>.</div></div>
+          <div class="bullet"><span class="dot"></span><div><b>Flexible cadence.</b> Weekly or bi-weekly; online via Zoom.</div></div>
+          <div class="bullet"><span class="dot"></span><div><b>Transparent goals.</b> Skills check-ins, timed sets, and review of mistakes.</div></div>
+          <p class="note" style="margin-top:8px">Tip: Include your contest dates and typical availability in the message.</p>
+        </aside>
       </div>
+    </div>
+  </section>
 
-      <!-- Optional extras -->
-      <div class="two-col">
-        <div class="form-group">
-          <label for="gradeLevel">Grade level <span class="note">(optional)</span></label>
-          <select id="gradeLevel" name="gradeLevel">
-            <option value="">Select…</option>
-            <option>Middle school</option>
-            <option>9th grade</option>
-            <option>10th grade</option>
-            <option>11th grade</option>
-            <option>12th grade</option>
-            <option>Gap year</option>
-            <option>College</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="state">State <span class="note">(optional)</span></label>
-          <select id="state" name="state">
-            <option value="">Select…</option>
-            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
-            <option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option>
-            <option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option>
-            <option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option>
-            <option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option>
-            <option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option>
-            <option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option>
-            <option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option>
-            <option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option>
-            <option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option>
-            <option>WY</option><option>Outside US</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="two-col">
-        <div class="form-group">
-          <label for="school">School <span class="note">(optional)</span></label>
-          <input type="text" id="school" name="school" placeholder="e.g., Lincoln High School" />
-        </div>
-        <div class="form-group">
-          <label for="classes">Previous / Current math classes <span class="note">(optional)</span></label>
-          <input type="text" id="classes" name="classes" placeholder="e.g., Algebra II, Precalculus, AoPS Intro NT" />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="needs">What do you need help with? <span class="note">(required)</span></label>
-        <textarea id="needs" name="needs" rows="4" required placeholder="Topics, contests, goals, schedule…"></textarea>
-      </div>
-
-      <!-- Honeypot to reduce spam -->
-      <div class="hp-wrap">
-        <label>Leave this field empty:
-          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
-        </label>
-      </div>
-
-      <button type="submit">Submit</button>
-      <div id="okMsg" class="success">Thank you! We’ve received your request. We’ll email you soon.</div>
-      <div id="errMsg" class="error">Submission failed — please try again in a moment.</div>
-    </form>
-  </main>
-
-  <footer>
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
-  </footer>
+  <footer>© 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.</footer>
 
   <!-- Email + optional cloud save -->
   <script type="module">
-    // 1) Replace with your Formspree endpoint:
+    // Your Formspree endpoint
     const FORMSPREE_ENDPOINT = "https://formspree.io/f/mldwopzp";
 
-    // Optional: if you want to attach the signed-in user id/email to the payload
-    // we'll read from your existing auth (firebase-init.js + auth.js you already have)
-    // and include it when present.
+    // Autofill from Google sign-in when available
     let currentUser = null;
-    window.addEventListener("olympAuthReady", () => {
-      try { currentUser = window.olympAuth?.getUser?.() || null; } catch {}
-    });
+    function tryAutofill(){
+      try{
+        const u = window.olympAuth?.getUser?.();
+        if(!u) return;
+        currentUser = u;
+        const nameEl = document.getElementById('name');
+        const emailEl = document.getElementById('email');
+        if (u.displayName && !nameEl.value) nameEl.value = u.displayName;
+        if (u.email && !emailEl.value) emailEl.value = u.email;
+      }catch{}
+    }
+    window.addEventListener("olympAuthReady", tryAutofill);
+    // Also try once after load (in case auth is already ready)
+    setTimeout(tryAutofill, 400);
 
     const form = document.getElementById('tutor-form');
+    const submitBtn = document.getElementById('submitBtn');
     const okMsg = document.getElementById('okMsg');
     const errMsg = document.getElementById('errMsg');
 
@@ -162,23 +219,28 @@
       errMsg.style.display = 'none';
 
       const data = Object.fromEntries(new FormData(form).entries());
-      // Basic client validation
       if(!data.name || !data.email || !data.needs){
         errMsg.textContent = "Please fill out name, email, and what you need help with.";
         errMsg.style.display = 'block';
         return;
       }
 
-      // Compose payload for email
+      // Basic email sanity
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)){
+        errMsg.textContent = "Please enter a valid email address.";
+        errMsg.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      const oldLabel = submitBtn.textContent;
+      submitBtn.textContent = "Submitting…";
+
       const payload = {
-        name: data.name,
-        email: data.email,
-        gradeLevel: data.gradeLevel || '',
-        state: data.state || '',
-        school: data.school || '',
-        classes: data.classes || '',
+        name: data.name, email: data.email,
+        gradeLevel: data.gradeLevel || '', state: data.state || '',
+        school: data.school || '', classes: data.classes || '',
         needs: data.needs,
-        // Extra metadata
         page: location.href,
         userUid: currentUser?.uid || '',
         userDisplay: currentUser?.displayName || '',
@@ -186,37 +248,36 @@
       };
 
       try {
-        // 2) Send email via Formspree
         const r = await fetch(FORMSPREE_ENDPOINT, {
           method: "POST",
           headers: { "Accept":"application/json", "Content-Type":"application/json" },
           body: JSON.stringify(payload)
         });
-
         if (!r.ok) throw new Error("Email service returned " + r.status);
 
-        // Optional: also save to Firestore if you want (uncomment block below)
+        // Optional Firestore save (uncomment if you want)
         /*
         const { db } = await import("./firebase-init.js");
         const { addDoc, collection, serverTimestamp } =
           await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        await addDoc(collection(db, "tutorRequests"), {
-          ...payload,
-          createdAt: serverTimestamp()
-        });
+        await addDoc(collection(db, "tutorRequests"), { ...payload, createdAt: serverTimestamp() });
         */
 
         okMsg.style.display = 'block';
         form.reset();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
         console.error(err);
         errMsg.style.display = 'block';
         errMsg.textContent = "Submission failed — please try again.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldLabel;
       }
     });
   </script>
 
-  <!-- Keep this relative path consistent with your other pages -->
+  <!-- Auth (header sign-in) -->
   <script type="module" src="./auth.js"></script>
 </body>
 </html>
