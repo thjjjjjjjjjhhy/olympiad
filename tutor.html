@@ -7,25 +7,27 @@
   <link rel="stylesheet" href="styles.css" />
 
   <style>
-    /* ===== Page palette to match the site ===== */
+    /* ===== Site palette (aligned with other pages) ===== */
     :root{
       --fg:#0f172a;           /* main text */
       --muted:#64748b;        /* secondary text */
       --grid:#e5e7eb;         /* borders */
+      --soft:#f8fafc;         /* soft background */
       --card:#ffffff;         /* cards */
       --accent:#0ea5e9;       /* cyan */
-      --accent-2:#2563eb;     /* indigo for CTAs */
-      --chip-bg:#f8fafc;
-      --shadow:0 1px 4px rgba(0,0,0,.06);
+      --cta:#2563eb;          /* indigo CTA */
+      --cta-2:#1d4ed8;
+      --ring:#93c5fd;         /* focus ring */
+      --shadow:0 8px 30px rgba(2,6,23,.06);
     }
     html,body{background:#fff;color:var(--fg)}
     .container{max-width:1100px;margin:0 auto;padding:0 16px}
 
-    /* ===== Header (same as home/timeline) ===== */
+    /* ===== Header (same as site) ===== */
     .site-header{
       position:sticky; top:0; z-index:10;
       background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%) !important;
-      color:#fff; padding:12px 0; margin-bottom:18px;
+      color:#fff; padding:12px 0; margin-bottom:0;
     }
     .site-header .container{
       display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
@@ -38,49 +40,75 @@
     .site-nav a.active{ border-bottom:2px solid rgba(255,255,255,.9); padding-bottom:2px }
     #auth-slot{ display:flex; align-items:center; gap:10px; min-height:32px }
 
-    /* ===== Hero (force dark text so it’s readable) ===== */
-    .hero{ padding:8px 0 0 }
-    .hero h2{ margin:.25rem 0 .5rem; color:var(--fg) !important; display:flex; align-items:center; gap:10px }
-    .hero h2 .emoji{ display:inline-flex; align-items:center; justify-content:center;
-                     width:28px; height:28px; border-radius:8px; background:#eff6ff; border:1px solid var(--grid); }
-    .hero p{ color:var(--muted) !important; margin:0 0 10px }
+    /* ===== Hero (one clear header; no second header line) ===== */
+    .hero{
+      background: linear-gradient(180deg, rgba(99,102,241,.10), rgba(99,102,241,0));
+      padding:22px 0 12px;
+      border-bottom:1px solid var(--grid);
+    }
+    .hero h1{
+      margin:.2rem 0; font-size:clamp(1.6rem, 1.2rem + 1.8vw, 2.1rem);
+      display:flex; align-items:center; gap:10px; color:var(--fg);
+    }
+    .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 4px }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      background:#eef2ff; color:#1e293b; border:1px solid var(--grid);
+      padding:6px 10px; border-radius:999px; font-size:.86rem; font-weight:600;
+    }
+    .badge .dot{ width:8px; height:8px; border-radius:50%; background:#3b82f6 }
 
     /* ===== Layout: form + info card ===== */
-    .grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:14px; align-items:start; }
-    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
+    main{ padding:18px 0 24px }
+    .grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:16px; align-items:start }
+    @media (max-width:900px){ .grid{ grid-template-columns:1fr } }
 
-    .card{ background:var(--card); border:1px solid var(--grid); border-radius:16px; box-shadow:var(--shadow); padding:16px; }
-    .card h3{ margin:.2rem 0 .65rem }
-    .bullet{ margin:0; padding-left:18px; color:var(--fg) }
-    .bullet li{ margin:.4rem 0 }
-    .muted{ color:var(--muted) }
+    .card{
+      background:var(--card); border:1px solid var(--grid); border-radius:16px;
+      box-shadow:var(--shadow); padding:16px;
+    }
+    .side h3{ margin:.25rem 0 .65rem; font-size:1.1rem }
+    .side p, .side li{ color:var(--fg) }
+    .side .muted{ color:var(--muted) }
+    .bullet{ margin:0; padding-left:18px }
+    .bullet li{ margin:.45rem 0; line-height:1.4 }
+    .side a{ color:#2563eb; text-decoration:underline }
 
     /* ===== Form ===== */
     .tutor-form{ display:grid; gap:12px; }
-    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media (max-width:700px){ .two-col{ grid-template-columns:1fr; } }
-    .form-group{ display:grid; gap:6px; }
-    .tutor-form label{ color:var(--fg) !important; font-weight:600 }
-    .tutor-form .note{ color:var(--muted) !important; font-weight:400 }
+    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+    @media (max-width:700px){ .two-col{ grid-template-columns:1fr } }
+    .form-group{ display:grid; gap:6px }
+    .tutor-form label{ color:var(--fg); font-weight:700 }
+    .note{ color:var(--muted); font-weight:500; margin-left:.25rem }
+
     .tutor-form input, .tutor-form select, .tutor-form textarea{
-      border:1px solid var(--grid); border-radius:12px; padding:10px; background:#fff; color:var(--fg);
+      border:1px solid var(--grid); border-radius:12px; padding:11px 12px;
+      background:#fff; color:var(--fg); transition:border-color .15s, box-shadow .15s;
     }
-    .tutor-form input::placeholder,
-    .tutor-form textarea::placeholder{ color:#94a3b8 }
-    .tutor-form button{
-      cursor:pointer; border:0; background:var(--accent-2); color:#fff;
-      padding:10px 16px; border-radius:12px; font-weight:800; width:fit-content;
+    .tutor-form input::placeholder, .tutor-form textarea::placeholder{ color:#94a3b8 }
+    .tutor-form input:focus, .tutor-form select:focus, .tutor-form textarea:focus{
+      outline:none; border-color:#93c5fd; box-shadow:0 0 0 4px rgba(147,197,253,.35);
     }
+
+    .btn{
+      cursor:pointer; border:0; background:linear-gradient(90deg, var(--cta) 0%, var(--cta-2) 100%);
+      color:#fff; padding:11px 16px; border-radius:12px; font-weight:800; letter-spacing:.2px;
+      box-shadow:0 6px 18px rgba(37,99,235,.22); transition:transform .06s ease, filter .2s ease;
+    }
+    .btn:hover{ filter:brightness(1.05) }
+    .btn:active{ transform:translateY(1px) }
+
     .success, .error{ margin-top:10px; padding:10px 12px; border-radius:10px; display:none }
     .success{ background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46 }
     .error{ background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d }
 
-    /* Honeypot (hidden anti-bot field) */
-    .hp-wrap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    /* Anti-bot */
+    .hp-wrap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
 
     /* Print */
     @media print{
-      .site-header{ display:none !important }
+      .site-header,.badge-row{ display:none !important }
       .card{ box-shadow:none; border:1px solid var(--grid) }
     }
   </style>
@@ -103,15 +131,19 @@
     </div>
   </header>
 
-  <!-- ===== Hero ===== -->
+  <!-- ===== Hero (single clean header, badges instead of second header) ===== -->
   <section class="hero">
     <div class="container">
-      <h2><span class="emoji">👩‍🏫</span> Need a Tutor?</h2>
-      <p>Contest-savvy mentors for AMC 8/10/12, AIME, and US(A)JMO. Tell us what you need — we’ll introduce the best fit.</p>
+      <h1>👩‍🏫 Need a Tutor?</h1>
+      <div class="badge-row">
+        <span class="badge"><span class="dot"></span> AMC 8/10/12 → AIME → US(A)JMO</span>
+        <span class="badge"><span class="dot"></span> 1:1 online mentoring</span>
+        <span class="badge"><span class="dot"></span> Aligns to your study timeline</span>
+      </div>
     </div>
   </section>
 
-  <main class="container" style="margin-top:8px">
+  <main class="container">
     <div class="grid">
       <!-- ===== Left: Form ===== -->
       <section class="card">
@@ -179,15 +211,15 @@
             <textarea id="needs" name="needs" rows="4" required placeholder="Topics, contests, goals, meeting times…"></textarea>
           </div>
 
-          <!-- Honeypot to reduce spam -->
+          <!-- Anti-bot honeypot -->
           <div class="hp-wrap">
             <label>Leave this field empty:
               <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
             </label>
           </div>
 
-          <button type="submit">Submit</button>
-          <div class="muted" style="margin-top:6px">We’ll email you within 1–2 business days.</div>
+          <button type="submit" class="btn">Submit</button>
+          <div class="note" style="margin-top:8px">We’ll email you within 1–2 business days.</div>
 
           <div id="okMsg" class="success">Thank you! We’ve received your request. We’ll email you soon.</div>
           <div id="errMsg" class="error">Submission failed — please try again in a moment.</div>
@@ -195,7 +227,7 @@
       </section>
 
       <!-- ===== Right: Info card ===== -->
-      <aside class="card">
+      <aside class="card side">
         <h3>What to expect</h3>
         <ul class="bullet">
           <li><b>Tailored match.</b> We pair you with a mentor experienced in your goal (AMC 8 → US(A)JMO).</li>
@@ -203,7 +235,9 @@
           <li><b>Flexible cadence.</b> Weekly or bi-weekly; online via Zoom.</li>
           <li><b>Transparent goals.</b> Skills check-ins, timed sets, and review of mistakes.</li>
         </ul>
-        <p class="muted" style="margin-top:8px">Tip: Include your contest dates and typical availability in the message.</p>
+        <p class="muted" style="margin-top:10px">
+          Tip: Include your contest dates and typical availability in the message.
+        </p>
       </aside>
     </div>
   </main>
@@ -212,9 +246,8 @@
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
 
-  <!-- Email + optional cloud save -->
+  <!-- Submit via Formspree; optionally enrich with signed-in user -->
   <script type="module">
-    // Replace with your Formspree endpoint
     const FORMSPREE_ENDPOINT = "https://formspree.io/f/mldwopzp";
 
     let currentUser = null;
@@ -269,7 +302,7 @@
     });
   </script>
 
-  <!-- Auth (same file you already use) -->
+  <!-- Auth module (same as other pages) -->
   <script type="module" src="./auth.js"></script>
 </body>
 </html>
