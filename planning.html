@@ -83,6 +83,7 @@
             <label for="goal"><b>Goal</b></label>
             <select id="goal" name="goal" required style="width:100%">
               <option value="" disabled selected>Select your goal</option>
+              <option value="amc8">AMC 8</option>
               <option value="amc10">AMC 10</option>
               <option value="amc12">AMC 12</option>
               <option value="aime">AIME</option>
@@ -100,7 +101,7 @@
         </div>
 
         <button type="submit" style="margin-top:10px">Start Diagnostic →</button>
-        <p class="hint hintline">Mapping: AMC 10/12 → Test A, AIME → Test B, USAMO/USAJMO → Test C.</p>
+        <p class="hint hintline">Mapping: AMC 8/10/12 → Test A8/A, AIME → Test B, USAMO/USAJMO → Test C.</p>
       </form>
     </div>
 
@@ -153,6 +154,25 @@
   <script>
   // ---------- Test bank ----------
   const tests = {
+    /* NEW: AMC 8 — 12 easy MCQs */
+    A8: { title: "Diagnostic Test A8 (AMC 8 Readiness — Easy)", format: "12 multiple-choice (A–E)", time: 20,
+      questions: [
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"Solve \\(2x+3=13\\). What is \\(x\\)?", choices:["3","4","5","6","8"], answerIndex:2 },
+        { type:"mcq", topic:"Number Theory", latex:"Which number is divisible by 3?", choices:["124","205","312","401","502"], answerIndex:2 },
+        { type:"mcq", topic:"Geometry", latex:"A rectangle is \\(7\\times5\\). Its area is", choices:["10","12","24","30","35"], answerIndex:4 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many subsets does a 4-element set have?", choices:["4","6","8","12","16"], answerIndex:4 },
+        { type:"mcq", topic:"Probability", latex:"Roll a fair die. Probability of an even number is", choices:["\\(\\tfrac{1}{6}\\)","\\(\\tfrac{1}{3}\\)","\\(\\tfrac{1}{2}\\)","\\(\\tfrac{2}{3}\\)","\\(\\tfrac{5}{6}\\)"], answerIndex:2 },
+        { type:"mcq", topic:"Sequences and Series", latex:"In the sequence 2, 5, 8, 11, the next term is", choices:["12","13","14","15","16"], answerIndex:2 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"Compute \\(\\dfrac{3}{4}+\\dfrac{1}{8}\\).", choices:["\\(\\tfrac{1}{2}\\)","\\(\\tfrac{5}{8}\\)","\\(\\tfrac{3}{5}\\)","\\(\\tfrac{7}{8}\\)","\\(\\tfrac{9}{8}\\)"], answerIndex:3 },
+        { type:"mcq", topic:"Polynomials and Algebra", latex:"Evaluate \\(2^3\\cdot 2^2\\).", choices:["8","16","24","32","64"], answerIndex:3 },
+        { type:"mcq", topic:"Functions", latex:"The average of 4, 6, and 10 is", choices:["6","\\(\\tfrac{20}{3}\\)","7","8","9"], answerIndex:1 },
+        { type:"mcq", topic:"Geometry", latex:"A triangle has angles \\(50^\\circ\\) and \\(60^\\circ\\). The third angle is", choices:["50°","60°","70°","80°","90°"], answerIndex:2 },
+        { type:"mcq", topic:"Number Theory", latex:"\\(\\operatorname{lcm}(6,8)=\\)", choices:["12","16","18","24","48"], answerIndex:3 },
+        { type:"mcq", topic:"Combinatorics", latex:"How many two-digit positive integers are there?", choices:["80","81","88","90","99"], answerIndex:3 }
+      ]
+    },
+
+    /* Existing tests */
     A: { title: "Diagnostic Test A (AMC 12 Readiness — Hard)", format: "10 multiple-choice (A–E)", time: 30,
       questions: [
         { type:"mcq", topic:"Polynomials and Algebra", latex:"Let \\(r,s\\) be the roots of \\(x^2-(k+3)x+(2k+5)=0\\). If \\(r^2+s^2=29\\), find the sum of all possible values of \\(k\\).", choices:["\\(-11\\)","\\(-1\\)","1","11","30"], answerIndex:1 },
@@ -196,7 +216,7 @@
       ] }
   };
 
-  // --- Extra, easier AMC questions (same topics, more approachable) ---
+  // --- Extra, easier AMC10/12 add-ons (kept) ---
   const AMC_EASY_QUESTIONS = [
     { type:"mcq", topic:"Polynomials and Algebra",
       latex:"For \\(x^2-5x+6=0\\), what is the sum of the roots?",
@@ -230,7 +250,8 @@
       choices:["800","810","900","901","999"], answerIndex:2 }
   ];
 
-  const goalToTest = { 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
+  /* Goal → test mapping (now with AMC 8) */
+  const goalToTest = { 'amc8':'A8', 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
   // ---------- BIGGER Book catalog ----------
   const BOOKS = [
@@ -367,14 +388,14 @@
     return s;
   }
 
-  // ---- Render Test (AMC gets 10 easier add-ons) ----
+  // ---- Render Test (AMC10/12 gets +10 easier; AMC8 uses its own 12 Q set) ----
   function renderTest(testId){
     const t = tests[testId];
 
-    // For AMC (Test A), append easier questions to make 20 total
+    // Build question set
     const qset = (testId === 'A')
-      ? [...t.questions, ...AMC_EASY_QUESTIONS]
-      : t.questions;
+      ? [...t.questions, ...AMC_EASY_QUESTIONS]   // 20 total for AMC10/12
+      : t.questions;                              // 12 for A8, 10 for B/C
 
     diagSection.style.display = 'block';
     brk.style.display = 'none';
@@ -384,6 +405,7 @@
     recBooksEl.innerHTML='';
     otherBooksEl.innerHTML='';
 
+    // Display meta (special case AMC10/12 only)
     const displayFormat = (testId==='A') ? '20 multiple-choice (A–E)' : t.format;
     const displayTime   = (testId==='A') ? 40 : t.time;
 
@@ -456,10 +478,11 @@
     // Up/down suggestion
     const pct = Math.round(100*correct/total);
     let advice = '';
-    if(testId==='A' && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
-    if(testId==='B' && pct>=75) advice = `You scored ${pct}%. Consider trying the higher diagnostic (US(A)JMO – Test C).`;
-    if(testId==='B' && pct<=35) advice = `You scored ${pct}%. Consider taking the AMC diagnostic (Test A) first.`;
-    if(testId==='C' && pct<=35) advice = `You scored ${pct}%. Consider taking the AIME diagnostic (Test B).`;
+    if(testId==='A8' && pct>=90) advice = `Great job (${pct}%)! Consider the AMC 10 diagnostic next.`;
+    if(testId==='A'  && pct>=90) advice = `You scored ${pct}%. Consider trying the higher diagnostic (AIME – Test B).`;
+    if(testId==='B'  && pct>=75) advice = `You scored ${pct}%. Consider trying the higher diagnostic (US(A)JMO – Test C).`;
+    if(testId==='B'  && pct<=35) advice = `You scored ${pct}%. Consider taking the AMC diagnostic (Test A) first.`;
+    if(testId==='C'  && pct<=35) advice = `You scored ${pct}%. Consider taking the AIME diagnostic (Test B).`;
     levelAdvice.style.display = advice ? 'block' : 'none';
     levelAdvice.textContent = advice;
 
@@ -478,7 +501,7 @@
     const topOff = getCheckedWeekdays('top');
     setCheckedWeekdays('build', topOff);
 
-    // Book recs (capped to ≤3 pre-selected)
+    // Book recs (A8 uses same set as AMC10)
     buildBookRecommendations(testId, agg);
 
     // Generate
@@ -535,7 +558,7 @@
       .sort((a,b)=>a.score-b.score)
       .map(x=>x.k);
 
-    // Topic -> book helpers
+    // Topic → book helpers (AMC/A8 share)
     const byTopicAMC = (t) => {
       if(/Number Theory/.test(t)) return 'intro-nt';
       if(/Geometry/.test(t)) return 'intro-geo';
@@ -551,14 +574,18 @@
       return 'int-alg';
     };
 
-    const chosen = new Set();
+    let chosen = new Set();
+    let alsoSuggest = [];
 
-    if(testId==='A'){ // AMC
-      chosen.add('aops-v1');
+    if(testId==='A' || testId==='A8'){ // AMC 10/12 & AMC 8 share the same book set
+      chosen.add('aops-v1');           // base
+      chosen.add('intro-cp');          // base (2 total)
       for(const t of ranked){
-        chosen.add(byTopicAMC(t));
         if(chosen.size>=3) break;
+        chosen.add(byTopicAMC(t));     // optionally add a 3rd based on weakness
       }
+      // Show the rest unchecked:
+      alsoSuggest.push('intro-nt','intro-geo','intro-alg','cmms');
     } else if(testId==='B'){ // AIME
       chosen.add('aops-v2');
       if(ranked.length) chosen.add(byTopicAIME(ranked[0]));
@@ -566,19 +593,24 @@
         const next = ranked[1] ? byTopicAIME(ranked[1]) : 'precalc';
         chosen.add(next);
       }
-      while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
-    } else { // USAMO/USAJMO
+      alsoSuggest.push('int-alg','int-cp','precalc','egmo','104nt','zeitz');
+    } else { // C — US(A)JMO
       chosen.add('aops-v2');
       chosen.add('velleman');
       if(ranked.some(t=>/Geometry/.test(t))) chosen.add('egmo');
       else if(ranked.some(t=>/Combinatorics/.test(t))) chosen.add('engel');
       else chosen.add('int-alg');
-      while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
+      alsoSuggest.push('int-cp','precalc','zeitz','engel','104nt','path-comb');
     }
 
+    // Enforce ≤3 preselected
+    while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
+
+    // Build UI
     const chosenIds = new Set(chosen);
+    const allSuggest = Array.from(new Set(alsoSuggest.filter(id=>!chosenIds.has(id))));
     const recs   = BOOKS.filter(b => chosenIds.has(b.id));
-    const others = BOOKS.filter(b => !chosenIds.has(b.id));
+    const others = BOOKS.filter(b => allSuggest.includes(b.id));
 
     recBooksEl.innerHTML  = recs.map(b=>pillHTML(b,true)).join('');
     otherBooksEl.innerHTML= others.map(b=>pillHTML(b,false)).join('');
