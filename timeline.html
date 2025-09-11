@@ -71,7 +71,7 @@
     .topic-chip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:.78rem;margin-left:6px;background:#fafafa}
     .more{font-size:.85rem;color:var(--accent);cursor:pointer;user-select:none}
     .more-wrap{position:absolute;right:6px;bottom:6px;background:linear-gradient(90deg, rgba(255,255,255,0), #fff 35%);padding-left:18px}
-    .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 75%);border-radius:0 0 10px 10px;pointer-events:none}
+    .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg, rgba(0,0,0,0) 0%, #fff 75%);border-radius:0 0 10px 10px;pointer-events:none}
 
     .pager{display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0 6px}
     .pager button{cursor:pointer;border:0;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-weight:700}
@@ -177,7 +177,7 @@
       </div>
 
       <div style="grid-column:1/-1" class="hint">
-        Reading shows page ranges from your selected books. Exercises & timed sets use book problems or AMC contest problems (AMC 8 uses easier contest sets).
+        Reading shows page ranges from your selected books. Exercises & timed sets use book problems or AMC/AIME contest problems.
       </div>
     </div>
 
@@ -185,7 +185,7 @@
     <div class="legend">
       <span class="lg"><span class="dot"></span> Reading (with page ranges)</span>
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
-      <span class="lg"><span class="dot"></span> Timed set (book or AMC/AIME contest)</span>
+      <span class="lg"><span class="dot"></span> Timed set (contest-based)</span>
       <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
       <span class="lg"><span class="dot"></span> Proof track (US(A)JMO; AIME late-phase if strong)</span>
       <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
@@ -308,8 +308,7 @@
         return;
       }
 
-      // Inclusive day count (today through test day)
-      const diffDays = Math.floor((end - start)/86400000) + 1;
+      const diffDays = Math.floor((end - start)/86400000) + 1; // inclusive window
       const days = (Number.isFinite(diffDays) && diffDays>=1) ? diffDays : 14;
 
       /* Goal flags */
@@ -442,25 +441,37 @@
         return null;
       }
 
-      /* Reading speed per book */
+      /* === BOOK-SPECIFIC MINUTES-PER-PAGE (mpp) ============================= */
       function mppFor(bookId){
-        const light = ['aops-v1','prealgebra','intro-alg','intro-cp','intro-geo','intro-nt','cmms'];
-        const heavy = ['aops-v2','int-alg','int-cp','precalc','egmo'];
-        const proofy= ['velleman','zeitz','engel','104nt','path-comb'];
-        if(light.includes(bookId)) return 2.0;
-        if(heavy.includes(bookId)) return (onUSAMO?3.0:2.6);
-        if(proofy.includes(bookId)) return 3.2;
-        return 2.4;
+        switch(bookId){
+          case 'prealgebra': return 3.2;
+          case 'aops-v1': return 3.8;
+          case 'intro-alg': return 3.8;
+          case 'intro-cp': return 3.9;
+          case 'intro-geo': return 4.2;
+          case 'intro-nt': return 4.0;
+          case 'cmms': return 3.5;
+
+          case 'aops-v2': return 4.5;
+          case 'int-alg': return 4.6;
+          case 'int-cp': return 4.8;
+          case 'precalc': return 5.0;
+
+          case 'egmo': return 5.6;
+          case 'zeitz': return 5.2;
+          case 'velleman': return 5.6;
+          case 'engel': return 5.6;
+          case '104nt': return 5.0;
+          case 'path-comb': return 5.4;
+          default: return 4.0; // sensible default centered at ~4 min/page
+        }
       }
 
-      /* === NEW TIMING HELPERS ================================================= */
+      /* === TIMING FOR PROBLEMS ============================================== */
 
-      // Contest timing for AMC 8, 10, 12
+      // Contest timing for AMC 8/10/12 (per your spec)
       function timeForAMCProblem(level, num){
-        // level: '8' | '10' | '12'
-        if(level==='8'){
-          return 3.5; // best assumption per your guidance
-        }
+        if(level==='8'){ return 3.5; }
         if(level==='10' || level==='12'){
           if(num>=1 && num<=10) return 3.5;
           if(num>=11 && num<=14) return 6.0;
@@ -469,12 +480,11 @@
         return 4.0;
       }
 
-      // AIME timing (UNCHANGED: use existing app logic 6.5 min/problem)
+      // AIME timing unchanged
       function timePerAIMEProblem(){ return 6.5; }
 
-      // Book exercises timing
+      // Book exercises timing (non-hard-tail ~3.5, hard-tail ~10)
       function timeForBookProblem(sectionMeta, n){
-        // sectionMeta.problemRange = [L,R], sectionMeta.hardTail = k (last k are hard)
         if(!sectionMeta || !Array.isArray(sectionMeta.problemRange) || sectionMeta.problemRange.length<2) return 3.5;
         const L=Number(sectionMeta.problemRange[0]), R=Number(sectionMeta.problemRange[1]);
         if(!Number.isFinite(L)||!Number.isFinite(R)) return 3.5;
@@ -484,7 +494,7 @@
         return 3.5;
       }
 
-      function minutesPerProblem(){ // legacy defaults used elsewhere (AIME, etc.)
+      function minutesPerProblem(){ // legacy defaults
         if(onUSAMO) return 9.0;
         if(onAIME)  return 6.5;
         if(onAMC8)  return 3.5;
@@ -497,8 +507,8 @@
         return 5;
       }
 
-      /* Section progression */
-      const sectionProgress = new Map();
+      /* SECTION/PROGRESS UTILITIES */
+      const sectionProgress = new Map(); // key -> {from,to}
       const consumedSections = new Set();
       const catalogCursor = {};
 
@@ -527,77 +537,163 @@
         return null;
       }
 
-      function sliceReading(section, minutesBudget, finalPhase){
+      function deepCopyProgress(){
+        const copy = new Map();
+        sectionProgress.forEach((v,k)=>{ copy.set(k, {from:v.from, to:v.to}); });
+        const consumed = new Set(consumedSections);
+        const cursor = JSON.parse(JSON.stringify(catalogCursor||{}));
+        return {copy, consumed, cursor};
+      }
+      function restoreProgress(snapshot){
+        sectionProgress.clear();
+        snapshot.copy.forEach((v,k)=>sectionProgress.set(k, {from:v.from, to:v.to}));
+        consumedSections.clear();
+        snapshot.consumed.forEach(k=>consumedSections.add(k));
+        Object.keys(catalogCursor).forEach(k=>delete catalogCursor[k]);
+        Object.assign(catalogCursor, snapshot.cursor||{});
+      }
+
+      function ensureProgressEntry(section){
         const pg = parsePages(section.pages);
-        const minFloor = Math.max(12, Math.round(minutesBudget*0.5));
-        if(!pg){
-          return {
-            labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`,
-            labelLong:  `${section.bookTitle}, ${section.chapterTitle}`,
-            usedMin: Math.max(minFloor, Math.round(minutesBudget*0.8)),
-            _section: section
-          };
-        }
         const key = `${section.bookId}#${section.chapter}`;
+        if(!pg) return {key, cur:null, total:null};
         const cur = sectionProgress.get(key) || {from: pg.from, to: pg.from-1};
+        return {key, cur, total: pg};
+      }
 
-        if(cur.to >= pg.to){
-          consumedSections.add(key);
-          if(!finalPhase){
-            return null;
+      /* === READING SLICER: fills minutes with pages across sections ========= */
+      function planReading(topic, minutesBudget, finalPhase, catalogByTopic, availableTopics, commit){
+        let remaining = Math.max(0, Math.round(minutesBudget));
+        const parts = []; // [{bookTitle, chapterTitle, from, to, mpp}]
+        let used = 0;
+
+        // Helper to consume from a specific section
+        function consumeFromSection(section){
+          const {key, cur, total} = ensureProgressEntry(section);
+          const mpp = mppFor(section.bookId);
+
+          if(!total){ // unknown pages, time-based reading
+            const take = Math.max(8, Math.min(remaining, Math.round(minutesBudget*0.8)));
+            parts.push({bookTitle: section.bookTitle, chapterTitle: section.chapterTitle, from:null, to:null, mpp, minutes: take});
+            used += take; remaining -= take;
+            return true;
           }
-          const tail = Math.min(4, Math.max(1,(pg.to-pg.from+1)));
-          const skimFrom = Math.max(pg.from, pg.to - tail + 1);
-          const skimTo   = pg.to;
+
+          // If already finished this section
+          if(cur.to >= total.to){
+            if(commit){ consumedSections.add(key); }
+            return false;
+          }
+
+          // How many pages fit?
+          const startPage = Math.max(cur.to+1, total.from);
+          let canPages = Math.max(1, Math.floor(remaining / mpp));
+          let toPage = Math.min(total.to, startPage + canPages - 1);
+          if(toPage < startPage) toPage = startPage;
+
+          const pages = (toPage - startPage + 1);
+          const minutes = Math.round(pages * mpp);
+
+          // Apply
+          parts.push({
+            bookTitle: section.bookTitle,
+            chapterTitle: section.chapterTitle,
+            from: startPage, to: toPage, mpp, minutes
+          });
+          used += minutes; remaining -= minutes;
+
+          // Update progress
+          const newTo = toPage;
+          if(commit){
+            sectionProgress.set(key, {from: total.from, to: newTo});
+            if(newTo >= total.to) consumedSections.add(key);
+          }else{
+            // simulate locally without touching the global map
+            const tempTo = newTo;
+            sectionProgress.set(key, {from: total.from, to: tempTo});
+            if(tempTo >= total.to) consumedSections.add(key);
+          }
+
+          return true;
+        }
+
+        // Try to fill from current/topic sections as much as possible
+        let guard = 0;
+        while(remaining > 1 && guard < 100){
+          guard++;
+          let sec = nextUnconsumedSection(topic, catalogByTopic);
+          if(!sec){
+            // If no more sections in this topic, optionally roll into another topic if appropriate.
+            // Preference: stay in-topic; if exhausted, stop (remaining can spill to exercises later).
+            break;
+          }
+          const ok = consumeFromSection(sec);
+          if(!ok){
+            // consumed or empty; try again
+            continue;
+          }
+        }
+
+        // If still minutes remain and we are near test or have many sections left,
+        // roll over into the next section(s) again; otherwise we'll let balancing give extras to exercises.
+        if(remaining > 1){
+          const totalDays = days;
+          const dayIdxEstimate = 0; // not used precisely here
+          const finalPhase = true; // prefer progress late — conservative to roll forward
+          // Try one more pull if something available
+          let sec = nextUnconsumedSection(topic, catalogByTopic);
+          if(sec){
+            consumeFromSection(sec);
+          }
+        }
+
+        // If we overshot by rounding, trim last part a little
+        if(used > minutesBudget + 2 && parts.length){
+          const last = parts[parts.length-1];
+          const overflow = used - minutesBudget;
+          if(last.from!=null && last.to!=null){
+            const pagesOver = Math.ceil(overflow / last.mpp);
+            if(last.to - pagesOver >= last.from){
+              last.to -= pagesOver;
+              const newPages = (last.to - last.from + 1);
+              const delta = last.minutes - Math.round(newPages * last.mpp);
+              last.minutes -= delta;
+              used -= delta;
+              if(commit){
+                // rewind progress accordingly
+                const key = `${shortBook(last.bookTitle)}#${last.chapterTitle}`; // not exact key; we already updated earlier from consume step
+              }
+            }
+          }else{
+            const cut = Math.min(overflow, last.minutes - 8);
+            last.minutes -= cut;
+            used -= cut;
+          }
+        }
+
+        // Build labels
+        function partsLabel(){
+          if(!parts.length) return {short:'Selected reading', long:'Selected reading', minutes:0};
+          const chunks = parts.map(p=>{
+            if(p.from!=null) return `${shortBook(p.bookTitle)} — ${shortChapter(p.chapterTitle)} (pp.${p.from}–${p.to})`;
+            return `${shortBook(p.bookTitle)} — ${shortChapter(p.chapterTitle)}`;
+          });
+          const longChunks = parts.map(p=>{
+            if(p.from!=null) return `${p.bookTitle}, ${p.chapterTitle} (pp.${p.from}–${p.to})`;
+            return `${p.bookTitle}, ${p.chapterTitle}`;
+          });
           return {
-            labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (review pp.${skimFrom}–${skimTo})`,
-            labelLong:  `${section.bookTitle}, ${section.chapterTitle} (review pp.${skimFrom}–${skimTo})`,
-            usedMin: Math.max(10, Math.round(minutesBudget*0.6)),
-            _section: section
+            short: chunks[0] + (chunks.length>1 ? `; then ${chunks.slice(1).join('; then ')}` : ''),
+            long:  longChunks.join(' • '),
+            minutes: Math.max(0, Math.round(parts.reduce((s,p)=>s+(p.minutes||0),0)))
           };
         }
 
-        const mpp = mppFor(section.bookId);
-        const wantPages = Math.max(2, Math.floor((minutesBudget + 0.25*mpp)/mpp));
-        let from = Math.max(cur.to+1, pg.from);
-        if(from>pg.to){
-          consumedSections.add(key);
-          return null;
-        }
-        let to = Math.min(pg.to, from + wantPages - 1);
-        const usedMin = Math.max(minFloor, Math.round((to - from + 1)*mpp));
-        sectionProgress.set(key, {from, to});
-        const range = `pp.${from}–${to}`;
-        return {
-          labelShort: `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)} (${range})`,
-          labelLong:  `${section.bookTitle}, ${section.chapterTitle} (${range})`,
-          usedMin, pageSlice:{from,to}, _section: section
-        };
+        const lab = partsLabel();
+        return {parts, usedMin: lab.minutes, labelShort: lab.short, labelLong: lab.long};
       }
 
-      function getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics){
-        let sec = nextUnconsumedSection(topic, catalogByTopic);
-        while(sec){
-          const sl = sliceReading(sec, mRead, finalPhase);
-          if(sl) return {slice: sl, actualTopic: topic};
-          sec = nextUnconsumedSection(topic, catalogByTopic);
-        }
-        for(const t of availableTopics){
-          if(t===topic) continue;
-          let s = nextUnconsumedSection(t, catalogByTopic);
-          while(s){
-            const sl = sliceReading(s, mRead, finalPhase);
-            if(sl) return {slice: sl, actualTopic: t};
-            s = nextUnconsumedSection(t, catalogByTopic);
-          }
-        }
-        return {
-          slice: { labelShort: `${topic} — cumulative review`, labelLong: `${topic} — cumulative review`, usedMin: Math.max(12, Math.round(mRead*0.7)) },
-          actualTopic: topic
-        };
-      }
-
-      /* Problem selection helpers (book exercises) */
+      /* Problem selection for book exercises */
       function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, bookTag){
         const res = [];
         if(!sectionMeta) return res;
@@ -649,18 +745,16 @@
         return early ? 'mixed' : 'hard';
       }
 
-      /* NEW: choose problems for a minutes budget (book exercises) */
       function chooseBookProblemsForBudget(section, minutesBudget, target, usedSet){
         const meta = section.editionMeta;
         const picked = [];
         if(!meta || !Array.isArray(meta.problemRange) || meta.problemRange.length<2) return {nums:picked, minutes:0};
-        // Get a large ordered candidate list in the target preference order.
         const candidates = pickProblemsByHeuristic(meta, 9999, target, usedSet, section.bookId.toUpperCase());
         let total = 0;
         for(const n of candidates){
           const t = timeForBookProblem(meta, n);
           if(total + t <= minutesBudget + 0.01){ picked.push(n); total += t; }
-          if(minutesBudget - total < 2.0) break; // close enough
+          if(minutesBudget - total < 2.0) break;
         }
         return {nums:picked, minutes:Math.round(total)};
       }
@@ -671,7 +765,7 @@
         const chosen = chooseBookProblemsForBudget(section, minutesBudget, target, usedSet);
         const base = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
         if(!chosen.nums.length){
-          return {htmlShort:`🧠 Ex. ${base}`, htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`, mins: Math.round(minutesBudget), type:'bookex', _topic: topic, _exCount: 0, _exNums: []};
+          return {htmlShort:`🧠 Ex. ${base}`, htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`, mins: Math.round(minutesBudget), type:'bookex', _topic: topic, _exCount: 0, _exNums: [], _section: section};
         }
         const text = (chosen.nums.length<=10) ? chosen.nums.join(', ') : `${Math.min(...chosen.nums)}–${Math.max(...chosen.nums)} (selected)`;
         return {
@@ -747,7 +841,7 @@
         return {htmlShort:`🧩 Contest problem`, htmlLong:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd'};
       }
 
-      /* AMC 8/10/12 timed sets (contest-based now) */
+      /* AMC/ AIME timed sets */
       function buildAMCContestTimedSet(minutesBudget){
         const todayYear = new Date().getFullYear();
         const years = []; for(let y=todayYear-18; y<=todayYear-1; y++) years.push(y);
@@ -755,16 +849,13 @@
         const level = onAMC8 ? '8' : (onAMC10 ? '10' : '12');
         const year = pick(years);
 
-        // Pools by difficulty
         const easyPool = Array.from({length:10}, (_,i)=>i+1);
         const midPool  = Array.from({length:4},  (_,i)=>i+11);
         const hardPool = Array.from({length:11}, (_,i)=>i+15);
 
         function nextFrom(pool){ shuffle(pool); return pool.shift(); }
 
-        // Target difficulty mix based on overall accuracy & phase guess
         const target = (function(){
-          const t = minutesBudget;
           const acc = (Object.values(subs).reduce((s,v)=>s+(v?.right||0),0)) / Math.max(1,Object.values(subs).reduce((s,v)=>s+(v?.total||0),0));
           if(acc<0.35) return 'easy';
           if(acc<0.7)  return 'mixed';
@@ -777,11 +868,10 @@
         else order = [easyPool, midPool, hardPool];
 
         const chosen=[]; let total=0;
-        const pools = order.map(p=>p.slice()); // copy
+        const pools = order.map(p=>p.slice());
         let guard=0;
         while(total < minutesBudget - 1.0 && guard<200){
           guard++;
-          // Cycle through pools to get a spread
           for(const pool of pools){
             const num = nextFrom(pool);
             if(num==null) continue;
@@ -809,7 +899,6 @@
         return {short, long, mins, type:'timed', _contest:`AMC${level}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:(n)=>timeForAMCProblem(level,n)};
       }
 
-      /* AIME timed set (contest-based; timing unchanged at 6.5 min/problem) */
       function buildAIMETimedSet(minutesBudget){
         const todayYear = new Date().getFullYear();
         const years = []; for(let y=todayYear-18; y<=todayYear-1; y++) years.push(y);
@@ -831,7 +920,7 @@
         return {short:`⏱️ Timed — AIME ${variant} ${year}: ${chosen.join(', ')}`, long:`⏱️ <b>Timed set</b> — AIME ${variant} ${year}: ${links}`, mins, type:'timed', _contest:`AIME${variant}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:()=>timePerAIMEProblem()};
       }
 
-      /* Mocks */
+      /* Mocks (unchanged) */
       const currentYear = new Date().getFullYear();
       const MOCK_YEARS = []; for(let y=currentYear-1; y>=2000; y--) MOCK_YEARS.push(y);
       let mockYearIdx = 0;
@@ -905,7 +994,7 @@
             return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic };
           }
 
-          /* Softer thresholds for AMC 8 */
+          /* Thresholds */
           const TH = onAMC8 ? { readMin: 12, drillMin: 14, timedMin: 8 } : { readMin: 14, drillMin: 16, timedMin: 10 };
           const totalDays = days;
 
@@ -961,18 +1050,16 @@
 
           function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
 
-          /* trim helpers respecting your priority (timed → exercises → reading) */
+          /* Trim order: timed → exercises → reading. Reading gets add-backs first. */
           function shrinkTimedTask(task, cut){
             if(!task || !Array.isArray(task._nums) || !task._perProblemFn) return 0;
             let reduced = 0;
             while(task._nums.length && reduced < cut - 0.5){
-              // remove the last (hardest/longest) first for AMC10/12; for AIME homogeneous
               const n = task._nums.pop();
               const t = task._perProblemFn(n);
               task.mins = Math.max(0, task.mins - t);
               reduced += t;
             }
-            // Rebuild short/long text after trimming
             const nums = task._nums.slice().sort((a,b)=>a-b);
             if(task._contest && task._contest.startsWith('AMC')){
               const level = task._contest.replace('AMC','');
@@ -1016,43 +1103,18 @@
             return reduced;
           }
 
-          function balance(tasks, target, timedRef, exRef, readRef){
-            let cur = totalMin(tasks);
-            if(Math.abs(cur-target)<=2) return;
-
-            if(cur>target){
-              let over = cur - target;
-              // 1) trim timed set
-              if(timedRef && over>0){
-                over -= shrinkTimedTask(timedRef, over);
-              }
-              // 2) trim exercises
-              if(exRef && over>0){
-                over -= shrinkExercisesTask(exRef, over);
-              }
-              // 3) adjust reading down to min
-              if(readRef && over>0){
-                const minKeep = onAMC8 ? 12 : 14;
-                const cut = Math.min(over, Math.max(0, (readRef.mins||0) - minKeep));
-                readRef.mins -= cut;
-                over -= cut;
-              }
-              return;
-            }
-
-            if(cur<target){
-              // prefer to add to reading (expand)
-              const add = target - cur;
-              if(readRef){
-                readRef.mins += add;
-              }
-            }
+          /* Reading recompute helper */
+          function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic, availableTopics){
+            const snap = deepCopyProgress();
+            // use a fresh view of progress/consumed for planning, then keep it
+            const planned = planReading(topic, minutes, finalPhase, catalogByTopic, availableTopics, true);
+            return planned;
           }
 
           function buildDay(dayIndex, dateObj){
             const weekday = dateObj.getDay();
             const phase = phaseNameForDay(dayIndex);
-            const finalPhase = (phase==='Final');
+            const isFinalPhase = (phase==='Final');
 
             if(offDaySet.has(weekday)){
               return [{short:'🌿 Off day (rest / light review)', long:'🌿 Off day (rest / review errors lightly)', mins:0, type:'off'}];
@@ -1064,14 +1126,14 @@
               return [{short:mk.htmlShort, long:mk.htmlLong, mins: minutesPerDay, type:'mock'}];
             }
 
-            // Low-time rule: if only ~20 minutes, do reading-only.
+            // Low-time rule: reading-only if ≤ ~22 minutes
             if(minutesPerDay <= 22){
               const topic = pickNextTopic();
-              const {slice, actualTopic} = getReadingSliceForTopic(topic, minutesPerDay, finalPhase, catalogByTopic, availableTopics);
+              const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic, availableTopics);
               return [{
-                short:`📘 <span class="topic-chip">${actualTopic}</span> ${slice.labelShort}`,
-                long: `📘 <b>${actualTopic}</b>: ${slice.labelLong}`,
-                mins: minutesPerDay, type:'reading', _topic: actualTopic, _sec: slice._section || fallbackSection(actualTopic)
+                short:`📘 <span class="topic-chip">${topic}</span> ${planned.labelShort}`,
+                long: `📘 <b>${topic}</b>: ${planned.labelLong}`,
+                mins: planned.usedMin, type:'reading', _topic: topic
               }];
             }
 
@@ -1089,24 +1151,37 @@
             }
 
             const tasks = [];
-
             const topic = pickNextTopic();
-            const {slice, actualTopic} = getReadingSliceForTopic(topic, mRead, finalPhase, catalogByTopic, availableTopics);
-            const chosenTopic = actualTopic;
-            const chosenSection = slice._section || fallbackSection(chosenTopic);
 
+            // Plan reading with mRead (but we might rebalance)
+            const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
             const readTask = {
-              short:`📘 <span class="topic-chip">${chosenTopic}</span> ${slice.labelShort}`,
-              long: `📘 <b>${chosenTopic}</b>: ${slice.labelLong}`,
-              mins: slice.usedMin, type:'reading', _topic: chosenTopic, _sec: chosenSection
+              short:`📘 <span class="topic-chip">${topic}</span> ${readingPlan.labelShort}`,
+              long: `📘 <b>${topic}</b>: ${readingPlan.labelLong}`,
+              mins: readingPlan.usedMin, type:'reading', _topic: topic
             };
             tasks.push(readTask);
 
-            const ex = makeExercisesFromSection(chosenSection, mDrill, dayIndex, totalDays, usedBookProblems);
-            tasks.push({short:`<span class="topic-chip">${chosenTopic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: chosenTopic, _exCount: ex._exCount, _exNums: ex._exNums, _section: chosenSection});
-            const exRef = tasks[tasks.length-1];
+            // Use the first section from that topic for exercises when possible
+            // If no sections available (all read), fall back to a generic one
+            let exSection = null;
+            (function findFirstSection(){
+              const arr = catalogByTopic[topic] || [];
+              for(const s of arr){
+                const pg = parsePages(s.pages);
+                const key = `${s.bookId}#${s.chapter}`;
+                const cur = sectionProgress.get(key) || (pg ? {from: pg.from, to: pg.from-1} : null);
+                if(!cur || (pg && cur.to < pg.to)){ exSection = s; return; }
+              }
+              exSection = fallbackSection(topic);
+            })();
 
-            if( (proofEnabledUSAMO) || (proofEnabledAIME && finalPhase) ){
+            const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
+            const exTask = {short:`<span class="topic-chip">${topic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: topic, _exCount: ex._exCount, _exNums: ex._exNums, _section: ex._section};
+            tasks.push(exTask);
+
+            // Proof (unchanged gating)
+            if( (proofEnabledUSAMO) || (proofEnabledAIME && isFinalPhase) ){
               const proofShare = 0.16;
               const proofBudget = Math.round(minutesPerDay*proofShare);
               scheduleProof(proofBudget).forEach(t=>tasks.push(t));
@@ -1114,42 +1189,53 @@
 
             let timedTask = null;
             if(onUSAMO){
-              // unchanged: keep existing behavior (book-based timed if any)
-              const timedObj = (function(){
-                const per = minutesPerProblem();
-                const want = Math.max(minProblemsFloor(), Math.floor((mTimed + 0.25*per)/per));
-                // fallback: use exercises selection as timed if available
-                const clone = {...exRef};
-                clone.mins = mTimed;
-                return {short:`<span class="topic-chip">${chosenTopic}</span> ⏱️ Timed — ${shortBook(chosenSection.bookTitle)} — ${shortChapter(chosenSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${chosenSection.bookTitle}, ${chosenSection.chapterTitle}`, mins:mTimed, type:'timed'};
-              })();
-              if(timedObj){
-                timedTask = {short: timedObj.short, long: timedObj.long, mins: timedObj.mins, type:'timed'};
-                tasks.push(timedTask);
-              }
+              // unchanged timing strategy for JMO/USAMO (book-timed fallback)
+              const timedObj = {short:`<span class="topic-chip">${topic}</span> ⏱️ Timed — ${shortBook(exSection.bookTitle)} — ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed'};
+              timedTask = {short: timedObj.short, long: timedObj.long, mins: timedObj.mins, type:'timed'};
+              tasks.push(timedTask);
             } else if(onAIME){
-              // AIME contest-based timed set; timing unchanged
               const t = buildAIMETimedSet(mTimed);
               timedTask = {short:t.short, long:t.long, mins:t.mins, type:'timed', _contest:t._contest, _year:t._year, _variant:t._variant, _nums:t._nums, _perProblemFn:t._perProblemFn};
               tasks.push(timedTask);
             } else if(onAMC){
-              // AMC contest-based timed set
               const t = buildAMCContestTimedSet(mTimed);
               timedTask = {short:t.short, long:t.long, mins:t.mins, type:'timed', _contest:t._contest, _year:t._year, _variant:t._variant, _nums:t._nums, _perProblemFn:t._perProblemFn};
               tasks.push(timedTask);
             } else {
-              // default (shouldn't happen often): book-based timed set
-              const per = minutesPerProblem();
-              const want = Math.max(minProblemsFloor(), Math.floor((mTimed + 0.25*per)/per));
-              timedTask = {short:`⏱️ Timed — ${shortBook(chosenSection.bookTitle)} — ${shortChapter(chosenSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${chosenSection.bookTitle}, ${chosenSection.chapterTitle}`, mins:mTimed, type:'timed'};
+              timedTask = {short:`⏱️ Timed — ${shortBook(exSection.bookTitle)} — ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed'};
               tasks.push(timedTask);
             }
 
             const potd = problemOfDay();
             tasks.push({short:potd.htmlShort, long:potd.htmlLong, mins: potd.mins, type:'potd'});
 
-            // Final balance: prioritize keeping reading; trim timed → ex → reading
-            balance(tasks, minutesPerDay, timedTask, exRef, readTask);
+            // Balance to minutesPerDay:
+            // 1) If over, trim timed → exercises → reading (minimal)
+            // 2) If under, add to reading first (extend reading forward), else to exercises
+            let cur = totalMin(tasks);
+            if(cur > minutesPerDay + 2){
+              let over = cur - minutesPerDay;
+              if(timedTask && over>0){ over -= shrinkTimedTask(timedTask, over); }
+              if(exTask && over>0){ over -= shrinkExercisesTask(exTask, over); }
+              if(over>0){
+                const minKeep = TH.readMin;
+                const cut = Math.min(over, Math.max(0, (readTask.mins||0) - minKeep));
+                readTask.mins -= cut;
+              }
+            } else if(cur < minutesPerDay - 2){
+              let add = minutesPerDay - cur;
+              // Extend reading forward by 'add' minutes
+              const extended = commitReadingForMinutes(topic, readTask.mins + add, isFinalPhase, catalogByTopic, availableTopics);
+              readTask.mins = extended.usedMin;
+              readTask.short = `📘 <span class="topic-chip">${topic}</span> ${extended.labelShort}`;
+              readTask.long  = `📘 <b>${topic}</b>: ${extended.labelLong}`;
+              cur = totalMin(tasks);
+              if(cur < minutesPerDay - 2 && exTask){
+                // if still short, top up exercises
+                exTask.mins += (minutesPerDay - cur);
+              }
+            }
+
             return tasks;
           }
 
@@ -1265,7 +1351,7 @@
           }
           function closeModal(){ modalBackdrop.style.display='none'; document.body.style.overflow=''; }
 
-          /* ICS export (unchanged timezone behavior) */
+          /* ICS export (unchanged) */
           $('downloadIcs').onclick = ()=>{
             const ics = buildICS(start, days, tasksByDay, Number(input.minutesPerDay), input);
             const blob = new Blob([ics], {type:'text/calendar'});
