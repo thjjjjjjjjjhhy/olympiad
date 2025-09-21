@@ -1,0 +1,134 @@
+{
+  "book": "AoPS: Prealgebra",
+  "edition": "2015 Edition",
+  "canonical_topics": [
+    "Polynomials and Algebra",
+    "Number Theory",
+    "Geometry",
+    "Probability",
+    "Combinatorics",
+    "Mixed Review"
+  ],
+  "sections": [
+    {
+      "id": "pa-ch01",
+      "title": "Properties of Arithmetic",
+      "topic": "Polynomials and Algebra",
+      "pages": "1-52",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch02",
+      "title": "Exponents",
+      "topic": "Polynomials and Algebra",
+      "pages": "53-91",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch03",
+      "title": "Number Theory",
+      "topic": "Number Theory",
+      "pages": "92-148",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch04",
+      "title": "Fractions",
+      "topic": "Number Theory",
+      "pages": "149-199",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch05",
+      "title": "Equations and Inequalities",
+      "topic": "Polynomials and Algebra",
+      "pages": "200-246",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch06",
+      "title": "Decimals",
+      "topic": "Number Theory",
+      "pages": "247-280",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch07",
+      "title": "Ratios, Conversions, and Rates",
+      "topic": "Polynomials and Algebra",
+      "pages": "281-319",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch08",
+      "title": "Percents",
+      "topic": "Polynomials and Algebra",
+      "pages": "320-350",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch09",
+      "title": "Square Roots",
+      "topic": "Number Theory",
+      "pages": "351-377",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch10",
+      "title": "Angles",
+      "topic": "Geometry",
+      "pages": "378-414",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch11",
+      "title": "Perimeter and Area",
+      "topic": "Geometry",
+      "pages": "415-441",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch12",
+      "title": "Right Triangles and Quadrilaterals",
+      "topic": "Geometry",
+      "pages": "442-475",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch13",
+      "title": "Data and Statistics",
+      "topic": "Probability",
+      "pages": "476-508",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch14",
+      "title": "Counting",
+      "topic": "Combinatorics",
+      "pages": "509-546",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "pa-ch15",
+      "title": "Problem-Solving Strategies",
+      "topic": "Mixed Review",
+      "pages": "547-568",
+      "problemRange": [],
+      "hardTail": 0
+    }
+  ]
+}
