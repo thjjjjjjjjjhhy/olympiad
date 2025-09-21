@@ -1,0 +1,131 @@
+{
+  "book": "AoPS: Introduction to Counting & Probability",
+  "edition": "2013 Edition",
+  "canonical_topics": [
+    "Combinatorics",
+    "Probability",
+    "Mixed Review"
+  ],
+  "sections": [
+    {
+      "id": "icp-ch01",
+      "title": "Counting Is Arithmetic",
+      "topic": "Combinatorics",
+      "pages": "1-26",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch02",
+      "title": "Basic Counting Techniques",
+      "topic": "Combinatorics",
+      "pages": "27-48",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch03",
+      "title": "Correcting for Overcounting",
+      "topic": "Combinatorics",
+      "pages": "49-64",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch04",
+      "title": "Committees and Combinations",
+      "topic": "Combinatorics",
+      "pages": "65-80",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch05",
+      "title": "More With Combinations",
+      "topic": "Combinatorics",
+      "pages": "81-96",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch06",
+      "title": "Some Harder Counting Problems",
+      "topic": "Combinatorics",
+      "pages": "97-110",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch07",
+      "title": "Introduction to Probability",
+      "topic": "Probability",
+      "pages": "111-122",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch08",
+      "title": "Basic Probability Techniques",
+      "topic": "Probability",
+      "pages": "123-144",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch09",
+      "title": "Think About It!",
+      "topic": "Probability",
+      "pages": "145-152",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch10",
+      "title": "Geometric Probability",
+      "topic": "Probability",
+      "pages": "153-164",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch11",
+      "title": "Expected Value",
+      "topic": "Probability",
+      "pages": "165-174",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch12",
+      "title": "Pascal's Triangle",
+      "topic": "Combinatorics",
+      "pages": "175-190",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch13",
+      "title": "The Hockey Stick Identity",
+      "topic": "Combinatorics",
+      "pages": "191-208",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch14",
+      "title": "The Binomial Theorem",
+      "topic": "Combinatorics",
+      "pages": "209-218",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "icp-ch15",
+      "title": "More Challenging Problems",
+      "topic": "Mixed Review",
+      "pages": "219-230",
+      "problemRange": [],
+      "hardTail": 0
+    }
+  ]
+}
