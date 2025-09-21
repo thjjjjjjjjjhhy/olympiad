@@ -66,7 +66,9 @@
     .past{opacity:.55}
     .today{outline:2px solid var(--accent)}
 
-    .task{font-size:.9rem;margin:4px 0;line-height:1.25}
+    /* FIX: Styles for new grouped task display */
+    .task-group h4{font-size:.9rem; margin:6px 0 2px; font-weight:700; color: #334155;}
+    .task{font-size:.9rem;margin:2px 0;line-height:1.25; padding-left: 4px;}
     .task .mins{font-size:.82rem;color:var(--muted)}
     .topic-chip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:.78rem;margin-left:6px;background:#fafafa}
     .more{font-size:.85rem;color:var(--accent);cursor:pointer;user-select:none}
@@ -119,7 +121,6 @@
     <div id="errBox" class="error"></div>
     <p class="hint" id="planSummary"></p>
 
-    <!-- Toolbar -->
     <div class="card toolbar" id="toolbar">
       <div class="group">
         <label>
@@ -181,7 +182,6 @@
       </div>
     </div>
 
-    <!-- Legend -->
     <div class="legend">
       <span class="lg"><span class="dot"></span> Reading (with page ranges)</span>
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
@@ -203,7 +203,6 @@
 
   <footer class="container" style="text-align:center;margin:20px 0;color:#64748b">© 2025 OlympiadPrep.</footer>
 
-  <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modal" role="document">
       <header>
@@ -217,7 +216,6 @@
     </div>
   </div>
 
-  <!-- Timeline engine -->
   <script>
     /* Safety */
     (function safetyHooks(){
@@ -239,7 +237,7 @@
       input = input.replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
       input = input.replace(/\s(on\w+)\s*=\s*(['"])[\s\S]*?\2/gi, '');
       input = input.replace(/href\s*=\s*(['"])\s*javascript:[\s\S]*?\1/gi, 'href="#"');
-      const allowed = ['a','b','strong','i','em','code','span'];
+      const allowed = ['a','b','strong','i','em','code','span','div','h4'];
       return input.replace(/<\/?([a-zA-Z0-9]+)(\s[^>]*)?>/g, (m, tag, attrs) => {
         tag = tag.toLowerCase();
         if(!allowed.includes(tag)) return '';
@@ -249,15 +247,15 @@
           if(href && !/^javascript:/i.test(href[2])) safe = href[2];
           return `<a href="${safe}" target="_blank" rel="noopener">`;
         }
-        return `<${tag}>`;
-      }).replace(/<\/?([a-zA-Z0-9]+)>/g, (m) => m);
+        return m; // Return the original match if allowed
+      });
     }
     function escapeICSText(s){
       if(!s) return '';
       return s.replace(/\r\n|\r|\n/g, '\\n')
-              .replace(/\\/g,'\\\\')
-              .replace(/,/g,'\\,')
-              .replace(/;/g,'\\;');
+             .replace(/\\/g,'\\\\')
+             .replace(/,/g,'\\,')
+             .replace(/;/g,'\\;');
     }
 
     /* Hour select */
@@ -358,7 +356,7 @@
       const EMPHASIS = (()=>{
         if(onUSAMO) return {'Geometry':1.3,'Number Theory':1.25,'Polynomials and Algebra':1.2,'Combinatorics':1.12,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':1.35,'Mixed Review':1.0};
         if(onAIME)  return {'Number Theory':1.25,'Polynomials and Algebra':1.2,'Combinatorics':1.15,'Geometry':1.05,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':0.7,'Mixed Review':0.95};
-        return        {'Polynomials and Algebra':1.15,'Number Theory':1.1,'Combinatorics':1.05,'Geometry':1.0,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':0.5,'Mixed Review':0.95};
+        return         {'Polynomials and Algebra':1.15,'Number Theory':1.1,'Combinatorics':1.05,'Geometry':1.0,'Probability':1.0,'Functions':0.95,'Sequences and Series':0.95,'Proof Techniques':0.5,'Mixed Review':0.95};
       })();
       Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
@@ -623,8 +621,6 @@
           guard++;
           let sec = nextUnconsumedSection(topic, catalogByTopic);
           if(!sec){
-            // If no more sections in this topic, optionally roll into another topic if appropriate.
-            // Preference: stay in-topic; if exhausted, stop (remaining can spill to exercises later).
             break;
           }
           const ok = consumeFromSection(sec);
@@ -633,64 +629,15 @@
             continue;
           }
         }
+        
+        // FIX: Check if any parts were generated. If not, the topic is exhausted.
+        const isExhausted = parts.length === 0;
 
-        // If still minutes remain and we are near test or have many sections left,
-        // roll over into the next section(s) again; otherwise we'll let balancing give extras to exercises.
-        if(remaining > 1){
-          const totalDays = days;
-          const dayIdxEstimate = 0; // not used precisely here
-          const finalPhase = true; // prefer progress late — conservative to roll forward
-          // Try one more pull if something available
-          let sec = nextUnconsumedSection(topic, catalogByTopic);
-          if(sec){
-            consumeFromSection(sec);
-          }
-        }
-
-        // If we overshot by rounding, trim last part a little
-        if(used > minutesBudget + 2 && parts.length){
-          const last = parts[parts.length-1];
-          const overflow = used - minutesBudget;
-          if(last.from!=null && last.to!=null){
-            const pagesOver = Math.ceil(overflow / last.mpp);
-            if(last.to - pagesOver >= last.from){
-              last.to -= pagesOver;
-              const newPages = (last.to - last.from + 1);
-              const delta = last.minutes - Math.round(newPages * last.mpp);
-              last.minutes -= delta;
-              used -= delta;
-              if(commit){
-                // rewind progress accordingly
-                const key = `${shortBook(last.bookTitle)}#${last.chapterTitle}`; // not exact key; we already updated earlier from consume step
-              }
-            }
-          }else{
-            const cut = Math.min(overflow, last.minutes - 8);
-            last.minutes -= cut;
-            used -= cut;
-          }
-        }
-
-        // Build labels
-        function partsLabel(){
-          if(!parts.length) return {short:'Selected reading', long:'Selected reading', minutes:0};
-          const chunks = parts.map(p=>{
-            if(p.from!=null) return `${shortBook(p.bookTitle)} — ${shortChapter(p.chapterTitle)} (pp.${p.from}–${p.to})`;
-            return `${shortBook(p.bookTitle)} — ${shortChapter(p.chapterTitle)}`;
-          });
-          const longChunks = parts.map(p=>{
-            if(p.from!=null) return `${p.bookTitle}, ${p.chapterTitle} (pp.${p.from}–${p.to})`;
-            return `${p.bookTitle}, ${p.chapterTitle}`;
-          });
-          return {
-            short: chunks[0] + (chunks.length>1 ? `; then ${chunks.slice(1).join('; then ')}` : ''),
-            long:  longChunks.join(' • '),
-            minutes: Math.max(0, Math.round(parts.reduce((s,p)=>s+(p.minutes||0),0)))
-          };
-        }
-
-        const lab = partsLabel();
-        return {parts, usedMin: lab.minutes, labelShort: lab.short, labelLong: lab.long};
+        return {
+          parts,
+          usedMin: Math.max(0, Math.round(parts.reduce((s,p)=>s+(p.minutes||0),0))),
+          isExhausted
+        };
       }
 
       /* Problem selection for book exercises */
@@ -759,19 +706,26 @@
         return {nums:picked, minutes:Math.round(total)};
       }
 
+      // FIX: Cleaned up task generation to create simpler display labels and store metadata
       function makeExercisesFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
         const topic = section.topic || 'Polynomials and Algebra';
         const target = difficultyTarget(topic, dayIndex, totalDays);
         const chosen = chooseBookProblemsForBudget(section, minutesBudget, target, usedSet);
-        const base = `${shortBook(section.bookTitle)} — ${shortChapter(section.chapterTitle)}`;
+        const baseDesc = `Ex: ${section.chapterTitle}`;
+        const longBase = `🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`;
+        
         if(!chosen.nums.length){
-          return {htmlShort:`🧠 Ex. ${base}`, htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`, mins: Math.round(minutesBudget), type:'bookex', _topic: topic, _exCount: 0, _exNums: [], _section: section};
+          return {
+            display: baseDesc,
+            long: longBase,
+            mins: Math.round(minutesBudget), type:'bookex', _topic: topic, _exCount: 0, _exNums: [], _section: section, _book: shortBook(section.bookTitle)
+          };
         }
         const text = (chosen.nums.length<=10) ? chosen.nums.join(', ') : `${Math.min(...chosen.nums)}–${Math.max(...chosen.nums)} (selected)`;
         return {
-          htmlShort:`🧠 Ex. ${base}: ${text}`,
-          htmlLong:`🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle}): ${text}`,
-          mins: chosen.minutes, type:'bookex', _topic: topic, _exCount: chosen.nums.length, _exNums: chosen.nums, _section: section
+          display: `${baseDesc}: ${text}`,
+          long: `${longBase}: ${text}`,
+          mins: chosen.minutes, type:'bookex', _topic: topic, _exCount: chosen.nums.length, _exNums: chosen.nums, _section: section, _book: shortBook(section.bookTitle)
         };
       }
 
@@ -807,18 +761,18 @@
             const id = `AIME-${y}-${variant}-${num}`;
             if(usedContest.has(id)) continue;
             usedContest.add(id);
-            return {htmlShort:`🧩 ${y} AIME ${variant} • #${num}`, htmlLong:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type:'potd'};
+            return {display:`${y} AIME ${variant} • #${num}`, long:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type:'potd', _book:'🧩 Problem of the Day'};
           } else if(onUSAMO){
             if(/usajmo/.test(goalStr)){
               const num = 1 + Math.floor(rand()*6);
               const id = `USAJMO-${y}-${num}`; if(usedContest.has(id)) continue;
               usedContest.add(id);
-              return {htmlShort:`🧩 ${y} USAJMO • #${num}`, htmlLong:`🧩 <a href="${usajmoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAJMO • Problem ${num}</a>`, mins: 12, type:'potd'};
+              return {display:`${y} USAJMO • #${num}`, long:`🧩 <a href="${usajmoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAJMO • Problem ${num}</a>`, mins: 12, type:'potd', _book:'🧩 Problem of the Day'};
             } else {
               const num = 1 + Math.floor(rand()*6);
               const id = `USAMO-${y}-${num}`; if(usedContest.has(id)) continue;
               usedContest.add(id);
-              return {htmlShort:`🧩 ${y} USAMO • #${num}`, htmlLong:`🧩 <a href="${usamoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAMO • Problem ${num}</a>`, mins: 15, type:'potd'};
+              return {display:`${y} USAMO • #${num}`, long:`🧩 <a href="${usamoProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} USAMO • Problem ${num}</a>`, mins: 15, type:'potd', _book:'🧩 Problem of the Day'};
             }
           } else {
             if(onAMC8){
@@ -826,7 +780,7 @@
               const id = `AMC8-${y}-${num}`;
               if(usedContest.has(id)) continue;
               usedContest.add(id);
-              return {htmlShort:`🧩 ${y} AMC 8 • #${num}`, htmlLong:`🧩 <a href="${amc8ProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC 8 • Problem ${num}</a>`, mins: 6, type:'potd'};
+              return {display:`${y} AMC 8 • #${num}`, long:`🧩 <a href="${amc8ProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC 8 • Problem ${num}</a>`, mins: 6, type:'potd', _book:'🧩 Problem of the Day'};
             } else {
               const level = (onAMC10)?'10':'12';
               const variant = pick(['A','B']);
@@ -834,11 +788,11 @@
               const id = `AMC${level}-${y}-${variant}-${num}`;
               if(usedContest.has(id)) continue;
               usedContest.add(id);
-              return {htmlShort:`🧩 ${y} AMC ${level}${variant} • #${num}`, htmlLong:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd'};
+              return {display:`${y} AMC ${level}${variant} • #${num}`, long:`🧩 <a href="${amcProbURL(y,level,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC ${level}${variant} • Problem ${num}</a>`, mins: 8, type:'potd', _book:'🧩 Problem of the Day'};
             }
           }
         }
-        return {htmlShort:`🧩 Contest problem`, htmlLong:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd'};
+        return {display:`Contest problem`, long:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd', _book:'🧩 Problem of the Day'};
       }
 
       /* AMC/ AIME timed sets */
@@ -886,17 +840,19 @@
         chosen.sort((a,b)=>a-b);
 
         const mins = Math.round(total);
-        let short,long;
+        let display,long, book;
         if(level==='8'){
-          short = `⏱️ Timed — AMC 8 ${year}: ${chosen.join(', ')}`;
+          book = `⏱️ Timed — AMC 8 ${year}`;
+          display = `Problems: ${chosen.join(', ')}`;
           const links = chosen.map(n=>`<a href="${amc8ProbURL(year,n)}">#${n}</a>`).join(', ');
           long = `⏱️ <b>Timed set</b> — AMC 8 ${year}: ${links}`;
         } else {
-          short = `⏱️ Timed — AMC ${level}${variant} ${year}: ${chosen.join(', ')}`;
+          book = `⏱️ Timed — AMC ${level}${variant} ${year}`;
+          display = `Problems: ${chosen.join(', ')}`;
           const links = chosen.map(n=>`<a href="${amcProbURL(year,level,variant,n)}">#${n}</a>`).join(', ');
           long = `⏱️ <b>Timed set</b> — AMC ${level}${variant} ${year}: ${links}`;
         }
-        return {short, long, mins, type:'timed', _contest:`AMC${level}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:(n)=>timeForAMCProblem(level,n)};
+        return {display, long, mins, type:'timed', _book: book, _contest:`AMC${level}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:(n)=>timeForAMCProblem(level,n)};
       }
 
       function buildAIMETimedSet(minutesBudget){
@@ -916,8 +872,11 @@
         chosen.sort((a,b)=>a-b);
 
         const mins = Math.round(total);
+        const book = `⏱️ Timed — AIME ${variant} ${year}`;
+        const display = `Problems: ${chosen.join(', ')}`;
         const links = chosen.map(n=>`<a href="${aimeProbURL(year,variant,n)}">#${n}</a>`).join(', ');
-        return {short:`⏱️ Timed — AIME ${variant} ${year}: ${chosen.join(', ')}`, long:`⏱️ <b>Timed set</b> — AIME ${variant} ${year}: ${links}`, mins, type:'timed', _contest:`AIME${variant}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:()=>timePerAIMEProblem()};
+        const long = `⏱️ <b>Timed set</b> — AIME ${variant} ${year}: ${links}`;
+        return {display, long, mins, type:'timed', _book:book, _contest:`AIME${variant}`, _year:year, _variant:variant, _nums:chosen, _perProblemFn:()=>timePerAIMEProblem()};
       }
 
       /* Mocks (unchanged) */
@@ -935,21 +894,21 @@
         const y = nextMockYear();
         if(onUSAMO){
           if(/usajmo/.test(goalStr)){
-            return {htmlShort:`📝 USAJMO ${y} full mock`, htmlLong:`📝 <a href="${jmoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAJMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+            return {display:`USAJMO ${y} full mock`, long:`📝 <a href="${jmoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAJMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
           } else {
-            return {htmlShort:`📝 USAMO ${y} full mock`, htmlLong:`📝 <a href="${usamoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+            return {display:`USAMO ${y} full mock`, long:`📝 <a href="${usamoSetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} USAMO</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
           }
         }
         if(onAIME){
           const variant = (mockYearIdx % 2 === 0) ? 'I' : 'II';
-          return {htmlShort:`📝 AIME ${variant} ${y} full mock`, htmlLong:`📝 <a href="${aimeSetURL(y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AIME ${variant} (15 problems)</a> • Review thoroughly.`, mins: totalMinutes, type:'mock'};
+          return {display:`AIME ${variant} ${y} full mock`, long:`📝 <a href="${aimeSetURL(y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AIME ${variant} (15 problems)</a> • Review thoroughly.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
         }
         if(onAMC8){
-          return {htmlShort:`📝 AMC 8 ${y} mock`, htmlLong:`📝 <a href="${amc8SetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} AMC 8</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+          return {display:`AMC 8 ${y} mock`, long:`📝 <a href="${amc8SetURL(y)}" target="_blank" rel="noopener">Full mock: ${y} AMC 8</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
         }
         const level = (onAMC10)?'10':'12';
         const variant = (mockYearIdx % 2 === 0) ? 'A' : 'B';
-        return {htmlShort:`📝 AMC ${level}${variant} ${y} mock`, htmlLong:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock'};
+        return {display:`AMC ${level}${variant} ${y} mock`, long:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
       }
 
       /* Proof track (unchanged) */
@@ -972,12 +931,12 @@
         const out=[]; let used=0;
         while(used+20<=blockMinutes && proofUnits.length){
           const it = proofUnits[proofCursor++ % proofUnits.length];
-          out.push({htmlShort:`📗 Proof: ${it.label}`, htmlLong:`📗 <b>Proof track</b>: ${it.label}. Write at least one full proof.`, mins: it.mins, type:'proof'});
+          out.push({display:`${it.label}`, long:`📗 <b>Proof track</b>: ${it.label}. Write at least one full proof.`, mins: it.mins, type:'proof', _book:'📗 Proof Track'});
           used += it.mins;
         }
         if(blockMinutes - used >= 14 && proofUnits.length){
           const it = proofUnits[proofCursor % proofUnits.length];
-          out.push({htmlShort:`📗 Proof: ${it.label} (short)`, htmlLong:`📗 <b>Proof track</b>: ${it.label} (short set).`, mins: blockMinutes-used, type:'proof'});
+          out.push({display:`${it.label} (short)`, long:`📗 <b>Proof track</b>: ${it.label} (short set).`, mins: blockMinutes-used, type:'proof', _book:'📗 Proof Track'});
         }
         return out;
       }
@@ -1030,11 +989,11 @@
           function baseMixForPhase(ph){
             if(onAMC8){
               if(ph==='Foundation') return {read:0.60, drill:0.34, timed:0.06};
-              if(ph==='Mixed')      return {read:0.50, drill:0.38, timed:0.12};
+              if(ph==='Mixed')     return {read:0.50, drill:0.38, timed:0.12};
               return                 {read:0.40, drill:0.42, timed:0.18};
             }
             if(ph==='Foundation') return {read:0.56, drill:0.34, timed:0.10};
-            if(ph==='Mixed')      return {read:0.46, drill:0.38, timed:0.16};
+            if(ph==='Mixed')     return {read:0.46, drill:0.38, timed:0.16};
             return                 {read:0.36, drill:0.42, timed:0.22};
           }
           function phaseNameForDay(d){
@@ -1050,63 +1009,8 @@
 
           function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
 
-          /* Trim order: timed → exercises → reading. Reading gets add-backs first. */
-          function shrinkTimedTask(task, cut){
-            if(!task || !Array.isArray(task._nums) || !task._perProblemFn) return 0;
-            let reduced = 0;
-            while(task._nums.length && reduced < cut - 0.5){
-              const n = task._nums.pop();
-              const t = task._perProblemFn(n);
-              task.mins = Math.max(0, task.mins - t);
-              reduced += t;
-            }
-            const nums = task._nums.slice().sort((a,b)=>a-b);
-            if(task._contest && task._contest.startsWith('AMC')){
-              const level = task._contest.replace('AMC','');
-              if(level==='8'){
-                task.short = `⏱️ Timed — AMC 8 ${task._year}: ${nums.join(', ')}`;
-                const links = nums.map(n=>`<a href="${amc8ProbURL(task._year,n)}">#${n}</a>`).join(', ');
-                task.long  = `⏱️ <b>Timed set</b> — AMC 8 ${task._year}: ${links}`;
-              }else{
-                task.short = `⏱️ Timed — AMC ${level}${task._variant} ${task._year}: ${nums.join(', ')}`;
-                const links = nums.map(n=>`<a href="${amcProbURL(task._year,level,task._variant,n)}">#${n}</a>`).join(', ');
-                task.long  = `⏱️ <b>Timed set</b> — AMC ${level}${task._variant} ${task._year}: ${links}`;
-              }
-            }else if(task._contest && task._contest.startsWith('AIME')){
-              task.short = `⏱️ Timed — AIME ${task._variant} ${task._year}: ${nums.join(', ')}`;
-              const links = nums.map(n=>`<a href="${aimeProbURL(task._year,task._variant,n)}">#${n}</a>`).join(', ');
-              task.long  = `⏱️ <b>Timed set</b> — AIME ${task._variant} ${task._year}: ${links}`;
-            }
-            return reduced;
-          }
-
-          function shrinkExercisesTask(task, cut){
-            if(!task || !Array.isArray(task._exNums) || !task._section) return 0;
-            let reduced = 0;
-            const meta = task._section.editionMeta;
-            while(task._exNums.length && reduced < cut - 0.5){
-              const n = task._exNums.pop();
-              const t = timeForBookProblem(meta, n);
-              task.mins = Math.max(0, task.mins - t);
-              reduced += t;
-            }
-            const nums = task._exNums.slice();
-            const base = `${shortBook(task._section.bookTitle)} — ${shortChapter(task._section.chapterTitle)}`;
-            if(nums.length){
-              const text = (nums.length<=10) ? nums.join(', ') : `${Math.min(...nums)}–${Math.max(...nums)} (selected)`;
-              task.htmlShort = `🧠 Ex. ${base}: ${text}`;
-              task.htmlLong  = `🧠 <b>Book exercises</b> (${task._section.bookTitle}, ${task._section.chapterTitle}): ${text}`;
-            }else{
-              task.htmlShort = `🧠 Ex. ${base}`;
-              task.htmlLong  = `🧠 <b>Book exercises</b> (${task._section.bookTitle}, ${task._section.chapterTitle})`;
-            }
-            return reduced;
-          }
-
-          /* Reading recompute helper */
           function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic, availableTopics){
             const snap = deepCopyProgress();
-            // use a fresh view of progress/consumed for planning, then keep it
             const planned = planReading(topic, minutes, finalPhase, catalogByTopic, availableTopics, true);
             return planned;
           }
@@ -1117,31 +1021,30 @@
             const isFinalPhase = (phase==='Final');
 
             if(offDaySet.has(weekday)){
-              return [{short:'🌿 Off day (rest / light review)', long:'🌿 Off day (rest / review errors lightly)', mins:0, type:'off'}];
+              return [{display:'Rest / light review', long:'🌿 Off day (rest / review errors lightly)', mins:0, type:'off', _book:'🌿 Off Day'}];
             }
             const inMockPhase = (dayIndex >= mockStartIdx);
             const isMockDay = inMockPhase && mockWeekdays.has(weekday);
             if(isMockDay){
-              const mk = makeMock(minutesPerDay);
-              return [{short:mk.htmlShort, long:mk.htmlLong, mins: minutesPerDay, type:'mock'}];
+              return [makeMock(minutesPerDay)];
             }
 
-            // Low-time rule: reading-only if ≤ ~22 minutes
             if(minutesPerDay <= 22){
               const topic = pickNextTopic();
               const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic, availableTopics);
-              return [{
-                short:`📘 <span class="topic-chip">${topic}</span> ${planned.labelShort}`,
-                long: `📘 <b>${topic}</b>: ${planned.labelLong}`,
-                mins: planned.usedMin, type:'reading', _topic: topic
-              }];
+              const readTasks = planned.parts.map(p => ({
+                display: `Read: ${p.chapterTitle} (pp.${p.from}-${p.to})`,
+                long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle} (pp.${p.from}-${p.to})`,
+                mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
+              }));
+              return readTasks;
             }
 
             const mix = adjustedMix(baseMixForPhase(phase), minutesPerDay);
             let mRead = Math.max(TH.readMin, Math.round(minutesPerDay*mix.read));
             let mDrill= Math.max(TH.drillMin, Math.round(minutesPerDay*mix.drill));
             let mTimed= Math.max(TH.timedMin, Math.round(minutesPerDay*mix.timed));
-
+            
             let sum = mRead+mDrill+mTimed;
             if(sum>minutesPerDay){
               const over = sum - minutesPerDay;
@@ -1149,21 +1052,36 @@
               const cutD = Math.min(over-cutT, Math.max(0, mDrill-TH.drillMin)); mDrill-=cutD;
               const cutR = Math.max(0, over-cutT-cutD); mRead = Math.max(TH.readMin, mRead-cutR);
             }
-
+            
             const tasks = [];
             const topic = pickNextTopic();
 
-            // Plan reading with mRead (but we might rebalance)
+            // Plan reading
             const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
-            const readTask = {
-              short:`📘 <span class="topic-chip">${topic}</span> ${readingPlan.labelShort}`,
-              long: `📘 <b>${topic}</b>: ${readingPlan.labelLong}`,
-              mins: readingPlan.usedMin, type:'reading', _topic: topic
-            };
-            tasks.push(readTask);
 
-            // Use the first section from that topic for exercises when possible
-            // If no sections available (all read), fall back to a generic one
+            // FIX: Handle topic exhaustion
+            if (readingPlan.isExhausted) {
+                // Create a review task and re-allocate the time
+                tasks.push({
+                    display: `Review key concepts in ${topic}`,
+                    long: `🌀 Review key concepts, formulas, and previous errors for <strong>${topic}</strong>. No new reading material is available for this topic.`,
+                    mins: Math.min(mRead, 15), // Cap review time at 15 mins
+                    type: 'review',
+                    _topic: topic,
+                    _book: `🌀 Review: ${topic}`
+                });
+                // Add the leftover reading time to the drill time
+                mDrill += (mRead - tasks[0].mins);
+            } else {
+                readingPlan.parts.forEach(p => {
+                  tasks.push({
+                    display: `Read: ${p.chapterTitle}` + (p.from ? ` (pp.${p.from}–${p.to})` : ''),
+                    long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}` + (p.from ? ` (pp.${p.from}–${p.to})` : ''),
+                    mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
+                  });
+                });
+            }
+
             let exSection = null;
             (function findFirstSection(){
               const arr = catalogByTopic[topic] || [];
@@ -1176,67 +1094,40 @@
               exSection = fallbackSection(topic);
             })();
 
-            const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
-            const exTask = {short:`<span class="topic-chip">${topic}</span> ${ex.htmlShort}`, long:ex.htmlLong, mins: ex.mins, type:'bookex', _topic: topic, _exCount: ex._exCount, _exNums: ex._exNums, _section: ex._section};
-            tasks.push(exTask);
+            if (!readingPlan.isExhausted) {
+                const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
+                tasks.push(ex);
+            } else {
+                // If reading was exhausted, maybe pick a different topic for exercises or a timed set
+                const timedSet = onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill);
+                tasks.push(timedSet);
+            }
 
-            // Proof (unchanged gating)
             if( (proofEnabledUSAMO) || (proofEnabledAIME && isFinalPhase) ){
               const proofShare = 0.16;
               const proofBudget = Math.round(minutesPerDay*proofShare);
               scheduleProof(proofBudget).forEach(t=>tasks.push(t));
             }
 
-            let timedTask = null;
             if(onUSAMO){
-              // unchanged timing strategy for JMO/USAMO (book-timed fallback)
-              const timedObj = {short:`<span class="topic-chip">${topic}</span> ⏱️ Timed — ${shortBook(exSection.bookTitle)} — ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed'};
-              timedTask = {short: timedObj.short, long: timedObj.long, mins: timedObj.mins, type:'timed'};
-              tasks.push(timedTask);
+              tasks.push({display: `Timed practice: ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${shortBook(exSection.bookTitle)}`});
             } else if(onAIME){
-              const t = buildAIMETimedSet(mTimed);
-              timedTask = {short:t.short, long:t.long, mins:t.mins, type:'timed', _contest:t._contest, _year:t._year, _variant:t._variant, _nums:t._nums, _perProblemFn:t._perProblemFn};
-              tasks.push(timedTask);
+              tasks.push(buildAIMETimedSet(mTimed));
             } else if(onAMC){
-              const t = buildAMCContestTimedSet(mTimed);
-              timedTask = {short:t.short, long:t.long, mins:t.mins, type:'timed', _contest:t._contest, _year:t._year, _variant:t._variant, _nums:t._nums, _perProblemFn:t._perProblemFn};
-              tasks.push(timedTask);
+              tasks.push(buildAMCContestTimedSet(mTimed));
             } else {
-              timedTask = {short:`⏱️ Timed — ${shortBook(exSection.bookTitle)} — ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed'};
-              tasks.push(timedTask);
+              tasks.push({display: `Timed practice: ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${shortBook(exSection.bookTitle)}`});
             }
 
-            const potd = problemOfDay();
-            tasks.push({short:potd.htmlShort, long:potd.htmlLong, mins: potd.mins, type:'potd'});
-
-            // Balance to minutesPerDay:
-            // 1) If over, trim timed → exercises → reading (minimal)
-            // 2) If under, add to reading first (extend reading forward), else to exercises
+            tasks.push(problemOfDay());
+            
+            // Final balance (simplified)
             let cur = totalMin(tasks);
-            if(cur > minutesPerDay + 2){
-              let over = cur - minutesPerDay;
-              if(timedTask && over>0){ over -= shrinkTimedTask(timedTask, over); }
-              if(exTask && over>0){ over -= shrinkExercisesTask(exTask, over); }
-              if(over>0){
-                const minKeep = TH.readMin;
-                const cut = Math.min(over, Math.max(0, (readTask.mins||0) - minKeep));
-                readTask.mins -= cut;
-              }
-            } else if(cur < minutesPerDay - 2){
-              let add = minutesPerDay - cur;
-              // Extend reading forward by 'add' minutes
-              const extended = commitReadingForMinutes(topic, readTask.mins + add, isFinalPhase, catalogByTopic, availableTopics);
-              readTask.mins = extended.usedMin;
-              readTask.short = `📘 <span class="topic-chip">${topic}</span> ${extended.labelShort}`;
-              readTask.long  = `📘 <b>${topic}</b>: ${extended.labelLong}`;
-              cur = totalMin(tasks);
-              if(cur < minutesPerDay - 2 && exTask){
-                // if still short, top up exercises
-                exTask.mins += (minutesPerDay - cur);
-              }
+            if(cur < minutesPerDay - 5 && tasks[0].type === 'reading'){
+              tasks[0].mins += (minutesPerDay - cur);
             }
 
-            return tasks;
+            return tasks.filter(t => t && t.mins > 0);
           }
 
           /* Build all days */
@@ -1279,9 +1170,9 @@
               const header = new Date(year, month, 1).toLocaleString(undefined,{month:'long',year:'numeric'});
               wrap.innerHTML=`<h3>${header}</h3><div class="cal"></div>`; const grid=wrap.querySelector('.cal');
 
-              ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d=>{
-                const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc';
-                head.innerHTML=`<div class="date" style="opacity:.7">${d}</div>`; grid.appendChild(head);
+              ['S','M','T','W','T','F','S'].forEach(d=>{
+                const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc'; head.style.minHeight='auto';
+                head.innerHTML=`<div class="date" style="opacity:.7; text-align:center;">${d}</div>`; grid.appendChild(head);
               });
 
               const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
@@ -1296,19 +1187,41 @@
                 if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(dateObj.getTime()===today.getTime()) cls+=' today';
                 box.className=cls;
 
+                // FIX: New rendering logic to group tasks
                 let html=`<div class="date">${day}</div>`;
-                if(inRange){
-                  const shown = Math.min(2, tasks.length);
-                  for(let i=0;i<shown;i++){
-                    const t = tasks[i];
-                    const line = t.short || t.htmlShort || t.html || '';
-                    const mins = (t.mins>0)? `<span class="mins">• ${t.mins}m</span>` : '';
-                    html += `<div class="task">${sanitizeHTML(line)} ${mins}</div>`;
-                  }
-                  const remaining = tasks.length - shown;
-                  if(remaining>0){
-                    html += `<div class="more-wrap"><span class="more" data-date="${key}">+ ${remaining} more</span></div><div class="fade-bottom"></div>`;
-                  }
+                if(inRange && tasks.length > 0){
+                    const grouped = tasks.reduce((acc, task) => {
+                        const bookKey = task._book || 'General';
+                        if (!acc[bookKey]) acc[bookKey] = [];
+                        acc[bookKey].push(task);
+                        return acc;
+                    }, {});
+                    
+                    const topic = tasks[0]._topic;
+                    if (topic) {
+                        html += `<span class="topic-chip">${topic}</span>`;
+                    }
+
+                    const groupKeys = Object.keys(grouped);
+                    const MAX_SHOWN_TASKS = 2;
+                    let tasksShownCount = 0;
+                    
+                    for (const key of groupKeys) {
+                        if (tasksShownCount >= MAX_SHOWN_TASKS) break;
+                        html += `<div class="task-group"><h4>${sanitizeHTML(key)}</h4>`;
+                        for (const task of grouped[key]) {
+                            if (tasksShownCount >= MAX_SHOWN_TASKS) break;
+                            const mins = (task.mins > 0) ? ` <span class="mins">• ${task.mins}m</span>` : '';
+                            html += `<div class="task">${sanitizeHTML(task.display)}${mins}</div>`;
+                            tasksShownCount++;
+                        }
+                        html += `</div>`;
+                    }
+
+                    const remaining = tasks.length - tasksShownCount;
+                    if(remaining > 0){
+                      html += `<div class="more-wrap"><span class="more" data-date="${key}">+ ${remaining} more</span></div><div class="fade-bottom"></div>`;
+                    }
                 }
                 box.innerHTML=html;
                 box.addEventListener('click',(ev)=>{
@@ -1342,9 +1255,9 @@
             dayTitle.textContent = `Details — ${dt.toLocaleDateString(undefined,{weekday:'long', month:'short', day:'numeric'})}`;
             dayMetaGoal.textContent = (input.goal||'').toUpperCase();
             dayContent.innerHTML = tasks.map(t=>{
-              const line = t.long || t.htmlLong || t.html || t.short || '';
+              const line = t.long || t.display || '';
               const mins = (t.mins>0)? `<span class="pill">${t.mins} min</span>` : '';
-              return `<div class="task">${sanitizeHTML(line)} ${mins}</div>`;
+              return `<div class="task" style="margin-bottom:8px;">${sanitizeHTML(line)} ${mins}</div>`;
             }).join('');
             modalBackdrop.style.display='flex';
             document.body.style.overflow='hidden';
@@ -1375,11 +1288,11 @@
             for(let i=0;i<spanDays;i++){
               const day=new Date(startDate.getTime()+i*86400000);
               const items=tasks[i]||[];
-              if(!items.length) continue;
+              if(!items.length || items.every(it => it.type === 'off')) continue;
 
               const startUTC=new Date(Date.UTC(day.getFullYear(),day.getMonth(),day.getDate(),startHour,startMin,0));
               const endUTC=new Date(startUTC.getTime()+minutes*60000);
-              const desc=escapeICSText(items.map(t=>(t.long||t.html||'').replace(/<[^>]+>/g,'')).join('\n'));
+              const desc=escapeICSText(items.map(t=>(t.long||t.display||'').replace(/<[^>]+>/g,'')).join('\n'));
               const uid = `olympiadprep-${planId}-${i}@studyplan`;
               lines.push('BEGIN:VEVENT',`UID:${uid}`, `DTSTAMP:${fmtUTC(new Date())}`, `DTSTART:${fmtUTC(startUTC)}`, `DTEND:${fmtUTC(endUTC)}`, `SUMMARY:Study • ${(meta.goal||'').toUpperCase()}`, `DESCRIPTION:${desc}`,'END:VEVENT');
             }
@@ -1421,8 +1334,8 @@
             const wrap = document.createElement('section'); wrap.className='month';
             wrap.innerHTML = `<h3>${today.toLocaleString(undefined,{month:'long',year:'numeric'})}</h3><div class="cal"></div>`;
             const grid = wrap.querySelector('.cal');
-            ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach(d => {
-              grid.insertAdjacentHTML('beforeend', `<div class="day" style="background:#f8fafc"><div class="date" style="opacity:.7">${d}</div></div>`);
+            ['S','M','T','W','T','F','S'].forEach(d => {
+              grid.insertAdjacentHTML('beforeend', `<div class="day" style="background:#f8fafc; min-height:auto;"><div class="date" style="opacity:.7; text-align:center;">${d}</div></div>`);
             });
             const first = new Date(today.getFullYear(), today.getMonth(), 1);
             const lead = first.getDay(); for(let i=0;i<lead;i++) grid.insertAdjacentHTML('beforeend', `<div class="day out-of-range"></div>`);
@@ -1436,7 +1349,6 @@
     })();
   </script>
 
-  <!-- Auth glue -->
   <script type="module" src="./auth.js"></script>
 </body>
 </html>
