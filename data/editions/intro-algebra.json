@@ -1,0 +1,188 @@
+{
+  "book": "AoPS: Introduction to Algebra",
+  "edition": "2014 Edition",
+  "canonical_topics": [
+    "Polynomials and Algebra",
+    "Functions",
+    "Sequences and Series",
+    "Mixed Review"
+  ],
+  "sections": [
+    {
+      "id": "ia-ch01",
+      "title": "Follow the Rules",
+      "topic": "Polynomials and Algebra",
+      "pages": "1-51",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch02",
+      "title": "x Marks the Spot",
+      "topic": "Polynomials and Algebra",
+      "pages": "52-76",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch03",
+      "title": "One-Variable Linear Equations",
+      "topic": "Polynomials and Algebra",
+      "pages": "77-102",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch04",
+      "title": "More Variables",
+      "topic": "Polynomials and Algebra",
+      "pages": "103-122",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch05",
+      "title": "Multi-Variable Linear Equations",
+      "topic": "Polynomials and Algebra",
+      "pages": "123-156",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch06",
+      "title": "Ratios and Percents",
+      "topic": "Polynomials and Algebra",
+      "pages": "157-186",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch07",
+      "title": "Proportion",
+      "topic": "Polynomials and Algebra",
+      "pages": "187-207",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch08",
+      "title": "Graphing Lines",
+      "topic": "Functions",
+      "pages": "208-251",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch09",
+      "title": "Introduction to Inequalities",
+      "topic": "Polynomials and Algebra",
+      "pages": "252-285",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch10",
+      "title": "Quadratic Equations - Part 1",
+      "topic": "Polynomials and Algebra",
+      "pages": "286-323",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch11",
+      "title": "Special Factorizations",
+      "topic": "Polynomials and Algebra",
+      "pages": "324-356",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch12",
+      "title": "Complex Numbers",
+      "topic": "Polynomials and Algebra",
+      "pages": "357-371",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch13",
+      "title": "Quadratic Equations - Part 2",
+      "topic": "Polynomials and Algebra",
+      "pages": "372-403",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch14",
+      "title": "Graphing Quadratics",
+      "topic": "Functions",
+      "pages": "404-424",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch15",
+      "title": "More Inequalities",
+      "topic": "Polynomials and Algebra",
+      "pages": "425-450",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch16",
+      "title": "Functions",
+      "topic": "Functions",
+      "pages": "451-483",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch17",
+      "title": "Graphing Functions",
+      "topic": "Functions",
+      "pages": "484-511",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch18",
+      "title": "Polynomials",
+      "topic": "Polynomials and Algebra",
+      "pages": "512-524",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch19",
+      "title": "Exponents and Logarithms",
+      "topic": "Polynomials and Algebra",
+      "pages": "525-557",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch20",
+      "title": "Special Functions",
+      "topic": "Functions",
+      "pages": "558-588",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch21",
+      "title": "Sequences & Series",
+      "topic": "Sequences and Series",
+      "pages": "589-627",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ia-ch22",
+      "title": "Special Manipulations",
+      "topic": "Mixed Review",
+      "pages": "628-642",
+      "problemRange": [],
+      "hardTail": 0
+    }
+  ]
+}
