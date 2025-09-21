@@ -1,0 +1,131 @@
+{
+  "book": "AoPS: Introduction to Number Theory",
+  "edition": "2013 Edition",
+  "canonical_topics": [
+    "Number Theory",
+    "Polynomials and Algebra",
+    "Mixed Review"
+  ],
+  "sections": [
+    {
+      "id": "int-ch01",
+      "title": "Integers: The Basics",
+      "topic": "Number Theory",
+      "pages": "1-24",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch02",
+      "title": "Primes and Composites",
+      "topic": "Number Theory",
+      "pages": "25-38",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch03",
+      "title": "Multiples and Divisors",
+      "topic": "Number Theory",
+      "pages": "39-62",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch04",
+      "title": "Prime Factorization",
+      "topic": "Number Theory",
+      "pages": "63-90",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch05",
+      "title": "Divisor Problems",
+      "topic": "Number Theory",
+      "pages": "91-108",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch06",
+      "title": "Special Numbers",
+      "topic": "Number Theory",
+      "pages": "109-124",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch07",
+      "title": "Algebra With Integers",
+      "topic": "Polynomials and Algebra",
+      "pages": "125-140",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch08",
+      "title": "Base Numbers",
+      "topic": "Number Theory",
+      "pages": "141-164",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch09",
+      "title": "Base Number Arithmetic",
+      "topic": "Number Theory",
+      "pages": "165-176",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch10",
+      "title": "Units Digits",
+      "topic": "Number Theory",
+      "pages": "177-194",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch11",
+      "title": "Decimals and Fractions",
+      "topic": "Number Theory",
+      "pages": "195-216",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch12",
+      "title": "Introduction to Modular Arithmetic",
+      "topic": "Number Theory",
+      "pages": "217-246",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch13",
+      "title": "Divisibility Rules",
+      "topic": "Number Theory",
+      "pages": "247-260",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch14",
+      "title": "Linear Congruences",
+      "topic": "Number Theory",
+      "pages": "261-282",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "int-ch15",
+      "title": "Number Sense",
+      "topic": "Mixed Review",
+      "pages": "283-302",
+      "problemRange": [],
+      "hardTail": 0
+    }
+  ]
+}
