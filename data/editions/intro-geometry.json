@@ -1,0 +1,162 @@
+{
+  "book": "AoPS: Introduction to Geometry",
+  "edition": "2014 Edition",
+  "canonical_topics": [
+    "Geometry",
+    "Mixed Review"
+  ],
+  "sections": [
+    {
+      "id": "ig-ch01",
+      "title": "What's in a Name?",
+      "topic": "Geometry",
+      "pages": "1-12",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch02",
+      "title": "Angles",
+      "topic": "Geometry",
+      "pages": "13-48",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch03",
+      "title": "Congruent Triangles",
+      "topic": "Geometry",
+      "pages": "49-80",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch04",
+      "title": "Perimeter and Area",
+      "topic": "Geometry",
+      "pages": "81-98",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch05",
+      "title": "Similar Triangles",
+      "topic": "Geometry",
+      "pages": "99-132",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch06",
+      "title": "Right Triangles",
+      "topic": "Geometry",
+      "pages": "133-169",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch07",
+      "title": "Special Parts of a Triangle",
+      "topic": "Geometry",
+      "pages": "170-205",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch08",
+      "title": "Quadrilaterals",
+      "topic": "Geometry",
+      "pages": "206-243",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch09",
+      "title": "Polygons",
+      "topic": "Geometry",
+      "pages": "244-265",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch10",
+      "title": "Geometric Inequalities",
+      "topic": "Geometry",
+      "pages": "266-283",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch11",
+      "title": "Circles",
+      "topic": "Geometry",
+      "pages": "284-303",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch12",
+      "title": "Circles and Angles",
+      "topic": "Geometry",
+      "pages": "304-339",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch13",
+      "title": "Power of a Point",
+      "topic": "Geometry",
+      "pages": "340-355",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch14",
+      "title": "Three-Dimensional Geometry",
+      "topic": "Geometry",
+      "pages": "356-379",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch15",
+      "title": "Curved Surfaces",
+      "topic": "Geometry",
+      "pages": "380-407",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch16",
+      "title": "The More Things Change...",
+      "topic": "Geometry",
+      "pages": "408-434",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch17",
+      "title": "Analytic Geometry",
+      "topic": "Geometry",
+      "pages": "435-477",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch18",
+      "title": "Introduction to Trigonometry",
+      "topic": "Geometry",
+      "pages": "478-504",
+      "problemRange": [],
+      "hardTail": 0
+    },
+    {
+      "id": "ig-ch19",
+      "title": "Problem Solving Strategies in Geometry",
+      "topic": "Mixed Review",
+      "pages": "505-524",
+      "problemRange": [],
+      "hardTail": 0
+    }
+  ]
+}
