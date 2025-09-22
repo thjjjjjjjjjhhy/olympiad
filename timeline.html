@@ -66,11 +66,10 @@
     .past{opacity:.55}
     .today{outline:2px solid var(--accent)}
 
-    /* FIX: Styles for new grouped task display */
     .task-group h4{font-size:.9rem; margin:6px 0 2px; font-weight:700; color: #334155;}
     .task{font-size:.9rem;margin:2px 0;line-height:1.25; padding-left: 4px;}
     .task .mins{font-size:.82rem;color:var(--muted)}
-    .topic-chip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:.78rem;margin-left:6px;background:#fafafa}
+    .topic-chip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:.78rem;margin-right:4px; background:#fafafa}
     .more{font-size:.85rem;color:var(--accent);cursor:pointer;user-select:none}
     .more-wrap{position:absolute;right:6px;bottom:6px;background:linear-gradient(90deg, rgba(255,255,255,0), #fff 35%);padding-left:18px}
     .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg, rgba(0,0,0,0) 0%, #fff 75%);border-radius:0 0 10px 10px;pointer-events:none}
@@ -630,7 +629,6 @@
           }
         }
         
-        // FIX: Check if any parts were generated. If not, the topic is exhausted.
         const isExhausted = parts.length === 0;
 
         return {
@@ -706,7 +704,6 @@
         return {nums:picked, minutes:Math.round(total)};
       }
 
-      // FIX: Cleaned up task generation to create simpler display labels and store metadata
       function makeExercisesFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
         const topic = section.topic || 'Polynomials and Algebra';
         const target = difficultyTarget(topic, dayIndex, totalDays);
@@ -1032,11 +1029,14 @@
             if(minutesPerDay <= 22){
               const topic = pickNextTopic();
               const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic, availableTopics);
-              const readTasks = planned.parts.map(p => ({
-                display: `Read: ${p.chapterTitle} (pp.${p.from}-${p.to})`,
-                long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle} (pp.${p.from}-${p.to})`,
-                mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
-              }));
+              const readTasks = planned.parts.map(p => {
+                const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
+                return {
+                    display: `Read: ${p.chapterTitle}${pageStr}`,
+                    long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
+                    mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
+                };
+              });
               return readTasks;
             }
 
@@ -1059,24 +1059,22 @@
             // Plan reading
             const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
 
-            // FIX: Handle topic exhaustion
             if (readingPlan.isExhausted) {
-                // Create a review task and re-allocate the time
                 tasks.push({
                     display: `Review key concepts in ${topic}`,
                     long: `🌀 Review key concepts, formulas, and previous errors for <strong>${topic}</strong>. No new reading material is available for this topic.`,
-                    mins: Math.min(mRead, 15), // Cap review time at 15 mins
+                    mins: Math.min(mRead, 15),
                     type: 'review',
                     _topic: topic,
                     _book: `🌀 Review: ${topic}`
                 });
-                // Add the leftover reading time to the drill time
                 mDrill += (mRead - tasks[0].mins);
             } else {
                 readingPlan.parts.forEach(p => {
+                  const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
                   tasks.push({
-                    display: `Read: ${p.chapterTitle}` + (p.from ? ` (pp.${p.from}–${p.to})` : ''),
-                    long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}` + (p.from ? ` (pp.${p.from}–${p.to})` : ''),
+                    display: `Read: ${p.chapterTitle}${pageStr}`,
+                    long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
                     mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
                   });
                 });
@@ -1098,7 +1096,6 @@
                 const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
                 tasks.push(ex);
             } else {
-                // If reading was exhausted, maybe pick a different topic for exercises or a timed set
                 const timedSet = onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill);
                 tasks.push(timedSet);
             }
@@ -1121,9 +1118,8 @@
 
             tasks.push(problemOfDay());
             
-            // Final balance (simplified)
             let cur = totalMin(tasks);
-            if(cur < minutesPerDay - 5 && tasks[0].type === 'reading'){
+            if(cur < minutesPerDay - 5 && tasks.length > 0 && tasks[0].type === 'reading'){
               tasks[0].mins += (minutesPerDay - cur);
             }
 
@@ -1187,7 +1183,6 @@
                 if(!inRange) cls+=' out-of-range'; else if(dateObj<today) cls+=' past'; else if(dateObj.getTime()===today.getTime()) cls+=' today';
                 box.className=cls;
 
-                // FIX: New rendering logic to group tasks
                 let html=`<div class="date">${day}</div>`;
                 if(inRange && tasks.length > 0){
                     const grouped = tasks.reduce((acc, task) => {
