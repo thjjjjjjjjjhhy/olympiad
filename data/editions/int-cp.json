@@ -1,0 +1,23 @@
+{
+  "book": "AoPS Intermediate Counting & Probability",
+  "edition": "2012 Edition",
+  "canonical_topics": ["Combinatorics", "Probability", "Proof Techniques", "Number Theory", "Mixed Review"],
+  "sections": [
+    {"id": "icp-ch01", "title": "Review of Counting & Probability Basics", "topic": "Mixed Review", "pages": "1-26"},
+    {"id": "icp-ch02", "title": "Sets and Logic", "topic": "Proof Techniques", "pages": "27-48"},
+    {"id": "icp-ch03", "title": "A Piece of PIE", "topic": "Combinatorics", "pages": "49-82"},
+    {"id": "icp-ch04", "title": "Constructive Counting and 1-1 Correspondences", "topic": "Combinatorics", "pages": "83-117"},
+    {"id": "icp-ch05", "title": "The Pigeonhole Principle", "topic": "Combinatorics", "pages": "118-129"},
+    {"id": "icp-ch06", "title": "Constructive Expectation", "topic": "Probability", "pages": "130-144"},
+    {"id": "icp-ch07", "title": "Distributions", "topic": "Combinatorics", "pages": "145-160"},
+    {"id": "icp-ch08", "title": "Mathematical Induction", "topic": "Proof Techniques", "pages": "161-171"},
+    {"id": "icp-ch09", "title": "Fibonacci Numbers", "topic": "Number Theory", "pages": "172-191"},
+    {"id": "icp-ch10", "title": "Recursion", "topic": "Combinatorics", "pages": "192-226"},
+    {"id": "icp-ch11", "title": "Conditional Probability", "topic": "Probability", "pages": "227-242"},
+    {"id": "icp-ch12", "title": "Combinatorial Identities", "topic": "Combinatorics", "pages": "243-264"},
+    {"id": "icp-ch13", "title": "Events With States", "topic": "Probability", "pages": "265-297"},
+    {"id": "icp-ch14", "title": "Generating Functions", "topic": "Combinatorics", "pages": "298-330"},
+    {"id": "icp-ch15", "title": "Graph Theory", "topic": "Combinatorics", "pages": "331-362"},
+    {"id": "icp-ch16", "title": "Challenge Problems", "topic": "Mixed Review", "pages": "363-365"}
+  ]
+}
