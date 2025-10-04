@@ -1,0 +1,20 @@
+{
+  "book": "AoPS Precalculus",
+  "edition": "2014 Edition",
+  "canonical_topics": ["Functions", "Geometry", "Complex Numbers", "Polynomials and Algebra"],
+  "sections": [
+    {"id": "pc-ch01", "title": "Functions Review", "topic": "Functions", "pages": "1-28"},
+    {"id": "pc-ch02", "title": "Introduction to Trigonometric Functions", "topic": "Functions", "pages": "29-82"},
+    {"id": "pc-ch03", "title": "Trigonometric Identities", "topic": "Functions", "pages": "83-127"},
+    {"id": "pc-ch04", "title": "Applications to Geometry", "topic": "Geometry", "pages": "128-157"},
+    {"id": "pc-ch05", "title": "Parameterization and Trigonometric Coordinate Systems", "topic": "Geometry", "pages": "158-191"},
+    {"id": "pc-ch06", "title": "Basics of Complex Numbers", "topic": "Complex Numbers", "pages": "192-217"},
+    {"id": "pc-ch07", "title": "Trigonometry and Complex Numbers", "topic": "Complex Numbers", "pages": "218-254"},
+    {"id": "pc-ch08", "title": "Geometry of Complex Numbers", "topic": "Complex Numbers", "pages": "255-296"},
+    {"id": "pc-ch09", "title": "Vectors in Two Dimensions", "topic": "Geometry", "pages": "297-333"},
+    {"id": "pc-ch10", "title": "Matrices in Two Dimensions", "topic": "Polynomials and Algebra", "pages": "334-379"},
+    {"id": "pc-ch11", "title": "Vectors and Matrices in Three Dimensions, Part 1", "topic": "Polynomials and Algebra", "pages": "380-420"},
+    {"id": "pc-ch12", "title": "Vectors and Matrices in Three Dimensions, Part 2", "topic": "Polynomials and Algebra", "pages": "421-462"},
+    {"id": "pc-ch13", "title": "Vector Geometry", "topic": "Geometry", "pages": "463-487"}
+  ]
+}
