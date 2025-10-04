@@ -186,7 +186,7 @@
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
       <span class="lg"><span class="dot"></span> Timed set (contest-based)</span>
       <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
-      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after all reading complete)</span>
+      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after reading is complete)</span>
       <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
       <span class="lg"><span class="dot"></span> Off day</span>
     </div>
@@ -359,11 +359,6 @@
       })();
       Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
-      /* Allow proof track only when ALL reading done (for AMC10/12); never for AMC 8 */
-      const selectedBooks = new Set(input.selectedBooks || []);
-      const PROOF_BOOKS = ['velleman','zeitz','engel','egmo'];
-      const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
-
       /* Edition packs */
       const BOOK_PACK_PATH = {
         'aops-v1': 'data/editions/aops-vol1.json',
@@ -384,7 +379,9 @@
         'path-comb': 'data/editions/path-comb.json',
         'cmms': 'data/editions/cmms.json'
       };
+      const PROOF_BOOKS = ['velleman','zeitz','engel','egmo'];
 
+      const selectedBooks = new Set(input.selectedBooks || []);
       const selectedPackIds = Object.keys(BOOK_PACK_PATH).filter(id=>selectedBooks.has(id));
 
       async function tryFetchPack(id){
@@ -401,49 +398,24 @@
         }
       }
 
-      /* NEW: accept problemRange or problems, array or string */
-      function normalizeProblemRange(meta){
-        if(!meta) return null;
-
-        // Array form: [L, R]
-        if(Array.isArray(meta.problemRange) && meta.problemRange.length>=2){
-          const L=Number(meta.problemRange[0]), R=Number(meta.problemRange[1]);
-          if(Number.isFinite(L)&&Number.isFinite(R)&&L>=1&&R>=L) return [L,R];
-        }
-        // String form: "L-R"
-        if(typeof meta.problemRange === 'string'){
-          const m = meta.problemRange.match(/(\d+)\s*[–-]\s*(\d+)/);
-          if(m){ const L=+m[1], R=+m[2]; if(R>=L&&L>=1) return [L,R]; }
-        }
-        // Alternate field: problems
-        if(Array.isArray(meta.problems) && meta.problems.length){
-          const nums = meta.problems.map(n=>+n).filter(n=>Number.isFinite(n)&&n>=1);
-          if(nums.length){ return [Math.min(...nums), Math.max(...nums)]; }
-        }
-        if(typeof meta.problems === 'string'){
-          const m = meta.problems.match(/(\d+)\s*[–-]\s*(\d+)/);
-          if(m){ const L=+m[1], R=+m[2]; if(R>=L&&L>=1) return [L,R]; }
-        }
-        return null;
-      }
-
       function indexSectionsByTopic(packs){
         const byTopic = {};
         for(const pk of packs){
           const sections = Array.isArray(pk?.sections)? pk.sections : [];
           for(const s of sections){
             const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
-            const normRange = normalizeProblemRange(s);
             if(!byTopic[topic]) byTopic[topic]=[];
+            const chapter = s.chapter || s.id || '?';
             byTopic[topic].push({
               bookId: pk.__bookId,
               bookTitle: pk.book || pk.__bookId,
-              chapter: s.chapter || s.id || '?',
+              chapter,
               chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
               pages: s.pages || '',
-              editionMeta: {...s, _normRange: normRange},
+              editionMeta: s,
               topic,
-              hasExercises: !!normRange
+              hasExercises: Array.isArray(s.problemRange) && s.problemRange.length>=2,
+              sectionKey: `${pk.__bookId}#${chapter}`
             });
           }
         }
@@ -485,12 +457,11 @@
           case 'engel': return 5.6;
           case '104nt': return 5.0;
           case 'path-comb': return 5.4;
-          default: return 4.0; // sensible default centered at ~4 min/page
+          default: return 4.0;
         }
       }
 
       /* === TIMING FOR PROBLEMS ============================================== */
-
       function timeForAMCProblem(level, num){
         if(level==='8'){ return 3.5; }
         if(level==='10' || level==='12'){
@@ -501,36 +472,26 @@
         return 4.0;
       }
       function timePerAIMEProblem(){ return 6.5; }
-
       function timeForBookProblem(sectionMeta, n){
+        if(!sectionMeta || !Array.isArray(sectionMeta.problemRange) || sectionMeta.problemRange.length<2) return 3.5;
+        const L=Number(sectionMeta.problemRange[0]), R=Number(sectionMeta.problemRange[1]);
+        if(!Number.isFinite(L)||!Number.isFinite(R)) return 3.5;
         const hardTail = Math.max(0, Number(sectionMeta.hardTail||0));
-        if(!hardTail) return 3.5;
-        const range = sectionMeta._normRange || sectionMeta.problemRange;
-        if(!Array.isArray(range) || range.length<2) return 3.5;
-        const L = Number(range[0]), R = Number(range[1]);
         const hardStart = Math.max(L, R - hardTail + 1);
-        return (n>=hardStart) ? 10.0 : 3.5;
+        if(n>=hardStart) return 10.0;
+        return 3.5;
       }
 
-      function minutesPerProblem(){
-        if(onUSAMO) return 9.0;
-        if(onAIME)  return 6.5;
-        if(onAMC8)  return 3.5;
-        return 4.0;
-      }
-      function minProblemsFloor(){
-        if(onUSAMO) return 2;
-        if(onAIME)  return 3;
-        if(onAMC8)  return 4;
-        return 5;
-      }
+      function minutesPerProblem(){ if(onUSAMO) return 9.0; if(onAIME) return 6.5; if(onAMC8) return 3.5; return 4.0; }
+      function minProblemsFloor(){ if(onUSAMO) return 2; if(onAIME) return 3; if(onAMC8) return 4; return 5; }
 
       /* SECTION/PROGRESS UTILITIES */
-      const sectionProgress = new Map(); // reading progress
-      const consumedSections = new Set(); // fully read sections
-      const consumedExerciseSections = new Set(); // fully exercised sections
-      const catalogCursor = {};
-      const exCursor = {};
+      const sectionProgress = new Map();      // reading progress per section (pages)
+      const consumedSections = new Set();     // reading sections finished
+      const catalogCursor = {};               // reading cursor per topic
+
+      const exerciseCursorByTopic = {};       // NEW: exercise rotation cursor per topic
+      const usedBookProblems = new Set();     // global set of assigned problems (bookId+chapter+num)
 
       function shortBook(title){
         if(!title) return '';
@@ -553,23 +514,6 @@
           }
           idx = (idx+1) % arr.length;
           tries++;
-        }
-        return null;
-      }
-
-      /* NEW: exercise section picker that respects exercise consumption */
-      function nextExerciseSectionForTopic(topic, catalogByTopic, exerciseCapableBooks){
-        const arr = catalogByTopic[topic] || [];
-        if(!arr.length) return null;
-        let idx = (exCursor[topic]||0) % arr.length;
-        for(let tries=0; tries<arr.length; tries++){
-          const s = arr[(idx+tries) % arr.length];
-          const key = `${s.bookId}#${s.chapter}`;
-          if(!s.hasExercises) continue;
-          if(!exerciseCapableBooks.has(s.bookId)) continue;
-          if(consumedExerciseSections.has(key)) continue;
-          exCursor[topic] = (idx+tries+1) % arr.length;
-          return s;
         }
         return null;
       }
@@ -608,7 +552,7 @@
           const {key, cur, total} = ensureProgressEntry(section);
           const mpp = mppFor(section.bookId);
 
-          if(!total){
+          if(!total){ // unknown pages -> time-based reading
             const take = Math.max(8, Math.min(remaining, Math.round(minutesBudget*0.8)));
             parts.push({bookTitle: section.bookTitle, chapterTitle: section.chapterTitle, from:null, to:null, mpp, minutes: take});
             used += take; remaining -= take;
@@ -628,11 +572,7 @@
           const pages = (toPage - startPage + 1);
           const minutes = Math.round(pages * mpp);
 
-          parts.push({
-            bookTitle: section.bookTitle,
-            chapterTitle: section.chapterTitle,
-            from: startPage, to: toPage, mpp, minutes
-          });
+          parts.push({bookTitle: section.bookTitle, chapterTitle: section.chapterTitle, from: startPage, to: toPage, mpp, minutes});
           used += minutes; remaining -= minutes;
 
           const newTo = toPage;
@@ -643,7 +583,6 @@
             sectionProgress.set(key, {from: total.from, to: newTo});
             if(newTo >= total.to) consumedSections.add(key);
           }
-
           return true;
         }
 
@@ -655,22 +594,38 @@
           const ok = consumeFromSection(sec);
           if(!ok) continue;
         }
-        
         const isExhausted = parts.length === 0;
-
-        return {
-          parts,
-          usedMin: Math.max(0, Math.round(parts.reduce((s,p)=>s+(p.minutes||0),0))),
-          isExhausted
-        };
+        return { parts, usedMin: Math.max(0, Math.round(parts.reduce((s,p)=>s+(p.minutes||0),0))), isExhausted };
       }
 
-      /* Problem selection for book exercises */
-      function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, bookTag){
+      /* === Exercise helpers ================================================= */
+      function problemKey(bookId, chapter, n){
+        return `${String(bookId).toUpperCase()}#${chapter}#${n}`;
+      }
+
+      function remainingProblemsInfo(section, usedSet){
+        const meta = section.editionMeta;
+        if(!meta || !Array.isArray(meta.problemRange) || meta.problemRange.length<2){
+          return {count:0, minT:Infinity};
+        }
+        const L = Number(meta.problemRange[0]), R = Number(meta.problemRange[1]);
+        if(!Number.isFinite(L)||!Number.isFinite(R)||L>R) return {count:0,minT:Infinity};
+        let count = 0, minT = Infinity;
+        for(let n=L;n<=R;n++){
+          const id = problemKey(section.bookId, section.chapter, n);
+          if(!usedSet.has(id)){
+            count++;
+            const t = timeForBookProblem(meta, n);
+            if(t < minT) minT = t;
+          }
+        }
+        return {count, minT: (minT===Infinity? 1e9 : minT)};
+      }
+
+      function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, sectionTag){
         const res = [];
         if(!sectionMeta) return res;
-
-        const range = sectionMeta._normRange || sectionMeta.problemRange;
+        const range = sectionMeta.problemRange;
         if(!Array.isArray(range) || range.length<2) return res;
         const L = Number(range[0]), R = Number(range[1]);
         if(!(Number.isFinite(L) && Number.isFinite(R) && L<=R && L>=1)) return res;
@@ -681,7 +636,7 @@
 
         const easy=[], mid=[], hard=[];
         for(let n=L;n<=R;n++){
-          const id = `${bookTag||sectionMeta.bookTag||'BK'}-${sectionMeta.chapter||'?'}-${n}`;
+          const id = `${sectionTag}#${n}`;
           if(usedSet.has(id)) continue;
           if (hardTail>0 && n>=hardStart) { hard.push(n); continue; }
           const pos = (n - L) / Math.max(1, span - hardTail);
@@ -693,8 +648,7 @@
           shuffle(pool);
           while(pool.length && res.length<k){
             const n = pool.pop();
-            const id = `${bookTag||sectionMeta.bookTag||'BK'}-${sectionMeta.chapter||'?'}-${n}`;
-            usedSet.add(id);
+            usedSet.add(`${sectionTag}#${n}`);
             res.push(n);
           }
         }
@@ -721,32 +675,84 @@
       function chooseBookProblemsForBudget(section, minutesBudget, target, usedSet){
         const meta = section.editionMeta;
         const picked = [];
-        const range = meta && (meta._normRange || meta.problemRange);
-        if(!range || range.length<2) return {nums:picked, minutes:0};
-        const candidates = pickProblemsByHeuristic(meta, 9999, target, usedSet, section.bookId.toUpperCase());
-        let total = 0;
-        for(const n of candidates){
-          const t = timeForBookProblem(meta, n);
-          if(total + t <= minutesBudget + 0.01){ picked.push(n); total += t; }
-          if(minutesBudget - total < 2.0) break;
+        if(!meta || !Array.isArray(meta.problemRange) || meta.problemRange.length<2) return {nums:picked, minutes:0, exhausted:true};
+
+        // Build a section-specific tag so usedSet keys are unique *per section*
+        const sectionTag = `${String(section.bookId).toUpperCase()}#${section.chapter}`;
+
+        // Build candidates (don’t mutate usedSet until we actually take problems)
+        const L = Number(meta.problemRange[0]), R = Number(meta.problemRange[1]);
+        const allAvail = [];
+        for(let n=L;n<=R;n++){
+          const id = `${sectionTag}#${n}`;
+          if(!usedSet.has(id)) allAvail.push(n);
         }
-        return {nums:picked, minutes:Math.round(total)};
+        if(allAvail.length===0) return {nums:picked, minutes:0, exhausted:true};
+
+        // Split into easy/mid/hard following target
+        const hardTail = Math.max(0, Number(meta.hardTail||0));
+        const hardStart = Math.max(L, R - hardTail + 1);
+        const easy=[], mid=[], hard=[];
+        for(const n of allAvail){
+          if (hardTail>0 && n>=hardStart) { hard.push(n); continue; }
+          const pos = (n - L) / Math.max(1, (R - L + 1) - hardTail);
+          if (pos <= 0.34) easy.push(n);
+          else if (pos <= 0.67) mid.push(n);
+          else hard.push(n);
+        }
+        const order = (target==='hard')? [hard,mid,easy] : (target==='easy')? [easy,mid,hard] : [mid,easy,hard];
+
+        // Greedy pack by budget
+        let total = 0;
+        const takeFrom = (pool)=>{
+          shuffle(pool);
+          while(pool.length){
+            const n = pool.pop();
+            const t = timeForBookProblem(meta, n);
+            if(total + t <= minutesBudget + 0.01){
+              picked.push(n); total += t;
+            }
+            if(minutesBudget - total < 2.0) break;
+          }
+        };
+        for(const pool of order){
+          if(minutesBudget - total < 2.0) break;
+          takeFrom(pool);
+        }
+
+        // Only mark problems as used if we actually took them
+        for(const n of picked){
+          usedSet.add(`${sectionTag}#${n}`);
+        }
+
+        const exhausted = (picked.length===0 && allAvail.length>0) ? false : (picked.length===0 && allAvail.length===0) ? true : (picked.length>0 && picked[picked.length-1]===R && usedSet.has(`${sectionTag}#${R}`));
+        return {nums:picked, minutes:Math.round(total), exhausted};
       }
 
       function makeExercisesFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
         const topic = section.topic || 'Polynomials and Algebra';
         const target = difficultyTarget(topic, dayIndex, totalDays);
-        const chosen = chooseBookProblemsForBudget(section, minutesBudget, target, usedSet);
-        if(!chosen.nums.length){
-          return null; // ← IMPORTANT: don't render empty exercise tasks
+
+        // If nothing fits budget, skip early
+        const rem = remainingProblemsInfo(section, usedSet);
+        if(rem.count===0 || rem.minT > minutesBudget + 0.01){
+          return null;
         }
+
+        const chosen = chooseBookProblemsForBudget(section, minutesBudget, target, usedSet);
         const baseDesc = `Ex: ${section.chapterTitle}`;
         const longBase = `🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`;
-        const text = (chosen.nums.length<=10) ? chosen.nums.join(', ') : `${Math.min(...chosen.nums)}–${Math.max(...chosen.nums)} (selected)`;
+
+        if(!chosen.nums.length){
+          // Fail-closed: return null so caller can schedule a timed set instead of a blank row
+          return null;
+        }
+        const numsSorted = chosen.nums.slice().sort((a,b)=>a-b);
+        const text = (numsSorted.length<=10) ? numsSorted.join(', ') : `${Math.min(...numsSorted)}–${Math.max(...numsSorted)} (selected)`;
         return {
           display: `${baseDesc}: ${text}`,
           long: `${longBase}: ${text}`,
-          mins: chosen.minutes, type:'bookex', _topic: topic, _exCount: chosen.nums.length, _exNums: chosen.nums, _section: section, _book: shortBook(section.bookTitle)
+          mins: chosen.minutes, type:'bookex', _topic: topic, _exCount: numsSorted.length, _exNums: numsSorted, _section: section, _book: shortBook(section.bookTitle)
         };
       }
 
@@ -782,7 +788,7 @@
             const id = `AIME-${y}-${variant}-${num}`;
             if(usedContest.has(id)) continue;
             usedContest.add(id);
-            return {display:`${y} AIME ${variant} • #${num}`, long:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type:'potd', _book:'🧩 Problem of the Day'};
+            return {display:`${y} AIME ${variant} • #${num}`, long:`🧩 <a href="${aimeProbURL(y,variant,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AIME ${variant} • Problem ${num}</a>`, mins: 10, type: 'potd', _book:'🧩 Problem of the Day'};
           } else if(onUSAMO){
             if(/usajmo/.test(goalStr)){
               const num = 1 + Math.floor(rand()*6);
@@ -816,7 +822,7 @@
         return {display:`Contest problem`, long:`🧩 Problem of the day: see recent contests on AoPS`, mins:8, type:'potd', _book:'🧩 Problem of the Day'};
       }
 
-      /* Timed sets */
+      /* AMC/ AIME timed sets */
       function buildAMCContestTimedSet(minutesBudget){
         const todayYear = new Date().getFullYear();
         const years = []; for(let y=todayYear-18; y<=todayYear-1; y++) years.push(y);
@@ -932,7 +938,8 @@
         return {display:`AMC ${level}${variant} ${y} mock`, long:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
       }
 
-      /* Proof track gating (AMC10/12 only, after all reading complete) */
+      /* Proof gating per your rules */
+      const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
       const proofUnits = [];
       if(hasProofBooks){
         if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Direct & Contrapositive Proofs', mins:25});
@@ -958,19 +965,20 @@
         return out;
       }
 
+      /* Build plan */
       (async function buildPlan(){
         try{
           const packs = (await Promise.all(selectedPackIds.map(id => tryFetchPack(id)))).filter(Boolean);
           const catalogByTopic = indexSectionsByTopic(packs);
           $('booksBadge').textContent = `Books: ${selectedPackIds.length}`;
 
-          // Which books actually have any exercises defined?
+          // Only allow exercises from books that actually contain problem ranges
           const EXERCISE_BOOKS = new Set(
-            packs.filter(pk => Array.isArray(pk.sections) && pk.sections.some(s => normalizeProblemRange(s)))
+            packs.filter(pk => Array.isArray(pk.sections) && pk.sections.some(s => Array.isArray(s.problemRange) && s.problemRange.length>=2))
                  .map(pk => pk.__bookId)
           );
 
-          // Is ALL reading complete? (only then allow proofs for AMC10/12)
+          // Check if ALL reading (across all selected sections with parseable pages) is finished so far
           function allReadingDoneSoFar(){
             for(const pk of packs){
               const secs = Array.isArray(pk.sections) ? pk.sections : [];
@@ -987,7 +995,7 @@
 
           function fallbackSection(topic){
             const pickBookId = selectedPackIds[0] || 'aops-v1';
-            return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic, hasExercises:false };
+            return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic, hasExercises:false, sectionKey:`${pickBookId}#?` };
           }
 
           /* Thresholds */
@@ -998,7 +1006,6 @@
           const mockWeekdays = new Set([2,4,6]); // Tue, Thu, Sat
           const offDaySet = new Set(storedOff.map(Number));
 
-          const usedBookProblems = new Set();
           const seenTopics = new Map();
 
           function allAvailableTopics(fromCatalog){
@@ -1047,8 +1054,31 @@
           function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
 
           function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic, availableTopics){
+            const snap = deepCopyProgress();
             const planned = planReading(topic, minutes, finalPhase, catalogByTopic, availableTopics, true);
             return planned;
+          }
+
+          function findExerciseSectionForTopic(topic, minutesBudget){
+            const arr = catalogByTopic[topic] || [];
+            if(!arr.length) return null;
+            const startIdx = (exerciseCursorByTopic[topic] || 0) % arr.length;
+
+            for(let k=0; k<arr.length; k++){
+              const idx = (startIdx + k) % arr.length;
+              const s = arr[idx];
+              if(!s.hasExercises) continue;
+              // Only books that actually have exercises
+              if(!EXERCISE_BOOKS.has(s.bookId)) continue;
+
+              const rem = remainingProblemsInfo(s, usedBookProblems);
+              if(rem.count === 0) continue;                       // no unused problems left
+              if(rem.minT > minutesBudget + 0.01) continue;       // none fit today's budget
+
+              exerciseCursorByTopic[topic] = idx + 1;             // rotate next time
+              return s;
+            }
+            return null;
           }
 
           function buildDay(dayIndex, dateObj){
@@ -1118,27 +1148,17 @@
                 });
             }
 
-            // --- EXERCISES: only from sections/books that have exercises and match topic
-            let exSection = nextExerciseSectionForTopic(topic, catalogByTopic, EXERCISE_BOOKS);
-            let pushedExercise = false;
-
+            // --- Exercises: topic-matched, only from sections with problemRange, rotate, and skip exhausted/unfit ---
+            const exSection = findExerciseSectionForTopic(topic, mDrill);
             if (exSection) {
-              const exKey = `${exSection.bookId}#${exSection.chapter}`;
               const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
-              if(ex){
-                tasks.push(ex);
-                pushedExercise = true;
-              } else {
-                // No available problems left from this section → mark consumed and fallback
-                consumedExerciseSections.add(exKey);
-              }
-            }
-            if(!pushedExercise){
-              const timedSet = onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill);
-              tasks.push(timedSet);
+              if(ex){ tasks.push(ex); }
+              else   { tasks.push(onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill)); }
+            } else {
+              tasks.push(onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill));
             }
 
-            // --- PROOF GATING: No proofs for AMC8; for AMC10/12 only after all reading is done
+            // --- Proofs: none for AMC8; for AMC10/12 only after ALL reading is complete ---
             const allowProofNow = hasProofBooks && (onAMC10 || onAMC12) && allReadingDoneSoFar();
             if(allowProofNow){
               const proofShare = 0.16;
@@ -1146,7 +1166,7 @@
               scheduleProof(proofBudget).forEach(t=>tasks.push(t));
             }
 
-            // Timed practice block
+            // Timed set
             if(onUSAMO){
               const tag = exSection ? shortBook(exSection.bookTitle) : 'Mixed Practice';
               const chap = exSection ? shortChapter(exSection.chapterTitle) : 'Mixed';
@@ -1173,7 +1193,7 @@
 
           /* Build all days */
           const tasksByDay = [];
-          for(let d=0; d<days; d++){
+          for(let d=0; d<totalDays; d++){
             const dateObj = new Date(start.getTime()+d*86400000);
             tasksByDay.push( buildDay(d, dateObj) );
           }
