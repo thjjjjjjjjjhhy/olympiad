@@ -1,0 +1,18 @@
+{
+  "book": "EGMO — Euclidean Geometry in Mathematical Olympiads",
+  "edition": "1st Edition",
+  "canonical_topics": ["Geometry", "Complex Numbers"],
+  "sections": [
+    {"id": "eg-ch01", "title": "Angle Chasing", "topic": "Geometry", "pages": "3-22"},
+    {"id": "eg-ch02", "title": "Circles", "topic": "Geometry", "pages": "23-42"},
+    {"id": "eg-ch03", "title": "Lengths and Ratios", "topic": "Geometry", "pages": "43-58"},
+    {"id": "eg-ch04", "title": "Assorted Configurations", "topic": "Geometry", "pages": "59-72"},
+    {"id": "eg-ch05", "title": "Computational Geometry", "topic": "Geometry", "pages": "75-94"},
+    {"id": "eg-ch06", "title": "Complex Numbers", "topic": "Complex Numbers", "pages": "95-118"},
+    {"id": "eg-ch07", "title": "Barycentric Coordinates", "topic": "Geometry", "pages": "119-146"},
+    {"id": "eg-ch08", "title": "Inversion", "topic": "Geometry", "pages": "149-168"},
+    {"id": "eg-ch09", "title": "Projective Geometry", "topic": "Geometry", "pages": "169-194"},
+    {"id": "eg-ch10", "title": "Complete Quadrilaterals", "topic": "Geometry", "pages": "195-208"},
+    {"id": "eg-ch11", "title": "Personal Favorites", "topic": "Mixed Review", "pages": "209-212"}
+  ]
+}
