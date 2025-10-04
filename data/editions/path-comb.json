@@ -1,0 +1,16 @@
+{
+  "book": "A Path to Combinatorics for Undergraduates",
+  "edition": "1st Edition",
+  "canonical_topics": ["Combinatorics", "Proof Techniques", "Mixed Review"],
+  "sections": [
+    {"id": "pc-ch01", "title": "Addition or Multiplication?", "topic": "Combinatorics", "pages": "1-24"},
+    {"id": "pc-ch02", "title": "Combinations", "topic": "Combinatorics", "pages": "25-42"},
+    {"id": "pc-ch03", "title": "Properties of Binomial Coefficients", "topic": "Combinatorics", "pages": "43-68"},
+    {"id": "pc-ch04", "title": "Bijections", "topic": "Proof Techniques", "pages": "69-90"},
+    {"id": "pc-ch05", "title": "Recursions", "topic": "Combinatorics", "pages": "91-116"},
+    {"id": "pc-ch06", "title": "Inclusion and Exclusion", "topic": "Combinatorics", "pages": "117-142"},
+    {"id": "pc-ch07", "title": "Calculating in Two Ways: Fubini's Principle", "topic": "Proof Techniques", "pages": "143-164"},
+    {"id": "pc-ch08", "title": "Generating Functions", "topic": "Combinatorics", "pages": "165-194"},
+    {"id": "pc-ch09", "title": "Review Exercises", "topic": "Mixed Review", "pages": "195-212"}
+  ]
+}
