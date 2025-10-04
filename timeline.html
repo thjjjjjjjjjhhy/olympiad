@@ -186,7 +186,7 @@
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
       <span class="lg"><span class="dot"></span> Timed set (contest-based)</span>
       <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
-      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after reading is complete)</span>
+      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after all reading complete)</span>
       <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
       <span class="lg"><span class="dot"></span> Off day</span>
     </div>
@@ -246,7 +246,7 @@
           if(href && !/^javascript:/i.test(href[2])) safe = href[2];
           return `<a href="${safe}" target="_blank" rel="noopener">`;
         }
-        return m; // Return the original match if allowed
+        return m;
       });
     }
     function escapeICSText(s){
@@ -359,6 +359,9 @@
       })();
       Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
+      /* Topic blocklist: NO Proof Techniques for AMC 8 */
+      const TOPIC_BLOCKLIST = onAMC8 ? new Set(['Proof Techniques']) : new Set();
+
       /* Edition packs */
       const BOOK_PACK_PATH = {
         'aops-v1': 'data/editions/aops-vol1.json',
@@ -403,7 +406,9 @@
         for(const pk of packs){
           const sections = Array.isArray(pk?.sections)? pk.sections : [];
           for(const s of sections){
-            const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
+            const topicRaw = s.topic || 'Polynomials and Algebra';
+            const topic = canonicalTopic(topicRaw);
+            if (TOPIC_BLOCKLIST.has(topic)) continue; // ← skip blocked topics (AMC 8: Proof Techniques)
             if(!byTopic[topic]) byTopic[topic]=[];
             const chapter = s.chapter || s.id || '?';
             byTopic[topic].push({
@@ -490,8 +495,8 @@
       const consumedSections = new Set();     // reading sections finished
       const catalogCursor = {};               // reading cursor per topic
 
-      const exerciseCursorByTopic = {};       // NEW: exercise rotation cursor per topic
-      const usedBookProblems = new Set();     // global set of assigned problems (bookId+chapter+num)
+      const exerciseCursorByTopic = {};       // exercise rotation cursor per topic
+      const usedBookProblems = new Set();     // global set of assigned problems (Book#Ch#Num)
 
       function shortBook(title){
         if(!title) return '';
@@ -602,7 +607,6 @@
       function problemKey(bookId, chapter, n){
         return `${String(bookId).toUpperCase()}#${chapter}#${n}`;
       }
-
       function remainingProblemsInfo(section, usedSet){
         const meta = section.editionMeta;
         if(!meta || !Array.isArray(meta.problemRange) || meta.problemRange.length<2){
@@ -620,41 +624,6 @@
           }
         }
         return {count, minT: (minT===Infinity? 1e9 : minT)};
-      }
-
-      function pickProblemsByHeuristic(sectionMeta, wantCount, target, usedSet, sectionTag){
-        const res = [];
-        if(!sectionMeta) return res;
-        const range = sectionMeta.problemRange;
-        if(!Array.isArray(range) || range.length<2) return res;
-        const L = Number(range[0]), R = Number(range[1]);
-        if(!(Number.isFinite(L) && Number.isFinite(R) && L<=R && L>=1)) return res;
-
-        const span = R - L + 1;
-        const hardTail = Math.max(0, Number(sectionMeta.hardTail || 0));
-        const hardStart = Math.max(L, R - hardTail + 1);
-
-        const easy=[], mid=[], hard=[];
-        for(let n=L;n<=R;n++){
-          const id = `${sectionTag}#${n}`;
-          if(usedSet.has(id)) continue;
-          if (hardTail>0 && n>=hardStart) { hard.push(n); continue; }
-          const pos = (n - L) / Math.max(1, span - hardTail);
-          if (pos <= 0.34) easy.push(n);
-          else if (pos <= 0.67) mid.push(n);
-          else hard.push(n);
-        }
-        function take(pool, k){
-          shuffle(pool);
-          while(pool.length && res.length<k){
-            const n = pool.pop();
-            usedSet.add(`${sectionTag}#${n}`);
-            res.push(n);
-          }
-        }
-        const order = (target==='hard')? [hard,mid,easy] : (target==='easy')? [easy,mid,hard] : [mid,easy,hard];
-        for(const p of order){ if(res.length>=wantCount) break; take(p, wantCount); }
-        return res;
       }
 
       function difficultyTarget(topicKey, dayIndex, totalDays){
@@ -677,10 +646,8 @@
         const picked = [];
         if(!meta || !Array.isArray(meta.problemRange) || meta.problemRange.length<2) return {nums:picked, minutes:0, exhausted:true};
 
-        // Build a section-specific tag so usedSet keys are unique *per section*
         const sectionTag = `${String(section.bookId).toUpperCase()}#${section.chapter}`;
 
-        // Build candidates (don’t mutate usedSet until we actually take problems)
         const L = Number(meta.problemRange[0]), R = Number(meta.problemRange[1]);
         const allAvail = [];
         for(let n=L;n<=R;n++){
@@ -689,7 +656,6 @@
         }
         if(allAvail.length===0) return {nums:picked, minutes:0, exhausted:true};
 
-        // Split into easy/mid/hard following target
         const hardTail = Math.max(0, Number(meta.hardTail||0));
         const hardStart = Math.max(L, R - hardTail + 1);
         const easy=[], mid=[], hard=[];
@@ -702,7 +668,6 @@
         }
         const order = (target==='hard')? [hard,mid,easy] : (target==='easy')? [easy,mid,hard] : [mid,easy,hard];
 
-        // Greedy pack by budget
         let total = 0;
         const takeFrom = (pool)=>{
           shuffle(pool);
@@ -720,20 +685,16 @@
           takeFrom(pool);
         }
 
-        // Only mark problems as used if we actually took them
         for(const n of picked){
           usedSet.add(`${sectionTag}#${n}`);
         }
-
-        const exhausted = (picked.length===0 && allAvail.length>0) ? false : (picked.length===0 && allAvail.length===0) ? true : (picked.length>0 && picked[picked.length-1]===R && usedSet.has(`${sectionTag}#${R}`));
-        return {nums:picked, minutes:Math.round(total), exhausted};
+        return {nums:picked, minutes:Math.round(total), exhausted: picked.length===0 && allAvail.length===0};
       }
 
       function makeExercisesFromSection(section, minutesBudget, dayIndex, totalDays, usedSet){
         const topic = section.topic || 'Polynomials and Algebra';
         const target = difficultyTarget(topic, dayIndex, totalDays);
 
-        // If nothing fits budget, skip early
         const rem = remainingProblemsInfo(section, usedSet);
         if(rem.count===0 || rem.minT > minutesBudget + 0.01){
           return null;
@@ -744,8 +705,7 @@
         const longBase = `🧠 <b>Book exercises</b> (${section.bookTitle}, ${section.chapterTitle})`;
 
         if(!chosen.nums.length){
-          // Fail-closed: return null so caller can schedule a timed set instead of a blank row
-          return null;
+          return null; // fall back to timed set
         }
         const numsSorted = chosen.nums.slice().sort((a,b)=>a-b);
         const text = (numsSorted.length<=10) ? numsSorted.join(', ') : `${Math.min(...numsSorted)}–${Math.max(...numsSorted)} (selected)`;
@@ -807,7 +767,7 @@
               const id = `AMC8-${y}-${num}`;
               if(usedContest.has(id)) continue;
               usedContest.add(id);
-              return {display:`${y} AMC 8 • #${num}`, long:`🧩 <a href="${amc8ProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC 8 • Problem ${num}</a>`, mins: 6, type:'potd', _book:'🧩 Problem of the Day'};
+              return {display:`${y} AMC 8 • #${num}`, long:`🧩 <a href="${amc8ProbURL(y,num)}" target="_blank" rel="noopener">Problem of the day: ${y} AMC 8 • Problem ${num}</a>`, mins: 6, type: 'potd', _book:'🧩 Problem of the Day'};
             } else {
               const level = (onAMC10)?'10':'12';
               const variant = pick(['A','B']);
@@ -938,7 +898,7 @@
         return {display:`AMC ${level}${variant} ${y} mock`, long:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
       }
 
-      /* Proof gating per your rules */
+      /* Proof gating */
       const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
       const proofUnits = [];
       if(hasProofBooks){
@@ -978,13 +938,15 @@
                  .map(pk => pk.__bookId)
           );
 
-          // Check if ALL reading (across all selected sections with parseable pages) is finished so far
+          // Helper: are ALL allowed reading sections fully finished?
           function allReadingDoneSoFar(){
             for(const pk of packs){
               const secs = Array.isArray(pk.sections) ? pk.sections : [];
               for(const s of secs){
+                const topic = canonicalTopic(s.topic || 'Polynomials and Algebra');
+                if (TOPIC_BLOCKLIST.has(topic)) continue; // ignore blocked topics (e.g., Proof Techniques for AMC 8)
                 const pages = parsePages(s.pages);
-                if(!pages) return false; // unknown pages => treat as not complete
+                if(!pages) return false; // unknown page ranges count as not finished
                 const key = `${pk.__bookId}#${(s.chapter || s.id || '?')}`;
                 const prog = sectionProgress.get(key);
                 if(!(prog && Number.isFinite(prog.to) && prog.to >= pages.to)) return false;
@@ -1011,7 +973,8 @@
           function allAvailableTopics(fromCatalog){
             const fromPacks = Object.keys(fromCatalog);
             const base = new Set([...fromPacks, ...defaultCats.map(canonicalTopic)]);
-            return Array.from(base);
+            // drop blocked topics from the available pool
+            return Array.from(base).filter(t => !TOPIC_BLOCKLIST.has(canonicalTopic(t)));
           }
           const availableTopics = allAvailableTopics(catalogByTopic);
 
@@ -1054,7 +1017,6 @@
           function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
 
           function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic, availableTopics){
-            const snap = deepCopyProgress();
             const planned = planReading(topic, minutes, finalPhase, catalogByTopic, availableTopics, true);
             return planned;
           }
@@ -1068,17 +1030,54 @@
               const idx = (startIdx + k) % arr.length;
               const s = arr[idx];
               if(!s.hasExercises) continue;
-              // Only books that actually have exercises
               if(!EXERCISE_BOOKS.has(s.bookId)) continue;
 
               const rem = remainingProblemsInfo(s, usedBookProblems);
-              if(rem.count === 0) continue;                       // no unused problems left
-              if(rem.minT > minutesBudget + 0.01) continue;       // none fit today's budget
+              if(rem.count === 0) continue;
+              if(rem.minT > minutesBudget + 0.01) continue;
 
-              exerciseCursorByTopic[topic] = idx + 1;             // rotate next time
+              exerciseCursorByTopic[topic] = idx + 1;
               return s;
             }
             return null;
+          }
+
+          // NEW: try to fill reading minutes from other topics before resorting to review
+          function fillReadingAcrossTopics(minutesBudget, isFinalPhase){
+            const added = [];
+            let remain = Math.max(0, minutesBudget);
+            const tried = new Set();
+            let guard = 0;
+
+            while(remain > 3 && guard < availableTopics.length + 5){
+              guard++;
+              // pick a topic not tried yet
+              let candidate = null, bestScore=-1;
+              for(const t of availableTopics){
+                if(tried.has(t)) continue;
+                // prefer topics with higher weight and with some unconsumed section
+                const sec = nextUnconsumedSection(t, catalogByTopic);
+                if(!sec){ tried.add(t); continue; }
+                const score = (weights[canonicalTopic(t)]||1) + Math.random()*0.01;
+                if(score>bestScore){ bestScore=score; candidate=t; }
+              }
+              if(!candidate) break;
+              tried.add(candidate);
+
+              const plan = commitReadingForMinutes(candidate, remain, isFinalPhase, catalogByTopic, availableTopics);
+              if(plan.usedMin>0 && plan.parts.length){
+                plan.parts.forEach(p=>{
+                  const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
+                  added.push({
+                    display: `Read: ${p.chapterTitle}${pageStr}`,
+                    long: `📘 <b>${candidate}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
+                    mins: p.minutes, type: 'reading', _topic: candidate, _book: shortBook(p.bookTitle)
+                  });
+                });
+                remain -= plan.usedMin;
+              }
+            }
+            return {items:added, used: minutesBudget - remain};
           }
 
           function buildDay(dayIndex, dateObj){
@@ -1096,9 +1095,20 @@
             }
 
             if(minutesPerDay <= 22){
+              // Even in short days, follow the "review only if done" rule
+              const allDone = allReadingDoneSoFar();
+              if(allDone){
+                return [{display:`Targeted review & error log`, long:`🌀 Review previously missed problems and key formulas across topics.`, mins: minutesPerDay, type:'review', _book:`🌀 Review: Mixed`}];
+              }
               const topic = pickNextTopic();
               const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic, availableTopics);
-              const readTasks = planned.parts.map(p => {
+              if (planned.isExhausted || planned.usedMin===0){
+                const fill = fillReadingAcrossTopics(minutesPerDay, isFinalPhase);
+                if(fill.items.length) return fill.items;
+                // fallback: drills if absolutely no readable content (e.g., unknown pages everywhere)
+                return [onAIME ? buildAIMETimedSet(minutesPerDay) : buildAMCContestTimedSet(minutesPerDay)];
+              }
+              return planned.parts.map(p => {
                 const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
                 return {
                     display: `Read: ${p.chapterTitle}${pageStr}`,
@@ -1106,7 +1116,6 @@
                     mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
                 };
               });
-              return readTasks;
             }
 
             const mix = adjustedMix(baseMixForPhase(phase), minutesPerDay);
@@ -1126,29 +1135,42 @@
             const topic = pickNextTopic();
 
             const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
+            const allDoneNow = allReadingDoneSoFar();
 
-            if (readingPlan.isExhausted) {
+            if (readingPlan.isExhausted || readingPlan.usedMin===0) {
+              if(allDoneNow){
+                // Only review when all reading is done across allowed topics
                 tasks.push({
-                    display: `Review key concepts in ${topic}`,
-                    long: `🌀 Review key concepts, formulas, and previous errors for <strong>${topic}</strong>. No new reading material is available for this topic.`,
-                    mins: Math.min(mRead, 15),
+                    display: `Global review & error log`,
+                    long: `🌀 Review key concepts, formulas, and your error log across topics.`,
+                    mins: Math.min(mRead, 25),
                     type: 'review',
-                    _topic: topic,
-                    _book: `🌀 Review: ${topic}`
+                    _topic: 'Mixed Review',
+                    _book: `🌀 Review: Mixed`
                 });
                 mDrill += (mRead - tasks[0].mins);
+              } else {
+                // Try to fill reading from other topics
+                const fill = fillReadingAcrossTopics(mRead, isFinalPhase);
+                if(fill.items.length){
+                  tasks.push(...fill.items);
+                } else {
+                  // If absolutely nothing readable remained (unknown pages), push into drills
+                  mDrill += mRead;
+                }
+              }
             } else {
-                readingPlan.parts.forEach(p => {
-                  const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
-                  tasks.push({
-                    display: `Read: ${p.chapterTitle}${pageStr}`,
-                    long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
-                    mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
-                  });
+              readingPlan.parts.forEach(p => {
+                const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
+                tasks.push({
+                  display: `Read: ${p.chapterTitle}${pageStr}`,
+                  long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
+                  mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle)
                 });
+              });
             }
 
-            // --- Exercises: topic-matched, only from sections with problemRange, rotate, and skip exhausted/unfit ---
+            // --- Exercises: topic-matched, rotate, skip exhausted/unfit ---
             const exSection = findExerciseSectionForTopic(topic, mDrill);
             if (exSection) {
               const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
@@ -1158,7 +1180,7 @@
               tasks.push(onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill));
             }
 
-            // --- Proofs: none for AMC8; for AMC10/12 only after ALL reading is complete ---
+            // --- Proofs: NEVER for AMC 8; only AMC10/12 after ALL reading complete ---
             const allowProofNow = hasProofBooks && (onAMC10 || onAMC12) && allReadingDoneSoFar();
             if(allowProofNow){
               const proofShare = 0.16;
@@ -1184,8 +1206,14 @@
             tasks.push(problemOfDay());
             
             let cur = totalMin(tasks);
-            if(cur < minutesPerDay - 5 && tasks.length > 0 && tasks[0].type === 'reading'){
-              tasks[0].mins += (minutesPerDay - cur);
+            if(cur < minutesPerDay - 5){
+              // top up the first reading task if present; otherwise add minutes to timed
+              const firstRead = tasks.find(t=>t.type==='reading');
+              if(firstRead) firstRead.mins += (minutesPerDay - cur);
+              else {
+                const firstTimed = tasks.find(t=>t.type==='timed');
+                if(firstTimed) firstTimed.mins += (minutesPerDay - cur);
+              }
             }
 
             return tasks.filter(t => t && t.mins > 0);
@@ -1257,7 +1285,7 @@
                         return acc;
                     }, {});
                     
-                    const topic = tasks[0]._topic;
+                    const topic = tasks.find(t=>t._topic)?.['_topic'];
                     if (topic) {
                         html += `<span class="topic-chip">${topic}</span>`;
                     }
