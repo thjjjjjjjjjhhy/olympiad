@@ -1,0 +1,16 @@
+{
+  "book": "The Art & Craft of Problem Solving (Zeitz)",
+  "edition": "3rd Edition",
+  "canonical_topics": ["Proof Techniques", "Combinatorics", "Number Theory", "Geometry", "Polynomials and Algebra", "Functions", "Mixed Review"],
+  "sections": [
+    {"id": "zc-ch01", "title": "What This Book Is About", "topic": "Proof Techniques", "pages": "1-12"},
+    {"id": "zc-ch02", "title": "Strategies for Investigating Problems", "topic": "Proof Techniques", "pages": "13-60"},
+    {"id": "zc-ch03", "title": "Tactics for Solving Problems", "topic": "Mixed Review", "pages": "61-108"},
+    {"id": "zc-ch04", "title": "Three Important Crossover Tactics", "topic": "Mixed Review", "pages": "109-142"},
+    {"id": "zc-ch05", "title": "Algebra", "topic": "Polynomials and Algebra", "pages": "143-187"},
+    {"id": "zc-ch06", "title": "Combinatorics", "topic": "Combinatorics", "pages": "188-221"},
+    {"id": "zc-ch07", "title": "Number Theory", "topic": "Number Theory", "pages": "222-255"},
+    {"id": "zc-ch08", "title": "Geometry for Americans", "topic": "Geometry", "pages": "256-314"},
+    {"id": "zc-ch09", "title": "Calculus", "topic": "Mixed Review", "pages": "315-355"}
+  ]
+}
