@@ -624,7 +624,6 @@
           }
           const ok = consumeFromSection(sec);
           if(!ok){
-            // consumed or empty; try again
             continue;
           }
         }
@@ -1056,7 +1055,6 @@
             const tasks = [];
             const topic = pickNextTopic();
 
-            // Plan reading
             const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
 
             if (readingPlan.isExhausted) {
@@ -1092,7 +1090,7 @@
               exSection = fallbackSection(topic);
             })();
 
-            if (!readingPlan.isExhausted) {
+            if (exSection && !readingPlan.isExhausted) {
                 const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
                 tasks.push(ex);
             } else {
