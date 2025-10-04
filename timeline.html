@@ -186,7 +186,7 @@
       <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
       <span class="lg"><span class="dot"></span> Timed set (contest-based)</span>
       <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
-      <span class="lg"><span class="dot"></span> Proof track (US(A)JMO; AIME late-phase if strong)</span>
+      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after all reading complete)</span>
       <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
       <span class="lg"><span class="dot"></span> Off day</span>
     </div>
@@ -359,12 +359,6 @@
       })();
       Object.keys(weights).forEach(k=>{ weights[k] = (weights[k]||1) * (EMPHASIS[k]||1); });
 
-      /* Allow AIME late-phase proof only if strong */
-      const overallAttempted = Object.values(subs).reduce((s,v)=>s+(v?.total||0),0);
-      const overallCorrect   = Object.values(subs).reduce((s,v)=>s+(v?.right||0),0);
-      const overallAcc = overallAttempted ? (overallCorrect/overallAttempted) : 0;
-      const allowAIMEProofLate = onAIME && overallAcc >= 0.70;
-
       /* Edition packs */
       const BOOK_PACK_PATH = {
         'aops-v1': 'data/editions/aops-vol1.json',
@@ -418,7 +412,8 @@
               chapterTitle: s.title || `Chapter ${s.chapter||'?'}`,
               pages: s.pages || '',
               editionMeta: s,
-              topic
+              topic,
+              hasExercises: Array.isArray(s.problemRange) && s.problemRange.length>=2 // <- only pull exercises from sections that actually have them
             });
           }
         }
@@ -907,11 +902,8 @@
         return {display:`AMC ${level}${variant} ${y} mock`, long:`📝 <a href="${amcSetURL(level,y,variant)}" target="_blank" rel="noopener">Full mock: ${y} AMC ${level}${variant}</a> • Review & update your error log.`, mins: totalMinutes, type:'mock', _book:'📝 Mock Exam'};
       }
 
-      /* Proof track (unchanged) */
+      /* Proof track (UPDATED gating per your rules) */
       const hasProofBooks = (input.selectedBooks||[]).some(id=>PROOF_BOOKS.includes(id));
-      const proofEnabledUSAMO = hasProofBooks && onUSAMO;
-      const proofEnabledAIME = hasProofBooks && allowAIMEProofLate;
-
       const proofUnits = [];
       if(hasProofBooks){
         if(selectedBooks.has('velleman')) proofUnits.push({label:'Velleman — Direct & Contrapositive Proofs', mins:25});
@@ -944,9 +936,30 @@
           const catalogByTopic = indexSectionsByTopic(packs);
           $('booksBadge').textContent = `Books: ${selectedPackIds.length}`;
 
+          // EXERCISE-CAPABLE BOOKS (books that actually have problems listed in JSON)
+          const EXERCISE_BOOKS = new Set(
+            packs.filter(pk => Array.isArray(pk.sections) && pk.sections.some(s => Array.isArray(s.problemRange) && s.problemRange.length>=2))
+                 .map(pk => pk.__bookId)
+          );
+
+          // Check if ALL reading (across all selected sections with parseable pages) is finished so far
+          function allReadingDoneSoFar(){
+            for(const pk of packs){
+              const secs = Array.isArray(pk.sections) ? pk.sections : [];
+              for(const s of secs){
+                const pages = parsePages(s.pages);
+                if(!pages) return false; // unknown pages => treat as not complete
+                const key = `${pk.__bookId}#${(s.chapter || s.id || '?')}`;
+                const prog = sectionProgress.get(key);
+                if(!(prog && Number.isFinite(prog.to) && prog.to >= pages.to)) return false;
+              }
+            }
+            return true;
+          }
+
           function fallbackSection(topic){
             const pickBookId = selectedPackIds[0] || 'aops-v1';
-            return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic };
+            return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic, hasExercises:false };
           }
 
           /* Thresholds */
@@ -1078,44 +1091,54 @@
                 });
             }
 
+            // --- EXERCISES: ONLY from books/sections that actually have problems AND matching the same topic ---
             let exSection = null;
-            (function findFirstSection(){
+            (function findExerciseSectionForTopic(){
               const arr = catalogByTopic[topic] || [];
               for(const s of arr){
-                const pg = parsePages(s.pages);
-                const key = `${s.bookId}#${s.chapter}`;
-                const cur = sectionProgress.get(key) || (pg ? {from: pg.from, to: pg.from-1} : null);
-                if(!cur || (pg && cur.to < pg.to)){ exSection = s; return; }
+                if(!s.hasExercises) continue;                      // section must have problemRange in JSON
+                if(!EXERCISE_BOOKS.has(s.bookId)) continue;        // book must be exercise-capable
+                exSection = s; return;
               }
-              exSection = fallbackSection(topic);
+              exSection = null; // none available for this topic with exercises
             })();
 
-            if (exSection && !readingPlan.isExhausted) {
+            if (exSection) {
                 const ex = makeExercisesFromSection(exSection, mDrill, dayIndex, totalDays, usedBookProblems);
                 tasks.push(ex);
             } else {
+                // No valid exercise section for this topic → diversify with a timed set
                 const timedSet = onAIME ? buildAIMETimedSet(mDrill) : buildAMCContestTimedSet(mDrill);
                 tasks.push(timedSet);
             }
 
-            if( (proofEnabledUSAMO) || (proofEnabledAIME && isFinalPhase) ){
+            // --- PROOF GATING: No proofs for AMC8; proofs only for AMC10/12 AFTER ALL READING is complete ---
+            const allowProofNow = hasProofBooks && (onAMC10 || onAMC12) && allReadingDoneSoFar();
+            if(allowProofNow){
               const proofShare = 0.16;
               const proofBudget = Math.round(minutesPerDay*proofShare);
               scheduleProof(proofBudget).forEach(t=>tasks.push(t));
             }
 
+            // Timed practice block
             if(onUSAMO){
-              tasks.push({display: `Timed practice: ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${shortBook(exSection.bookTitle)}`});
+              const tag = exSection ? shortBook(exSection.bookTitle) : 'Mixed Practice';
+              const chap = exSection ? shortChapter(exSection.chapterTitle) : 'Mixed';
+              tasks.push({display: `Timed practice: ${chap}`, long:`⏱️ <b>Timed set</b> — ${tag}${exSection?`, ${exSection.chapterTitle}`:''}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${tag}`});
             } else if(onAIME){
               tasks.push(buildAIMETimedSet(mTimed));
             } else if(onAMC){
               tasks.push(buildAMCContestTimedSet(mTimed));
             } else {
-              tasks.push({display: `Timed practice: ${shortChapter(exSection.chapterTitle)}`, long:`⏱️ <b>Timed set</b> — ${exSection.bookTitle}, ${exSection.chapterTitle}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${shortBook(exSection.bookTitle)}`});
+              const tag = exSection ? shortBook(exSection.bookTitle) : 'Mixed Practice';
+              const chap = exSection ? shortChapter(exSection.chapterTitle) : 'Mixed';
+              tasks.push({display: `Timed practice: ${chap}`, long:`⏱️ <b>Timed set</b> — ${tag}${exSection?`, ${exSection.chapterTitle}`:''}`, mins:mTimed, type:'timed', _book: `⏱️ Timed — ${tag}`});
             }
 
+            // Problem of the day
             tasks.push(problemOfDay());
             
+            // Fill any small minute gap by top-most reading task if present
             let cur = totalMin(tasks);
             if(cur < minutesPerDay - 5 && tasks.length > 0 && tasks[0].type === 'reading'){
               tasks[0].mins += (minutesPerDay - cur);
