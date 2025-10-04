@@ -1,0 +1,21 @@
+{
+  "book": "Problem-Solving Strategies (Engel)",
+  "edition": "1st Edition",
+  "canonical_topics": ["Proof Techniques", "Combinatorics", "Number Theory", "Geometry", "Polynomials and Algebra", "Functions", "Sequences and Series"],
+  "sections": [
+    {"id": "en-ch01", "title": "The Invariance Principle", "topic": "Proof Techniques", "pages": "1-24"},
+    {"id": "en-ch02", "title": "Coloring Proofs", "topic": "Proof Techniques", "pages": "25-38"},
+    {"id": "en-ch03", "title": "The Extremal Principle", "topic": "Proof Techniques", "pages": "39-58"},
+    {"id": "en-ch04", "title": "The Box Principle", "topic": "Combinatorics", "pages": "59-84"},
+    {"id": "en-ch05", "title": "Enumerative Combinatorics", "topic": "Combinatorics", "pages": "85-116"},
+    {"id": "en-ch06", "title": "Number Theory", "topic": "Number Theory", "pages": "117-160"},
+    {"id": "en-ch07", "title": "Inequalities", "topic": "Polynomials and Algebra", "pages": "161-204"},
+    {"id": "en-ch08", "title": "The Induction Principle", "topic": "Proof Techniques", "pages": "205-220"},
+    {"id": "en-ch09", "title": "Sequences", "topic": "Sequences and Series", "pages": "221-244"},
+    {"id": "en-ch10", "title": "Polynomials", "topic": "Polynomials and Algebra", "pages": "245-270"},
+    {"id": "en-ch11", "title": "Functional Equations", "topic": "Functions", "pages": "271-288"},
+    {"id": "en-ch12", "title": "Geometry", "topic": "Geometry", "pages": "289-360"},
+    {"id": "en-ch13", "title": "Games", "topic": "Mixed Review", "pages": "361-372"},
+    {"id": "en-ch14", "title": "Further Strategies", "topic": "Proof Techniques", "pages": "373-396"}
+  ]
+}
