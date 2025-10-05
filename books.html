@@ -49,6 +49,29 @@
     .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:8px 12px;text-decoration:none;font-weight:800}
     .btn.primary{background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;border:0}
     .btn.secondary{background:#fff;border:1px solid var(--grid);color:#0f172a}
+    
+    /* New button styling for the "Link to free copy" */
+    .btn.free-link {
+      background: #4CAF50; /* Green background */
+      color: white; /* White text */
+      border: 1px solid #4CAF50; /* Green border */
+      padding: 8px 16px; /* Padding */
+      border-radius: 10px; /* Rounded corners */
+      text-decoration: none;
+      font-weight: 800;
+      transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+    }
+
+    .btn.free-link:hover {
+      background-color: #45a049; /* Darker green on hover */
+      transform: translateY(-2px); /* Slightly elevate the button on hover */
+    }
+
+    .btn.free-link:active {
+      background-color: #388e3c; /* Even darker green when clicked */
+      transform: translateY(0); /* Button goes back to normal after click */
+    }
+
     footer{border-top:1px solid var(--grid);padding:18px 0;text-align:center;color:#64748b;margin-top:10px}
     /* Force the "Recommended Books" title to be black */
     .hero h2 { 
@@ -167,7 +190,7 @@
           <div class="actions">
             <a class="btn primary" href="${b.link}" target="_blank" rel="noopener">Info / Buy →</a>
             <a class="btn secondary" href="planning.html?goal=${sec.id==='amc1012'?'amc10':sec.id==='usamo'?'usamo':sec.id==='amc8'?'amc8':sec.id==='aime'?'aime':'none'}" title="Use in a plan">Use in plan</a>
-            <a class="btn secondary" href="${b.freeLink || '#'}" target="_blank" rel="noopener">Link to free copy</a>
+            <a class="btn free-link" href="${b.freeLink || '#'}" target="_blank" rel="noopener">Link to free copy</a>
           </div>
         `;
         grid.appendChild(card);
