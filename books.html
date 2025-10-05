@@ -50,14 +50,10 @@
     .btn.primary{background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;border:0}
     .btn.secondary{background:#fff;border:1px solid var(--grid);color:#0f172a}
     footer{border-top:1px solid var(--grid);padding:18px 0;text-align:center;color:#64748b;margin-top:10px}
-/* Force the "Recommended Books" title to be black */
-.hero h2 { 
-  color: #0f172a !important;
-}
-
-
-
-}
+    /* Force the "Recommended Books" title to be black */
+    .hero h2 { 
+      color: #0f172a !important;
+    }
 
   </style>
 </head>
@@ -99,25 +95,23 @@
   <script>
     // Master catalog (same IDs your planner uses)
     const BOOKS = [
-      {id:'prealgebra', title:'AoPS Prealgebra', link:'https://artofproblemsolving.com/store/book/prealgebra', topics:['Polynomials & Algebra'], note:'Strong bridge to AMC 8 foundations.'},
-      {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', link:'https://artofproblemsolving.com/store/book/aops-vol1', topics:['Algebra','NT','Geometry','C&P','Probability'], note:'Core problem-solving toolkit for AMC 8–10.'},
-      {id:'cmms', title:'Competition Math for Middle School (Batterson)', link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school', topics:['Algebra','NT','C&P','Probability','Geometry'], note:'Targeted drills for AMC 8/10 speed and accuracy.'},
-      {id:'intro-alg', title:'AoPS Introduction to Algebra', link:'https://artofproblemsolving.com/store/book/introduction-to-algebra', topics:['Algebra','Functions','Sequences'], note:'Algebra depth for AMC 8 → 10.'},
-      {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', link:'https://artofproblemsolving.com/store/book/introduction-to-counting-and-probability', topics:['Combinatorics','Probability'], note:'Counting and probability fundamentals.'},
-      {id:'intro-nt', title:'AoPS Introduction to Number Theory', link:'https://artofproblemsolving.com/store/book/intro-number-theory', topics:['Number Theory'], note:'Divisibility, modular arithmetic, and more.'},
-      {id:'intro-geo', title:'AoPS Introduction to Geometry', link:'https://artofproblemsolving.com/store/book/intro-geometry', topics:['Geometry'], note:'Geometry basics with contest-style problems.'},
-
-      {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', link:'https://artofproblemsolving.com/store/book/aops-vol2', topics:['Algebra','NT','Geometry','C&P','Probability'], note:'AIME-level problem solving.'},
-      {id:'int-alg', title:'AoPS Intermediate Algebra', link:'https://artofproblemsolving.com/store/book/intermediate-algebra', topics:['Algebra','Functions','Sequences'], note:'Equations, inequalities, functional thinking.'},
-      {id:'int-cp', title:'AoPS Intermediate Counting & Probability', link:'https://artofproblemsolving.com/store/book/intermediate-counting', topics:['Combinatorics','Probability'], note:'Bijections, PIE, generating functions (intro).'},
-      {id:'precalc', title:'AoPS Precalculus', link:'https://artofproblemsolving.com/store/book/precalculus', topics:['Functions','Sequences','Algebra'], note:'Functional equations, series, and more.'},
-      {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276', topics:['Number Theory'], note:'Challenge sets for AIME/US(A)JMO NT.'},
-
-      {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', link:'https://bookstore.ams.org/prb-27/', topics:['Geometry'], note:'Geometry bible for olympiad style.'},
-      {id:'velleman', title:'How to Prove It (Velleman)', link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA', topics:['Proof'], note:'Proof methods: direct, contrapositive, induction.'},
-      {id:'engel', title:'Problem-Solving Strategies (Engel)', link:'https://link.springer.com/book/10.1007/b97682', topics:['Combinatorics','Number Theory','Geometry'], note:'Classic olympiad strategy compendium.'},
-      {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901', topics:['Strategy','Algebra','NT','Geometry','C&P'], note:'Heuristics and tactics across topics.'},
-      {id:'path-comb', title:'A Path to Combinatorics for Undergraduates', link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889', topics:['Combinatorics'], note:'Solid JMO/USAMO combinatorics build.'}
+      {id:'prealgebra', title:'AoPS Prealgebra', link:'https://artofproblemsolving.com/store/book/prealgebra', freeLink:'https://somefreelink.com/free-prealgebra-pdf', topics:['Polynomials & Algebra'], note:'Strong bridge to AMC 8 foundations.'},
+      {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', link:'https://artofproblemsolving.com/store/book/aops-vol1', freeLink:'https://somefreelink.com/free-aops-v1-pdf', topics:['Algebra','NT','Geometry','C&P','Probability'], note:'Core problem-solving toolkit for AMC 8–10.'},
+      {id:'cmms', title:'Competition Math for Middle School (Batterson)', link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school', freeLink:'https://somefreelink.com/free-cmms-pdf', topics:['Algebra','NT','C&P','Probability','Geometry'], note:'Targeted drills for AMC 8/10 speed and accuracy.'},
+      {id:'intro-alg', title:'AoPS Introduction to Algebra', link:'https://artofproblemsolving.com/store/book/introduction-to-algebra', freeLink:'https://somefreelink.com/free-intro-alg-pdf', topics:['Algebra','Functions','Sequences'], note:'Algebra depth for AMC 8 → 10.'},
+      {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', link:'https://artofproblemsolving.com/store/book/introduction-to-counting-and-probability', freeLink:'https://somefreelink.com/free-intro-cp-pdf', topics:['Combinatorics','Probability'], note:'Counting and probability fundamentals.'},
+      {id:'intro-nt', title:'AoPS Introduction to Number Theory', link:'https://artofproblemsolving.com/store/book/intro-number-theory', freeLink:'https://somefreelink.com/free-intro-nt-pdf', topics:['Number Theory'], note:'Divisibility, modular arithmetic, and more.'},
+      {id:'intro-geo', title:'AoPS Introduction to Geometry', link:'https://artofproblemsolving.com/store/book/intro-geometry', freeLink:'https://somefreelink.com/free-intro-geo-pdf', topics:['Geometry'], note:'Geometry basics with contest-style problems.'},
+      {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', link:'https://artofproblemsolving.com/store/book/aops-vol2', freeLink:'https://somefreelink.com/free-aops-v2-pdf', topics:['Algebra','NT','Geometry','C&P','Probability'], note:'AIME-level problem solving.'},
+      {id:'int-alg', title:'AoPS Intermediate Algebra', link:'https://artofproblemsolving.com/store/book/intermediate-algebra', freeLink:'https://somefreelink.com/free-int-alg-pdf', topics:['Algebra','Functions','Sequences'], note:'Equations, inequalities, functional thinking.'},
+      {id:'int-cp', title:'AoPS Intermediate Counting & Probability', link:'https://artofproblemsolving.com/store/book/intermediate-counting', freeLink:'https://somefreelink.com/free-int-cp-pdf', topics:['Combinatorics','Probability'], note:'Bijections, PIE, generating functions (intro).'},
+      {id:'precalc', title:'AoPS Precalculus', link:'https://artofproblemsolving.com/store/book/precalculus', freeLink:'https://somefreelink.com/free-precalc-pdf', topics:['Functions','Sequences','Algebra'], note:'Functional equations, series, and more.'},
+      {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276', freeLink:'https://somefreelink.com/free-104nt-pdf', topics:['Number Theory'], note:'Challenge sets for AIME/US(A)JMO NT.'},
+      {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', link:'https://bookstore.ams.org/prb-27/', freeLink:'https://somefreelink.com/free-egmo-pdf', topics:['Geometry'], note:'Geometry bible for olympiad style.'},
+      {id:'velleman', title:'How to Prove It (Velleman)', link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA', freeLink:'https://somefreelink.com/free-velleman-pdf', topics:['Proof'], note:'Proof methods: direct, contrapositive, induction.'},
+      {id:'engel', title:'Problem-Solving Strategies (Engel)', link:'https://link.springer.com/book/10.1007/b97682', freeLink:'https://somefreelink.com/free-engel-pdf', topics:['Combinatorics','Number Theory','Geometry'], note:'Classic olympiad strategy compendium.'},
+      {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901', freeLink:'https://somefreelink.com/free-zeitz-pdf', topics:['Strategy','Algebra','NT','Geometry','C&P'], note:'Heuristics and tactics across topics.'},
+      {id:'path-comb', title:'A Path to Combinatorics for Undergraduates', link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889', freeLink:'https://somefreelink.com/free-path-comb-pdf', topics:['Combinatorics'], note:'Solid JMO/USAMO combinatorics build.'}
     ];
 
     // Ranked lists by level
@@ -172,7 +166,8 @@
           <p class="desc">${b.note||''}</p>
           <div class="actions">
             <a class="btn primary" href="${b.link}" target="_blank" rel="noopener">Info / Buy →</a>
-            <a class="btn secondary" href="planning.html?goal=${sec.id==='amc1012'?'amc10':sec.id==='usamo'?'usamo':sec.id}" title="Use in a plan">Use in plan</a>
+            <a class="btn secondary" href="planning.html?goal=${sec.id==='amc1012'?'amc10':sec.id==='usamo'?'usamo':sec.id==='amc8'?'amc8':sec.id==='aime'?'aime':'none'}" title="Use in a plan">Use in plan</a>
+            <a class="btn secondary" href="${b.freeLink || '#'}" target="_blank" rel="noopener">Link to free copy</a>
           </div>
         `;
         grid.appendChild(card);
