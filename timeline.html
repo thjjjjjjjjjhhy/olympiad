@@ -13,96 +13,152 @@
   <meta charset="utf-8" />
   <title>Your Study Timeline - OlympiadPrep</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <style>
-    :root{
-      --fg:#0f172a; --muted:#64748b; --grid:#e5e7eb; --card:#ffffff; --accent:#0ea5e9; --accent-2:#2563eb;
-      --chip-bg:#f8fafc; --chip-fg:#334155; --soft:#f1f5f9; --danger:#ef4444; --danger-fg:#991b1b;
-      --ok:#059669; --warn:#d97706; --shadow:0 1px 4px rgba(0,0,0,.06);
+    :root {
+      --bg: #f9fafb;
+      --fg: #1f2937;
+      --muted: #4b5563;
+      --grid: #d1d5db;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --ring: rgba(37, 99, 235, 0.2);
     }
-    html,body{background:#fff;color:var(--fg)}
-    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    html,body{
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .container{max-width:1200px;margin:0 auto;padding:0 24px}
 
-    /* Header (match other pages) */
+    /* Header */
     .site-header{
       position:sticky; top:0; z-index:10;
-      background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%) !important;
-      color:#fff; padding:12px 0; margin-bottom:18px;
+      background: var(--card) !important;
+      color: var(--fg); padding:16px 0;
+      border-bottom: 1px solid var(--grid);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 32px;
     }
-    .site-header .container{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .brand-nav{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .logo{ font-weight:800; letter-spacing:.2px; color:#fff; }
-    .site-nav{ display:flex; gap:14px; flex-wrap:wrap; }
-    .site-nav a{ color:#fff; text-decoration:none; font-weight:600; opacity:.95 }
-    .site-nav a:hover{ opacity:1; text-decoration:underline }
-    .site-nav a.active{ border-bottom:2px solid rgba(255,255,255,.9); padding-bottom:2px }
-    #auth-slot{ display:flex; align-items:center; gap:10px; min-height:32px }
-    #auth-slot button{
-      border:1px solid rgba(255,255,255,.6);
-      background:rgba(255,255,255,.15);
-      color:#fff; padding:7px 12px; border-radius:999px; font-weight:600;
-      backdrop-filter: blur(6px)
+    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+    .logo{
+      font-family: 'Lora', serif;
+      font-weight:600;
+      color: #111827;
+      margin:0;
+      font-size: 1.75rem;
     }
-    #auth-slot .secondary{ background:#fff; color:#111; border-color:#e5e7eb }
+    .site-nav{display:flex; gap:16px; flex-wrap:wrap;}
+    .site-nav a{ color: var(--fg); text-decoration:none; font-weight:600; padding-bottom: 4px; border-bottom: 2px solid transparent;}
+    .site-nav a:hover{ color: var(--accent); border-bottom-color: var(--accent); }
+    .site-nav a.active{ color: var(--accent); border-bottom-color: var(--accent); }
+    #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
 
-    h2{display:flex;align-items:center;gap:10px}
-    h2 .emoji{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#eff6ff;border:1px solid #e5e7eb}
+    h1, h2, h3 {
+      font-family: 'Lora', serif;
+      color: #111827;
+      font-weight: 600;
+    }
+    h2 { font-size: 2rem; margin-bottom: 8px; }
 
-    .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;border:1px solid var(--grid)}
-    .error{border-left:4px solid var(--danger);background:#fff1f2;color:var(--danger-fg);padding:10px;border-radius:8px;margin:8px 0;display:none}
-    .hint{color:var(--muted);font-size:.92rem}
+    .card{background:var(--card);border-radius:8px;box-shadow:var(--shadow);padding:16px;border:1px solid var(--grid)}
+    .error{border-left:4px solid #ef4444;background:#fef2f2;color:#991b1b;padding:12px;border-radius:6px;margin:16px 0;display:none}
+    .hint{color:var(--muted);font-size:.875rem}
 
-    .toolbar{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;align-items:end}
-    .toolbar .group{grid-column:span 3}
-    .toolbar .group.wide{grid-column:span 6}
-    .toolbar label{display:flex;flex-direction:column;gap:4px;font-size:.92rem}
-    .toolbar input, .toolbar select{border:1px solid var(--grid);border-radius:10px;padding:8px 10px;background:#fff}
-    .toolbar button{cursor:pointer;border:0;background:var(--accent-2);color:#fff;padding:10px 14px;border-radius:12px;font-weight:700}
-    .toolbar button.secondary{background:#e5e7eb;color:#111}
-    .toolbar .chip{display:inline-flex;gap:8px;align-items:center;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;font-size:.86rem}
+    /* Toolbar */
+    .toolbar{
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap:16px;
+        align-items:end;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .toolbar .group { min-width: 120px; }
+    .toolbar .group.wide{ grid-column: span 2; }
+    @media(max-width: 600px) {
+        .toolbar .group.wide { grid-column: span 1; }
+    }
+    .toolbar label{display:flex;flex-direction:column;gap:6px;font-size:.875rem; font-weight: 600;}
+    .toolbar input, .toolbar select{
+        width: 100%;
+        border: 1px solid var(--grid); 
+        border-radius: 6px; 
+        padding:8px 12px; 
+        font-size: 0.9rem;
+        background:#f9fafb;
+    }
+     .toolbar input:focus, .toolbar select:focus{
+      outline:none; border-color:var(--accent); box-shadow: 0 0 0 3px var(--ring);
+    }
+    .toolbar button{
+        cursor:pointer;
+        border:0;
+        width: 100%;
+        background:var(--accent); color:#fff; padding:10px 14px; border-radius:6px; font-weight:700;
+        transition: background-color 0.2s;
+    }
+    .toolbar button:hover { background-color: var(--accent-hover); }
+    .toolbar button.secondary{background:#e5e7eb;color:var(--fg); border: 1px solid var(--grid); }
+    .toolbar button.secondary:hover { background-color: #d1d5db; }
 
-    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .legend .lg{font-size:.86rem;background:var(--chip-bg);border:1px solid var(--grid);padding:6px 10px;border-radius:999px;color:var(--chip-fg);display:flex;align-items:center;gap:8px}
-    .legend .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+    /* Legend */
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin: 24px 0; padding: 16px; background-color: #f3f4f6; border-radius: 8px;}
+    .legend .lg{font-size:.875rem;color:var(--muted);display:flex;align-items:center;gap:8px; font-weight: 600;}
+    .legend .dot{width:10px;height:10px;border-radius:50%;}
 
-    .cal-wrap{display:grid;gap:12px;margin-top:12px}
-    .month{border:1px solid var(--grid);border-radius:14px;padding:12px;background:#fff}
-    .month h3{margin:6px 6px 10px 6px}
-    .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .day{border:1px solid var(--grid);border-radius:10px;padding:6px;min-height:120px;background:#fff;position:relative}
-    .day .date{font-weight:800;font-size:.92rem;margin-bottom:4px}
-    .out-of-range{opacity:.35}
-    .past{opacity:.55}
-    .today{outline:2px solid var(--accent)}
+    /* Calendar */
+    .cal-wrap{display:grid;gap:24px;margin-top:16px}
+    .month{border:1px solid var(--grid);border-radius:8px;padding:16px;background:var(--card)}
+    .month h3{margin:0 0 16px 0; font-size: 1.5rem;}
+    .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day-header { text-align: center; font-weight: 700; color: var(--muted); font-size: 0.875rem; padding-bottom: 8px; }
+    .day{border:1px solid var(--grid);border-radius:6px;padding:8px;min-height:120px;background:var(--card);position:relative; transition: box-shadow .2s, border-color .2s; }
+    .day:not(.out-of-range):hover { border-color: #9ca3af; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .day .date{font-weight:700;font-size:.875rem;margin-bottom:6px; color: var(--fg);}
+    .out-of-range{background-color: #f9fafb; opacity: .7;}
+    .past .date { color: var(--muted); }
+    .today{border:2px solid var(--accent);}
+    .today .date { color: var(--accent); }
 
-    .task-group h4{font-size:.9rem; margin:6px 0 2px; font-weight:700; color: #334155;}
-    .task{font-size:.9rem;margin:2px 0;line-height:1.25; padding-left: 4px;}
-    .task .mins{font-size:.82rem;color:var(--muted)}
-    .topic-chip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:.78rem;margin-right:4px; background:#fafafa}
-    .more{font-size:.85rem;color:var(--accent);cursor:pointer;user-select:none}
-    .more-wrap{position:absolute;right:6px;bottom:6px;background:linear-gradient(90deg, rgba(0,0,0,0), #fff 35%);padding-left:18px}
-    .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg, rgba(0,0,0,0) 0%, #fff 75%);border-radius:0 0 10px 10px;pointer-events:none}
+    .task-group h4{font-size:.8rem; margin:8px 0 4px; font-weight:700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;}
+    .task{font-size:.875rem;margin:4px 0;line-height:1.4;}
+    .task .mins{font-size:.8rem;color:var(--muted)}
+    .topic-chip{display:inline-block;padding:3px 8px;border-radius:4px;border:1px solid transparent;font-size:.75rem;margin-bottom: 4px; font-weight: 600; background:#eef2ff; color:#3730a3;}
+    
+    .more{font-size:.875rem;color:var(--accent);cursor:pointer;user-select:none; font-weight: 700;}
+    .more-wrap{position:absolute;right:8px;bottom:8px;}
+    .fade-bottom{display: none;} /* Simplification, removing fade */
 
-    .pager{display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0 6px}
-    .pager button{cursor:pointer;border:0;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-weight:700}
-    .pager button:disabled{opacity:.5;cursor:not-allowed;background:#6b7280}
-    .badge{display:inline-block;border:1px solid var(--grid);border-radius:999px;padding:2px 8px;font-size:.8rem;color:var(--chip-fg);background:var(--chip-bg);margin-left:6px}
+    .pager{display:flex;gap:12px;justify-content:center;align-items:center;margin:24px 0 16px}
+    .pager button{cursor:pointer;border:1px solid var(--grid);background:var(--card);color:var(--fg);padding:8px 16px;border-radius:6px;font-weight:700}
+    .pager button:hover { background-color: #f3f4f6; }
+    .pager button:disabled{opacity:.5;cursor:not-allowed;}
+    #monthLabel { font-weight: 600; }
+    
+    .badge{display:inline-block;border:1px solid var(--grid);border-radius:6px;padding:4px 8px;font-size:.875rem;color:var(--muted);background:var(--card);margin-left:8px}
 
     /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-    .modal{max-width:760px;width:100%;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden;border:1px solid var(--grid)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(17, 24, 39, 0.6);backdrop-filter: blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal{max-width:600px;width:100%;background:var(--card);border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);border:1px solid var(--grid)}
     .modal header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--grid)}
-    .modal header h4{margin:0}
-    .modal .content{padding:14px 16px;max-height:70vh;overflow:auto}
-    .pill{display:inline-flex;gap:6px;align-items:center;background:#f0f9ff;border:1px solid var(--grid);padding:4px 8px;border-radius:999px;font-size:.82rem;color:#0c4a6e;margin-right:8px}
+    .modal header h4{margin:0; font-size: 1.25rem;}
+    .modal .content{padding:16px;max-height:70vh;overflow:y:auto;}
+    .modal .content .task { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6; }
+    .modal .content .task:last-child { border-bottom: none; }
+    .modal .content a { color: var(--accent); }
+    .pill{display:inline-flex;gap:6px;align-items:center;background:#eef2ff;border:1px solid #dbeafe;padding:4px 10px;border-radius:999px;font-size:.875rem;color:#4338ca;margin-right:8px; font-weight: 600;}
+    #closeModal { font-weight: 600; padding: 6px 12px; border-radius: 6px; }
 
     @media print{
+      body { background-color: #fff; }
       .site-header,.toolbar,.pager,.more-wrap,.fade-bottom,.modal-backdrop{display:none!important}
-      .month{break-inside:avoid}
-      body{background:#fff}
-      .card{box-shadow:none;border:1px solid var(--grid)}
+      .month{break-inside:avoid; box-shadow: none; border: 1px solid #ccc;}
       .day{min-height:auto}
-      .task{font-size:.92rem}
+      .task{font-size:.9rem}
     }
   </style>
 </head>
@@ -110,7 +166,6 @@
 <body>
   <header class="site-header">
     <div class="container">
-      <div class="brand-nav">
         <h1 class="logo">OlympiadPrep</h1>
         <nav class="site-nav">
           <a href="index.html">Home</a>
@@ -118,107 +173,88 @@
           <a href="tutor.html">Need a Tutor</a>
           <a href="books.html">Books</a>
         </nav>
-      </div>
       <div id="auth-slot"></div>
     </div>
   </header>
 
   <main class="container">
-    <h2><span class="emoji">📅</span> Your Study Timeline</h2>
-
+    <h2 style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.5em;">📅</span>
+        Your Study Timeline
+    </h2>
     <div id="errBox" class="error"></div>
     <p class="hint" id="planSummary"></p>
 
     <div class="card toolbar" id="toolbar">
       <div class="group">
-        <label>
-          <b>Minutes per day</b>
-          <input id="mPerDay" type="number" min="15" step="5" value="60" />
-        </label>
+        <label><b>Minutes per day</b><input id="mPerDay" type="number" min="15" step="5" value="60" /></label>
       </div>
-
       <div class="group">
-        <label>
-          <b>Test date</b>
-          <input id="testDate" type="date" />
-        </label>
+        <label><b>Test date</b><input id="testDate" type="date" /></label>
       </div>
-
-      <div class="group">
-        <label>
-          <b>Study time</b>
-          <div style="display:flex;gap:6px">
-            <select id="studyHour" aria-label="Hour"></select>
-            <select id="studyMin" aria-label="Minute">
-              <option>00</option><option>15</option><option>30</option><option>45</option>
-            </select>
-            <select id="studyAmpm" aria-label="AM/PM">
-              <option>AM</option><option selected>PM</option>
-            </select>
-          </div>
-        </label>
-        <div class="hint">Used for ICS export</div>
-      </div>
-
       <div class="group wide">
-        <label>
-          <b>Days off</b>
+        <label><b>Days off</b>
           <select id="daysOff" multiple size="3" title="Hold Ctrl/Cmd to select multiple" style="width:100%">
             <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
             <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
           </select>
         </label>
-        <div class="hint">Weekly off-days (optional)</div>
-      </div>
-
-      <div class="group">
-        <button id="rebuildBtn" class="secondary">Rebuild plan</button>
       </div>
       <div class="group">
-        <button id="downloadIcs">Download calendar (.ics)</button>
+        <label><b>Study time (for .ics)</b>
+          <div style="display:flex;gap:6px">
+            <select id="studyHour" aria-label="Hour"></select>
+            <select id="studyMin" aria-label="Minute"><option>00</option><option>15</option><option>30</option><option>45</option></select>
+            <select id="studyAmpm" aria-label="AM/PM"><option>AM</option><option selected>PM</option></select>
+          </div>
+        </label>
       </div>
       <div class="group">
-        <button id="saveCloudBtn" class="secondary">Save to cloud</button>
+        <button id="rebuildBtn" class="secondary">Rebuild Plan</button>
+      </div>
+      <div class="group">
+        <button id="downloadIcs">Download .ics</button>
+      </div>
+      <div class="group">
+        <button id="saveCloudBtn" class="secondary">Save to Cloud</button>
         <span id="saveStatus" class="chip" style="display:none">Saved</span>
       </div>
       <div class="group">
         <button class="secondary" onclick="window.print()">Print</button>
       </div>
-
-      <div style="grid-column:1/-1" class="hint">
-        Reading shows page ranges from your selected books. Exercises & timed sets use book problems or AMC/AIME contest problems.
-      </div>
     </div>
 
     <div class="legend">
-      <span class="lg"><span class="dot"></span> Reading (with page ranges)</span>
-      <span class="lg"><span class="dot"></span> Book exercises (explicit problems)</span>
-      <span class="lg"><span class="dot"></span> Timed set (contest-based)</span>
-      <span class="lg"><span class="dot"></span> Problem of the day (AMC 8/10/12, AIME, US(A)MO)</span>
-      <span class="lg"><span class="dot"></span> Proof track (AMC 10/12 — only after all reading complete)</span>
-      <span class="lg"><span class="dot"></span> Full mock (year-specific) + review</span>
-      <span class="lg"><span class="dot"></span> Off day</span>
+      <span class="lg"><span class="dot" style="background-color: #3b82f6;"></span> Reading</span>
+      <span class="lg"><span class="dot" style="background-color: #16a34a;"></span> Exercises</span>
+      <span class="lg"><span class="dot" style="background-color: #f97316;"></span> Timed Set</span>
+      <span class="lg"><span class="dot" style="background-color: #8b5cf6;"></span> Problem of Day</span>
+      <span class="lg"><span class="dot" style="background-color: #64748b;"></span> Mock Exam</span>
+      <span class="lg"><span class="dot" style="background-color: #db2777;"></span> Proof Track</span>
+      <span class="lg"><span class="dot" style="background-color: #a1a1aa;"></span> Off Day</span>
     </div>
 
-    <section id="calendar" class="cal-wrap"></section>
-
     <div class="pager">
-      <button id="prevMonth">← Previous month</button>
+      <button id="prevMonth">← Prev</button>
       <span id="monthLabel" class="hint"></span>
-      <button id="nextMonth">Next month →</button>
+      <button id="nextMonth">Next →</button>
+    </div>
+    <section id="calendar" class="cal-wrap"></section>
+    <div class="pager" style="margin-top: 16px;">
+      <button id="prevMonth2">← Prev</button>
+      <button id="nextMonth2">Next →</button>
     </div>
   </main>
 
-  <footer class="container" style="text-align:center;margin:20px 0;color:#64748b">© 2025 OlympiadPrep.</footer>
+  <footer class="container" style="text-align:center;margin-top:24px; padding-top:24px; border-top: 1px solid var(--grid);">
+    © 2025 OlympiadPrep. A resource for aspiring mathletes.
+  </footer>
 
   <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modal" role="document">
       <header>
         <h4 id="dayTitle">Day details</h4>
-        <div>
-          <span id="dayMeta" class="pill">Study • <span id="dayMetaGoal"></span></span>
-          <button id="closeModal" class="toolbar secondary" style="padding:6px 12px;border-radius:10px">Close</button>
-        </div>
+        <button id="closeModal" class="secondary">Close</button>
       </header>
       <div class="content" id="dayContent"></div>
     </div>
@@ -374,7 +410,7 @@
       /* Edition packs */
       const BOOK_PACK_PATH = {
         'aops-v1': 'data/editions/aops-vol1.json',
-        'aops-v2': 'data/editions/aops-vol2.json',
+        'aops-v2': 'data/editions/aops-v2.json',
         'intro-alg': 'data/editions/intro-algebra.json',
         'intro-cp': 'data/editions/intro-counting-prob.json',
         'intro-geo': 'data/editions/intro-geometry.json',
@@ -532,22 +568,6 @@
         return null;
       }
 
-      function deepCopyProgress(){
-        const copy = new Map();
-        sectionProgress.forEach((v,k)=>{ copy.set(k, {from:v.from, to:v.to}); });
-        const consumed = new Set(consumedSections);
-        const cursor = JSON.parse(JSON.stringify(catalogCursor||{}));
-        return {copy, consumed, cursor};
-      }
-      function restoreProgress(snapshot){
-        sectionProgress.clear();
-        snapshot.copy.forEach((v,k)=>sectionProgress.set(k, {from:v.from, to:v.to}));
-        consumedSections.clear();
-        snapshot.consumed.forEach(k=>consumedSections.add(k));
-        Object.keys(catalogCursor).forEach(k=>delete catalogCursor[k]);
-        Object.assign(catalogCursor, snapshot.cursor||{});
-      }
-
       function ensureProgressEntry(section){
         const pg = parsePages(section.pages);
         const key = `${section.bookId}#${section.chapter}`;
@@ -557,7 +577,7 @@
       }
 
       /* === READING SLICER =================================================== */
-      function planReading(topic, minutesBudget, finalPhase, catalogByTopic, availableTopics, commit){
+      function planReading(topic, minutesBudget, finalPhase, catalogByTopic, commit){
         let remaining = Math.max(0, Math.round(minutesBudget));
         const parts = [];
         let used = 0;
@@ -573,8 +593,7 @@
               chapterTitle: section.chapterTitle,
               from:null, to:null, mpp,
               minutes: take,
-              // carry sectionRef for later exercise matching
-              sectionRef: section                // <<< carry sectionRef
+              sectionRef: section
             });
             used += take; remaining -= take;
             return true;
@@ -597,15 +616,12 @@
             bookTitle: section.bookTitle,
             chapterTitle: section.chapterTitle,
             from: startPage, to: toPage, mpp, minutes,
-            sectionRef: section                  // <<< carry sectionRef
+            sectionRef: section
           });
           used += minutes; remaining -= minutes;
 
-          const newTo = toPage;
           if(commit){
-            sectionProgress.set(key, {from: total.from, to: newTo});
-            if(newTo >= total.to) consumedSections.add(key);
-          }else{
+            const newTo = toPage;
             sectionProgress.set(key, {from: total.from, to: newTo});
             if(newTo >= total.to) consumedSections.add(key);
           }
@@ -976,11 +992,6 @@
             return true;
           }
 
-          function fallbackSection(topic){
-            const pickBookId = selectedPackIds[0] || 'aops-v1';
-            return { bookId: pickBookId, bookTitle: pickBookId, chapter: '?', chapterTitle: `${topic} — Selected Reading`, pages: '', editionMeta: null, topic, hasExercises:false, sectionKey:`${pickBookId}#?` };
-          }
-
           /* Thresholds */
           const TH = onAMC8 ? { readMin: 12, drillMin: 14, timedMin: 8 } : { readMin: 14, drillMin: 16, timedMin: 10 };
           const totalDays = days;
@@ -1036,8 +1047,8 @@
 
           function totalMin(ts){ return Math.round(ts.reduce((s,t)=>s+(t.mins||0),0)); }
 
-          function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic, availableTopics){
-            return planReading(topic, minutes, finalPhase, catalogByTopic, availableTopics, true);
+          function commitReadingForMinutes(topic, minutes, finalPhase, catalogByTopic){
+            return planReading(topic, minutes, finalPhase, catalogByTopic, true);
           }
 
           function findExerciseSectionForTopic(topic, minutesBudget){
@@ -1081,7 +1092,7 @@
               if(!candidate) break;
               tried.add(candidate);
 
-              const plan = commitReadingForMinutes(candidate, remain, isFinalPhase, catalogByTopic, availableTopics);
+              const plan = commitReadingForMinutes(candidate, remain, isFinalPhase, catalogByTopic);
               if(plan.usedMin>0 && plan.parts.length){
                 plan.parts.forEach(p=>{
                   const pageStr = p.from ? (p.from === p.to ? ` (p.${p.from})` : ` (pp.${p.from}–${p.to})`) : '';
@@ -1090,7 +1101,7 @@
                     long: `📘 <b>${candidate}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
                     mins: p.minutes, type: 'reading',
                     _topic: candidate, _book: shortBook(p.bookTitle),
-                    _section: p.sectionRef           // <<< carry sectionRef into reading task
+                    _section: p.sectionRef
                   });
                 });
                 remain -= plan.usedMin;
@@ -1135,7 +1146,7 @@
                 return [{display:`Targeted review & error log`, long:`🌀 Review previously missed problems and key formulas across topics.`, mins: minutesPerDay, type: 'review', _book:`🌀 Review: Mixed`}];
               }
               const topic = pickNextTopic();
-              const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic, availableTopics);
+              const planned = commitReadingForMinutes(topic, minutesPerDay, isFinalPhase, catalogByTopic);
               if (planned.isExhausted || planned.usedMin===0){
                 const fill = fillReadingAcrossTopics(minutesPerDay, isFinalPhase);
                 if(fill.items.length) return fill.items;
@@ -1147,7 +1158,7 @@
                     display: `Read: ${p.chapterTitle}${pageStr}`,
                     long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
                     mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle),
-                    _section: p.sectionRef      // <<< carry sectionRef
+                    _section: p.sectionRef
                 };
               });
             }
@@ -1168,7 +1179,7 @@
             const tasks = [];
             const topic = pickNextTopic();
 
-            const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic, availableTopics);
+            const readingPlan = commitReadingForMinutes(topic, mRead, isFinalPhase, catalogByTopic);
             const allDoneNow = allReadingDoneSoFar();
 
             if (readingPlan.isExhausted || readingPlan.usedMin===0) {
@@ -1197,7 +1208,7 @@
                   display: `Read: ${p.chapterTitle}${pageStr}`,
                   long: `📘 <b>${topic}</b>: ${p.bookTitle}, ${p.chapterTitle}${pageStr}`,
                   mins: p.minutes, type: 'reading', _topic: topic, _book: shortBook(p.bookTitle),
-                  _section: p.sectionRef          // <<< carry sectionRef
+                  _section: p.sectionRef
                 });
               });
             }
@@ -1282,8 +1293,20 @@
           let monthIdx = 0;
           renderOneMonth(months[monthIdx]);
 
-          $('prevMonth').onclick = ()=>{ if(monthIdx>0){monthIdx--;renderOneMonth(months[monthIdx]);}};
-          $('nextMonth').onclick = ()=>{ if(monthIdx<months.length-1){monthIdx++;renderOneMonth(months[monthIdx]);}};
+          const pager1_prev = $('prevMonth'), pager1_next = $('nextMonth');
+          const pager2_prev = $('prevMonth2'), pager2_next = $('nextMonth2');
+
+          const updatePagers = () => {
+            pager1_prev.disabled = pager2_prev.disabled = (monthIdx===0);
+            pager1_next.disabled = pager2_next.disabled = (monthIdx===months.length-1);
+          };
+
+          const goPrev = ()=>{ if(monthIdx>0){monthIdx--;renderOneMonth(months[monthIdx]);}};
+          const goNext = ()=>{ if(monthIdx<months.length-1){monthIdx++;renderOneMonth(months[monthIdx]);}};
+
+          pager1_prev.onclick = pager2_prev.onclick = goPrev;
+          pager1_next.onclick = pager2_next.onclick = goNext;
+
 
           function buildMonthList(startDate, endDate){
             const out=[]; let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
@@ -1299,9 +1322,9 @@
               const header = new Date(year, month, 1).toLocaleString(undefined,{month:'long',year:'numeric'});
               wrap.innerHTML=`<h3>${header}</h3><div class="cal"></div>`; const grid=wrap.querySelector('.cal');
 
-              ['S','M','T','W','T','F','S'].forEach(d=>{
-                const head=document.createElement('div'); head.className='day'; head.style.background='#f8fafc'; head.style.minHeight='auto';
-                head.innerHTML=`<div class="date" style="opacity:.7; text-align:center;">${d}</div>`; grid.appendChild(head);
+              ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+                const head=document.createElement('div'); head.className='day-header';
+                head.textContent = d; grid.appendChild(head);
               });
 
               const firstDay=new Date(year,month,1), daysInMonth=new Date(year,month+1,0).getDate(), lead=firstDay.getDay();
@@ -1326,43 +1349,40 @@
                     }, {});
                     
                     const topic = tasks.find(t=>t._topic)?.['_topic'];
-                    if (topic) {
+                    if (topic && topic !== "Mixed Review") {
                         html += `<span class="topic-chip">${topic}</span>`;
                     }
 
-                    const groupKeys = Object.keys(grouped);
-                    const MAX_SHOWN_TASKS = 2;
+                    const MAX_SHOWN_TASKS = 3;
                     let tasksShownCount = 0;
                     
-                    for (const key of groupKeys) {
+                    for (const task of tasks) {
                         if (tasksShownCount >= MAX_SHOWN_TASKS) break;
-                        html += `<div class="task-group"><h4>${sanitizeHTML(key)}</h4>`;
-                        for (const task of grouped[key]) {
-                            if (tasksShownCount >= MAX_SHOWN_TASKS) break;
-                            const mins = (task.mins > 0) ? ` <span class="mins">• ${task.mins}m</span>` : '';
-                            html += `<div class="task">${sanitizeHTML(task.display)}${mins}</div>`;
-                            tasksShownCount++;
-                        }
-                        html += `</div>`;
+                        const mins = (task.mins > 0) ? ` <span class="mins">(${task.mins}m)</span>` : '';
+                        html += `<div class="task">${sanitizeHTML(task.display)}${mins}</div>`;
+                        tasksShownCount++;
                     }
 
                     const remaining = tasks.length - tasksShownCount;
                     if(remaining > 0){
-                      html += `<div class="more-wrap"><span class="more" data-date="${key}">+ ${remaining} more</span></div><div class="fade-bottom"></div>`;
+                      html += `<div class="more-wrap"><span class="more" data-date="${key}">+${remaining} more</span></div>`;
                     }
                 }
                 box.innerHTML=html;
                 box.addEventListener('click',(ev)=>{
                   const moreBtn = ev.target.closest('.more');
-                  if(moreBtn){ openDayModal(key, tasks); ev.preventDefault(); ev.stopPropagation(); }
+                  if(inRange && tasks.length > 0){
+                    openDayModal(key, tasks);
+                  }
+                  ev.preventDefault();
+                  ev.stopPropagation();
                 });
                 grid.appendChild(box);
               }
               cal.appendChild(wrap);
               const pos = months.findIndex(m=>m.year===year&&m.month===month);
-              $('monthLabel').innerText = `Month ${pos+1} of ${months.length} • ${header}`;
-              $('prevMonth').disabled=(monthIdx===0);
-              $('nextMonth').disabled=(monthIdx===months.length-1);
+              $('monthLabel').innerText = `${header}`;
+              updatePagers();
             }catch(e){
               console.error('[renderOneMonth crashed]', e);
               $('errBox').style.display='block';
@@ -1380,12 +1400,12 @@
 
           function openDayModal(dateKey, tasks){
             const dt = new Date(dateKey+'T00:00:00');
-            dayTitle.textContent = `Details — ${dt.toLocaleDateString(undefined,{weekday:'long', month:'short', day:'numeric'})}`;
-            dayMetaGoal.textContent = (input.goal||'').toUpperCase();
+            dayTitle.textContent = `${dt.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})}`;
+            
             dayContent.innerHTML = tasks.map(t=>{
               const line = t.long || t.display || '';
               const mins = (t.mins>0)? `<span class="pill">${t.mins} min</span>` : '';
-              return `<div class="task" style="margin-bottom:8px;">${sanitizeHTML(line)} ${mins}</div>`;
+              return `<div class="task"><div>${sanitizeHTML(line)}</div> ${mins}</div>`;
             }).join('');
             modalBackdrop.style.display='flex';
             document.body.style.overflow='hidden';
@@ -1455,23 +1475,6 @@
           console.error('[buildPlan failed]', e);
           errBox.style.display = 'block';
           errBox.textContent = 'Plan build failed: ' + (e.message || e);
-
-          const cal = $('calendar');
-          if(cal && cal.children.length===0){
-            const today = new Date(); today.setHours(0,0,0,0);
-            const wrap = document.createElement('section'); wrap.className='month';
-            wrap.innerHTML = `<h3>${today.toLocaleString(undefined,{month:'long',year:'numeric'})}</h3><div class="cal"></div>`;
-            const grid = wrap.querySelector('.cal');
-            ['S','M','T','W','T','F','S'].forEach(d => {
-              grid.insertAdjacentHTML('beforeend', `<div class="day" style="background:#f8fafc; min-height:auto;"><div class="date" style="opacity:.7; text-align:center;">${d}</div></div>`);
-            });
-            const first = new Date(today.getFullYear(), today.getMonth(), 1);
-            const lead = first.getDay(); for(let i=0;i<lead;i++) grid.insertAdjacentHTML('beforeend', `<div class="day out-of-range"></div>`);
-            const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-            for (let d=1; d<=dim; d++) grid.insertAdjacentHTML('beforeend', `<div class="day"><div class="date">${d}</div><div class="task hint">Loading…</div></div>`);
-            $('calendar').appendChild(wrap);
-            const monthLabel = $('monthLabel'); if(monthLabel) monthLabel.textContent = `Month 1 of 1 • ${today.toLocaleString(undefined,{month:'long',year:'numeric'})}`;
-          }
         }
       })();
     })();
