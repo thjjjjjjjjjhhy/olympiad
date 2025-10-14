@@ -14,120 +14,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Need a Tutor - OlympiadPrep</title>
   <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ===== Site palette (aligned with other pages) ===== */
-    :root{
-      --fg:#0f172a;           /* main text */
-      --muted:#64748b;        /* secondary text */
-      --grid:#e5e7eb;         /* borders */
-      --soft:#f8fafc;         /* soft background */
-      --card:#ffffff;         /* cards */
-      --accent:#0ea5e9;       /* cyan */
-      --cta:#2563eb;          /* indigo CTA */
-      --cta-2:#1d4ed8;
-      --ring:#93c5fd;         /* focus ring */
-      --shadow:0 8px 30px rgba(2,6,23,.06);
+    :root {
+      --bg: #f9fafb;
+      --fg: #1f2937;
+      --muted: #4b5563;
+      --grid: #d1d5db;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --ring: rgba(37, 99, 235, 0.2);
     }
-    html,body{background:#fff;color:var(--fg)}
-    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    html,body{
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .container{max-width:1000px;margin:0 auto;padding:0 24px}
 
-    /* ===== Header (same as site) ===== */
+    /* Header */
     .site-header{
       position:sticky; top:0; z-index:10;
-      background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%) !important;
-      color:#fff; padding:12px 0; margin-bottom:0;
+      background: var(--card) !important;
+      color: var(--fg); padding:16px 0;
+      border-bottom: 1px solid var(--grid);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 32px;
     }
-    .site-header .container{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+    .logo{
+      font-family: 'Lora', serif;
+      font-weight:600;
+      color: #111827;
+      margin:0;
+      font-size: 1.75rem;
     }
-    .brand-nav{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .logo{ font-weight:800; letter-spacing:.2px; color:#fff; }
-    .site-nav{ display:flex; gap:14px; flex-wrap:wrap; }
-    .site-nav a{ color:#fff; text-decoration:none; font-weight:600; opacity:.95 }
-    .site-nav a:hover{ opacity:1; text-decoration:underline }
-    .site-nav a.active{ border-bottom:2px solid rgba(255,255,255,.9); padding-bottom:2px }
-    #auth-slot{ display:flex; align-items:center; gap:10px; min-height:32px }
+    .site-nav{display:flex; gap:16px; flex-wrap:wrap;}
+    .site-nav a{ color: var(--fg); text-decoration:none; font-weight:600; padding-bottom: 4px; border-bottom: 2px solid transparent;}
+    .site-nav a:hover{ color: var(--accent); border-bottom-color: var(--accent); }
+    .site-nav a.active{ color: var(--accent); border-bottom-color: var(--accent); }
+    #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
 
-    /* ===== Hero (one clear header; no second header line) ===== */
-    .hero{
-      background: linear-gradient(180deg, rgba(99,102,241,.10), rgba(99,102,241,0));
-      padding:22px 0 12px;
-      border-bottom:1px solid var(--grid);
+    h1, h2, h3 {
+      font-family: 'Lora', serif;
+      color: #111827;
+      font-weight: 600;
     }
-    .hero h1{
-      margin:.2rem 0; font-size:clamp(1.6rem, 1.2rem + 1.8vw, 2.1rem);
-      display:flex; align-items:center; gap:10px; color:var(--fg);
+    main { padding: 16px 0; }
+    .page-header {
+        text-align: center;
+        margin-bottom: 32px;
     }
-    .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 4px }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      background:#eef2ff; color:#1e293b; border:1px solid var(--grid);
-      padding:6px 10px; border-radius:999px; font-size:.86rem; font-weight:600;
+    .page-header h1 {
+        font-size: 2.5rem;
     }
-    .badge .dot{ width:8px; height:8px; border-radius:50%; background:#3b82f6 }
+    .page-header p {
+        font-size: 1.125rem;
+        color: var(--muted);
+        max-width: 60ch;
+        margin: 8px auto 0;
+    }
 
-    /* ===== Layout: form + info card ===== */
-    main{ padding:18px 0 24px }
-    .grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:16px; align-items:start }
+    /* Layout */
+    .grid{ display:grid; grid-template-columns:1.2fr 0.8fr; gap:32px; align-items:start }
     @media (max-width:900px){ .grid{ grid-template-columns:1fr } }
 
-    .card{
-      background:var(--card); border:1px solid var(--grid); border-radius:16px;
-      box-shadow:var(--shadow); padding:16px;
-    }
-    .side h3{ margin:.25rem 0 .65rem; font-size:1.1rem }
-    .side p, .side li{ color:var(--fg) }
-    .side .muted{ color:var(--muted) }
-    .bullet{ margin:0; padding-left:18px }
-    .bullet li{ margin:.45rem 0; line-height:1.4 }
-    .side a{ color:#2563eb; text-decoration:underline }
-
-    /* ===== Form ===== */
-    .tutor-form{ display:grid; gap:12px; }
-    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+    .card{background:var(--card);border-radius:8px;box-shadow:var(--shadow);padding:24px;border:1px solid var(--grid)}
+    
+    /* Form */
+    .tutor-form{ display:grid; gap:16px; }
+    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
     @media (max-width:700px){ .two-col{ grid-template-columns:1fr } }
-    .form-group{ display:grid; gap:6px }
-    .tutor-form label{ color:var(--fg); font-weight:700 }
-    .note{ color:var(--muted); font-weight:500; margin-left:.25rem }
+    .form-group{ display:flex; flex-direction: column; }
+    .tutor-form label{ color:var(--fg); font-weight:600; margin-bottom: 6px; }
+    .note{ color:var(--muted); font-weight:400; font-size: 0.875rem; }
 
     .tutor-form input, .tutor-form select, .tutor-form textarea{
-      border:1px solid var(--grid); border-radius:12px; padding:11px 12px;
-      background:#fff; color:var(--fg); transition:border-color .15s, box-shadow .15s;
+      width: 100%;
+      border: 1px solid var(--grid); 
+      border-radius: 6px; 
+      padding:10px 12px; 
+      font-size: 1rem;
+      background:#f9fafb;
+      box-sizing: border-box;
     }
-    .tutor-form input::placeholder, .tutor-form textarea::placeholder{ color:#94a3b8 }
     .tutor-form input:focus, .tutor-form select:focus, .tutor-form textarea:focus{
-      outline:none; border-color:#93c5fd; box-shadow:0 0 0 4px rgba(147,197,253,.35);
+      outline:none; border-color:var(--accent); box-shadow: 0 0 0 3px var(--ring);
     }
-
-    .btn{
-      cursor:pointer; border:0; background:linear-gradient(90deg, var(--cta) 0%, var(--cta-2) 100%);
-      color:#fff; padding:11px 16px; border-radius:12px; font-weight:800; letter-spacing:.2px;
-      box-shadow:0 6px 18px rgba(37,99,235,.22); transition:transform .06s ease, filter .2s ease;
+    .tutor-form button{
+        cursor:pointer; border:0; background:var(--accent);color:white;padding:12px 20px;border-radius:6px;font-weight:700; font-size: 1rem;
+        width: auto;
     }
-    .btn:hover{ filter:brightness(1.05) }
-    .btn:active{ transform:translateY(1px) }
+    .tutor-form button:hover { background-color: var(--accent-hover); }
 
-    .success, .error{ margin-top:10px; padding:10px 12px; border-radius:10px; display:none }
-    .success{ background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46 }
-    .error{ background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d }
+    .success, .error{ margin-top:16px; padding:12px; border-radius:6px; display:none }
+    .success{ background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d }
+    .error{ background:#fef2f2; border:1px solid #fecaca; color:#991b1b }
+
+    /* Side info card */
+    .side h3{ margin-top:0; font-size: 1.25rem }
+    .side p, .side li{ color:var(--muted); line-height: 1.6; }
+    .bullet{ margin:0; padding-left:20px }
+    .bullet li{ margin-bottom: 12px; }
+    .side a{ color:var(--accent); text-decoration:none; font-weight: 600; }
+    .side a:hover { text-decoration: underline; }
 
     /* Anti-bot */
     .hp-wrap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
 
-    /* Print */
-    @media print{
-      .site-header,.badge-row{ display:none !important }
-      .card{ box-shadow:none; border:1px solid var(--grid) }
+    footer {
+        text-align:center;margin-top:32px; padding: 24px 0; border-top: 1px solid var(--grid); color: var(--muted);
     }
   </style>
 </head>
 
 <body>
-  <!-- ===== Header ===== -->
   <header class="site-header">
     <div class="container">
-      <div class="brand-nav">
         <h1 class="logo">OlympiadPrep</h1>
         <nav class="site-nav">
           <a href="index.html">Home</a>
@@ -135,29 +141,20 @@
           <a href="tutor.html" class="active">Need a Tutor</a>
           <a href="books.html">Books</a>
         </nav>
-      </div>
       <div id="auth-slot"></div>
     </div>
   </header>
 
-  <!-- ===== Hero (single clean header, badges instead of second header) ===== -->
-  <section class="hero">
-    <div class="container">
-      <h1>👩‍🏫 Need a Tutor?</h1>
-      <div class="badge-row">
-        <span class="badge"><span class="dot"></span> AMC 8/10/12 → AIME → US(A)JMO</span>
-        <span class="badge"><span class="dot"></span> 1:1 online mentoring</span>
-        <span class="badge"><span class="dot"></span> Aligns to your study timeline</span>
-      </div>
-    </div>
-  </section>
-
   <main class="container">
+    <div class="page-header">
+      <h1>👩‍🏫 Find a Tutor</h1>
+      <p>Connect with an experienced math contest coach for 1-on-1 online mentoring that aligns with your study plan and goals.</p>
+    </div>
     <div class="grid">
-      <!-- ===== Left: Form ===== -->
+      <!-- Left: Form -->
       <section class="card">
+        <h2>Get in Touch</h2>
         <form id="tutor-form" class="tutor-form" novalidate>
-          <!-- Required -->
           <div class="two-col">
             <div class="form-group">
               <label for="name">Name <span class="note">(required)</span></label>
@@ -169,24 +166,18 @@
             </div>
           </div>
 
-          <!-- Optional extras -->
           <div class="two-col">
             <div class="form-group">
               <label for="gradeLevel">Grade level <span class="note">(optional)</span></label>
               <select id="gradeLevel" name="gradeLevel">
                 <option value="">Select…</option>
-                <option>Middle school</option>
-                <option>9th grade</option>
-                <option>10th grade</option>
-                <option>11th grade</option>
-                <option>12th grade</option>
-                <option>Gap year</option>
-                <option>College</option>
-                <option>Other</option>
+                <option>Middle school</option><option>9th grade</option><option>10th grade</option>
+                <option>11th grade</option><option>12th grade</option><option>Gap year</option>
+                <option>College</option><option>Other</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="state">State <span class="note">(optional)</span></label>
+              <label for="state">State / Region <span class="note">(optional)</span></label>
               <select id="state" name="state">
                 <option value="">Select…</option>
                 <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
@@ -204,55 +195,40 @@
             </div>
           </div>
 
-          <div class="two-col">
-            <div class="form-group">
-              <label for="school">School <span class="note">(optional)</span></label>
-              <input type="text" id="school" name="school" placeholder="e.g., Lincoln High School" />
-            </div>
-            <div class="form-group">
-              <label for="classes">Previous / Current math classes <span class="note">(optional)</span></label>
-              <input type="text" id="classes" name="classes" placeholder="e.g., Algebra II, Precalculus, AoPS Intro NT" />
-            </div>
-          </div>
-
           <div class="form-group">
             <label for="needs">What do you need help with? <span class="note">(required)</span></label>
-            <textarea id="needs" name="needs" rows="4" required placeholder="Topics, contests, goals, meeting times…"></textarea>
+            <textarea id="needs" name="needs" rows="5" required placeholder="Tell us about your goals, topics you're struggling with, and your general availability..."></textarea>
           </div>
 
-          <!-- Anti-bot honeypot -->
           <div class="hp-wrap">
-            <label>Leave this field empty:
-              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
-            </label>
+            <label>Leave empty: <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label>
           </div>
 
-          <button type="submit" class="btn">Submit</button>
-          <div class="note" style="margin-top:8px">We’ll email you within 1–2 business days.</div>
+          <div>
+            <button type="submit">Send Request</button>
+            <p class="note" style="margin-top:12px">We’ll get back to you within 1-2 business days.</p>
+          </div>
 
-          <div id="okMsg" class="success">Thank you! We’ve received your request. We’ll email you soon.</div>
+          <div id="okMsg" class="success">Thank you! We’ve received your request and will email you soon.</div>
           <div id="errMsg" class="error">Submission failed — please try again in a moment.</div>
         </form>
       </section>
 
-      <!-- ===== Right: Info card ===== -->
+      <!-- Right: Info card -->
       <aside class="card side">
-        <h3>What to expect</h3>
+        <h3>What to Expect</h3>
         <ul class="bullet">
-          <li><b>Tailored match.</b> We pair you with a mentor experienced in your goal (AMC 8 → US(A)JMO).</li>
-          <li><b>Clear plan.</b> Tutors align sessions with your <a href="timeline.html">study timeline</a>.</li>
-          <li><b>Flexible cadence.</b> Weekly or bi-weekly; online via Zoom.</li>
-          <li><b>Transparent goals.</b> Skills check-ins, timed sets, and review of mistakes.</li>
+          <li><b>Tailored Match:</b> We pair you with a mentor experienced in your specific contest goals, from AMC 8 to US(A)JMO.</li>
+          <li><b>Integrated Plan:</b> Tutors work with you to align sessions with your personalized <a href="timeline.html">study timeline</a>.</li>
+          <li><b>Flexible Sessions:</b> Meet weekly or bi-weekly online through Zoom, at a time that works for you.</li>
+          <li><b>Focused Goals:</b> Work on skills check-ins, timed sets, and detailed reviews of challenging problems.</li>
         </ul>
-        <p class="muted" style="margin-top:10px">
-          Tip: Include your contest dates and typical availability in the message.
-        </p>
       </aside>
     </div>
   </main>
 
-  <footer class="container" style="text-align:center;margin:20px 0;color:#64748b">
-    © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
+  <footer>
+    © 2025 OlympiadPrep. A resource for aspiring mathletes.
   </footer>
 
   <!-- Submit via Formspree; optionally enrich with signed-in user -->
@@ -275,7 +251,7 @@
 
       const data = Object.fromEntries(new FormData(form).entries());
       if(!data.name || !data.email || !data.needs){
-        errMsg.textContent = "Please fill out name, email, and what you need help with.";
+        errMsg.textContent = "Please fill out your name, email, and what you need help with.";
         errMsg.style.display = 'block';
         return;
       }
