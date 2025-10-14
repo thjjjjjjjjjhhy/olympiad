@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://www.googagletagmanager.com/gtag/js?id=G-R641V1KFSP"></script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R641V1KFSP"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -12,166 +13,163 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OlympiadPrep - Home</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Kalam:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    :root{
-      --bg: #fdfdfd;
-      --fg: #2c3e50;
-      --muted: #7f8c8d;
-      --grid: #e0e0e0;
+    :root {
+      --bg: #f9fafb;
+      --fg: #1f2937;
+      --muted: #4b5563;
+      --grid: #d1d5db;
       --card: #ffffff;
-      --accent: #3498db;
-      --accent-2: #2980b9;
-      --shadow: 0 5px 15px rgba(0,0,0,0.08);
-      --ring: rgba(52, 152, 219, 0.25);
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --ring: rgba(37, 99, 235, 0.2);
     }
     html,body{
-        background-color: var(--bg);
-        color:var(--fg);
-        font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23e8f1f6" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
-    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
 
+    /* Header */
     .site-header{
       position:sticky; top:0; z-index:10;
-      background: white !important;
-      color: var(--fg); padding:12px 0; margin-bottom:0;
-      border-bottom: 2px solid var(--grid);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      background: var(--card) !important;
+      color: var(--fg); padding:16px 0;
+      border-bottom: 1px solid var(--grid);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
     .logo{
-        font-family: 'Kalam', cursive;
-        font-weight:700;
-        letter-spacing:.2px;
-        color: var(--accent-2);
-        margin:0;
-        font-size: 2rem;
+      font-family: 'Lora', serif;
+      font-weight:600;
+      color: #111827;
+      margin:0;
+      font-size: 1.75rem;
     }
-    .site-nav a{ color: var(--fg); text-decoration:none; font-weight:700; opacity:.8 }
-    .site-nav a:hover{ opacity:1; color: var(--accent); }
-    .site-nav a.active{ color: var(--accent-2); opacity: 1; border-bottom:3px solid var(--accent-2); padding-bottom:4px }
+    .site-nav a{ color: var(--fg); text-decoration:none; font-weight:600; padding-bottom: 4px; border-bottom: 2px solid transparent;}
+    .site-nav a:hover{ color: var(--accent); border-bottom-color: var(--accent); }
+    .site-nav a.active{ color: var(--accent); border-bottom-color: var(--accent); }
     #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
 
-    .hero{
-      background: transparent;
-      padding:40px 0 32px;
-      border-bottom:0;
+    /* Main Content Area */
+    .content-area {
+      padding: 48px 0;
     }
-    .hero-wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:stretch}
-    @media (max-width:900px){ .hero-wrap{grid-template-columns:1fr} }
+    .grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+    @media (max-width:900px){ .grid-layout{grid-template-columns:1fr} }
 
-    .search-card, .plan-card {
-      border:2px solid var(--grid);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:24px;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .search-card:hover, .plan-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    h1, h2, h3 {
+      font-family: 'Lora', serif;
+      color: #111827;
+      font-weight: 600;
     }
 
-    .search-title{
-      font-family: 'Poppins', sans-serif;
-      font-size:1.8rem;
-      font-weight:800;
-      color: var(--fg);
-      line-height: 1.2;
-      margin: 0;
+    .main-title {
+        font-size: 2.5rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
     }
-    .search-sub{color:var(--muted);margin-top:0; font-size: 1rem;}
 
-    .input-wrap{position:relative; display:flex; gap:8px; align-items:center}
+    .subtitle {
+        font-size: 1.125rem;
+        color: var(--muted);
+        max-width: 50ch;
+    }
+    
+    .action-panel {
+        background: var(--card);
+        border: 1px solid var(--grid);
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+    }
+
+    .action-panel h2 {
+        font-size: 1.5rem;
+        margin-top: 0;
+    }
+
+    .input-wrap{position:relative;}
     .input-icon{
       position:absolute; left:14px; top:50%; transform:translateY(-50%);
-      width:22px; height:22px; opacity:.5; pointer-events:none;
+      width:20px; height:20px; color: #9ca3af;
     }
     .lookup-form input{
-      flex:1; min-width:260px;
-      border:2px solid var(--grid); border-radius:12px; padding:14px 16px 14px 48px; font-size:1rem;
-      font-weight: 500;
-      background:#f8f9fa;
+      width: 100%;
+      border: 1px solid var(--grid); border-radius: 6px; padding:12px 14px 12px 44px; font-size: 1rem;
+      background:#f9fafb;
       transition: box-shadow .15s ease, border-color .15s ease;
     }
     .lookup-form input:focus{
-      outline:none; border-color:var(--accent); box-shadow: 0 0 0 4px var(--ring);
-      background: white;
+      outline:none; border-color:var(--accent); box-shadow: 0 0 0 3px var(--ring);
     }
     .lookup-form button{
-      border:0; background:var(--accent-2); color:#fff; padding:14px 20px; border-radius:12px; font-weight:700; font-size: 1rem; cursor:pointer;
-      box-shadow:0 4px 12px rgba(41, 128, 185, 0.3);
-      transition: transform 0.2s, background 0.2s;
+      margin-top: 12px;
+      width: 100%;
+      border:0; background:var(--accent); color:#fff; padding:12px 16px; border-radius:6px; font-weight:700; font-size: 1rem; cursor:pointer;
+      transition: background-color .2s;
     }
-    .lookup-form button:hover{ transform: translateY(-2px); background: var(--accent); }
+    .lookup-form button:hover{ background: var(--accent-hover); }
 
-    .suggestions{ display:flex;flex-wrap:wrap;gap:10px;margin-top:4px }
+    .suggestions{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:16px; border-top: 1px solid var(--grid); padding-top: 16px;
+    }
     .chip{
-      padding:8px 14px;border-radius:20px;border:2px solid transparent;
-      background:#ecf0f1;color:#34495e;font-size:.9rem;cursor:pointer; font-weight: 600;
-      transition: background .15s ease, transform .1s ease, border-color .15s ease;
+      padding:6px 12px;border-radius:6px;border:1px solid var(--grid);
+      background:#f3f4f6;color:var(--muted);font-size:.875rem;cursor:pointer; font-weight: 600;
+      transition: background .15s ease, color .15s ease;
     }
-    .chip:hover{background:#e0e7ec; border-color: var(--accent); transform: translateY(-1px)}
-    .chip:active{transform:translateY(1px)}
+    .chip:hover{background: #e5e7eb; color: var(--fg); }
 
-    .plan-card h3{
-        margin:0;
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--fg) !important;
-    }
-    .subtitle{color:var(--muted)}
-    .cta-row{display:flex;gap:10px;flex-wrap:wrap; margin-top: auto;}
-    .cta-primary{
-        background:var(--accent);
-        color:#fff;border:0;border-radius:12px;padding:12px 18px;font-weight:700;text-decoration:none;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-    }
-    .cta-primary:hover{transform: translateY(-2px); box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);}
-    .cta-dark{background:#2c3e50}
-    .cta-dark:hover{ background: #34495e; }
-    .quick-goals{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .quick-goals a{border:2px solid var(--grid);border-radius:20px;padding:6px 12px;text-decoration:none;color:var(--fg);background:#fff; font-weight:600;}
-    .quick-goals a:hover{background:#f8f9fa; border-color: var(--accent-2);}
-
-    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:32px auto}
-    @media (max-width:900px){ .features{grid-template-columns:1fr} }
-    .card{
-        background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:24px;border:2px solid var(--grid);
-        text-align: center;
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    .card h3 { font-size: 1.3rem; margin-top: 0; color: var(--accent-2); }
-    .card p { color: var(--muted); }
-    .card a{
-        font-weight:700;
-        color:var(--accent);
-        text-decoration:none;
+    .cta-button {
         display: inline-block;
-        margin-top: 1rem;
-        padding: 8px 16px;
-        border-radius: 10px;
-        background-color: #ecf0f1;
-        transition: background-color 0.2s;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background-color .2s;
     }
-    .card a:hover{background-color: #dfe6e9; text-decoration: none;}
-
-    footer{
-        border-top:2px solid var(--grid);padding:24px 0;text-align:center;color:#95a5a6;margin-top:16px;
-        font-weight: 600;
+    .cta-button:hover {
+        background: var(--accent-hover);
     }
 
+    /* Features Section */
+    .features {
+      padding: 48px 0;
+      background-color: #f3f4f6;
+      border-top: 1px solid var(--grid);
+      border-bottom: 1px solid var(--grid);
+    }
+    .features h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-top: 0;
+      margin-bottom: 32px;
+    }
+    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+    @media (max-width:900px){ .features-grid{grid-template-columns:1fr} }
+    .feature-card{
+        background:var(--card);border:1px solid var(--grid);border-radius:8px;padding:24px;
+        box-shadow: var(--shadow);
+    }
+    .feature-card h3{ margin-top: 0; font-size: 1.25rem; }
+    .feature-card p { color: var(--muted); margin-bottom: 1.5rem;}
+    .feature-card a {
+        font-weight: 700;
+        color: var(--accent);
+        text-decoration: none;
+    }
+    .feature-card a:hover {
+        text-decoration: underline;
+    }
+
+    footer{padding:32px 0;text-align:center;color:var(--muted);}
   </style>
 </head>
 <body>
@@ -188,71 +186,70 @@
     </div>
   </header>
 
-  <section class="hero">
-    <div class="container hero-wrap">
+  <main>
+    <section class="content-area">
+        <div class="container grid-layout">
+            <div>
+                <h1 class="main-title">A smarter way to prepare for math contests.</h1>
+                <p class="subtitle">OlympiadPrep creates a personalized study plan based on your skills, helping you master the topics you need to succeed in contests like the AMC, AIME, and USAMO.</p>
+                <div style="margin-top: 32px;">
+                    <a href="planning.html" class="cta-button">Create Your Study Plan →</a>
+                </div>
+            </div>
+            <div class="action-panel">
+                <h2>Find a Problem</h2>
+                <p style="color: var(--muted); margin-top: 0;">Quickly look up any past contest problem.</p>
+                 <form class="lookup-form" onsubmit="handleSearch(event)" autocomplete="off">
+                  <div class="input-wrap">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
+                    <input type="text" id="lookup-query" aria-label="Search contest problems"
+                           placeholder="e.g., AMC 12B 2023 P14" required>
+                  </div>
+                  <button type="submit" aria-label="Search">Search</button>
+                </form>
 
-      <div class="search-card">
-        <h2 class="search-title">Instantly Find Any Contest Problem 🚀</h2>
-        <p class="search-sub">Get direct links to any problem from past AMC 8/10/12, AIME, and USAMO contests. No more endless searching!</p>
-
-        <form class="lookup-form" onsubmit="handleSearch(event)" autocomplete="off">
-          <div class="input-wrap" style="flex:1">
-            <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 10-.71.71l.27.28v.79L20 20.5 21.5 19l-6-5.5zm-5.5 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"/></svg>
-            <input type="text" id="lookup-query" aria-label="Search contest problems"
-                   placeholder="e.g. AMC 8 2021 #12 or AIME I 2022 P3" required>
-          </div>
-          <button type="submit" aria-label="Search">Go!</button>
-        </form>
-
-        <div class="suggestions" id="chips">
-          <span class="chip" data-preset="AMC 8 2019 Problem 9">AMC 8 2019 #9</span>
-          <span class="chip" data-preset="AMC 12B 2023 Problem 14">AMC 12B 2023 #14</span>
-          <span class="chip" data-preset="AIME I 2022 Problem 3">AIME I 2022 #3</span>
-          <span class="chip" data-preset="USAMO 2015 Problem 1">USAMO 2015 #1</span>
-          <span class="chip" data-preset="AMC 10A 2020">AMC 10A 2020 (full test)</span>
+                <div class="suggestions" id="chips">
+                  <span class="chip" data-preset="AMC 8 2019 Problem 9">AMC 8 2019 P9</span>
+                  <span class="chip" data-preset="AMC 12B 2023 Problem 14">AMC 12B 2023 P14</span>
+                  <span class="chip" data-preset="AIME I 2022 Problem 3">AIME I 2022 #3</span>
+                  <span class="chip" data-preset="USAMO 2015 Problem 1">USAMO 2015 #1</span>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <div class="plan-card">
-        <h3>📅 Build Your Study Timeline</h3>
-        <p class="subtitle" style="margin:0 0 .5rem">Get a personalized, day-by-day study plan based on your diagnostic results. Readings, drills, and mocks all planned out for you!</p>
-        <div class="cta-row">
-          <a class="cta-primary" href="planning.html">Start Planning →</a>
-          <a class="cta-primary cta-dark" href="timeline.html">My Timeline</a>
+    <section class="features">
+        <div class="container">
+            <h2>Everything you need in one place</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                  <h3>🧭 Personalized Timelines</h3>
+                  <p>Take a short diagnostic test and get a day-by-day study schedule with recommended readings, practice problems, and mock exams.</p>
+                  <a href="planning.html">Get Started →</a>
+                </div>
+                <div class="feature-card">
+                  <h3>👩‍🏫 Expert Tutors</h3>
+                  <p>Connect with experienced coaches who can help you master difficult concepts and improve your problem-solving strategies.</p>
+                  <a href="tutor.html">Find a Tutor →</a>
+                </div>
+                <div class="feature-card">
+                  <h3>📚 Curated Book Library</h3>
+                  <p>Browse a ranked list of the best books for every level, from AMC 8 fundamentals to advanced USAMO preparation.</p>
+                  <a href="books.html">Explore Books →</a>
+                </div>
+            </div>
         </div>
-        <div class="quick-goals">
-          <a href="planning.html?goal=amc8">AMC 8</a>
-          <a href="planning.html?goal=amc10">AMC 10</a>
-          <a href="planning.html?goal=amc12">AMC 12</a>
-          <a href="planning.html?goal=aime">AIME</a>
-          <a href="planning.html?goal=usajmo">USAJMO</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <main class="features container">
-    <div class="card">
-      <h3>🧭 Smart Study Plans</h3>
-      <p>Daily reading, calibrated drills, timed sets, and full mocks scheduled right up to your test date.</p>
-      <a href="planning.html">Take the Diagnostic →</a>
-    </div>
-    <div class="card">
-      <h3>👩‍🏫 Expert Tutors</h3>
-      <p>Need help with a tough topic? Get 1-on-1 guidance from experienced contest coaches.</p>
-      <a href="tutor.html">Find a Tutor →</a>
-    </div>
-    <div class="card">
-      <h3>📚 Curated Book Library</h3>
-      <p>Explore the best books for your level, from AMC 8 foundations to USAMO strategies.</p>
-      <a href="books.html">Browse Books →</a>
-    </div>
+    </section>
   </main>
+  
 
   <footer>
-    © 2025 OlympiadPrep — Built by students, for students.
+    <div class="container">
+        © 2025 OlympiadPrep. A resource for aspiring mathletes.
+    </div>
   </footer>
 
+  <!-- Search logic (AMC 8 supported, “P14/#14/PROB 14” supported) -->
   <script>
     // Chip quick-fill
     document.getElementById('chips').addEventListener('click', (e)=>{
@@ -364,6 +361,7 @@
     }
   </script>
 
+  <!-- Auth (header sign-in) -->
   <script type="module" src="./auth.js"></script>
 </body>
 </html>
