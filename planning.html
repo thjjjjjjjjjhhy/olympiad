@@ -14,6 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Build Timeline - OlympiadPrep</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- MathJax (LaTeX) -->
   <script>
@@ -24,74 +25,150 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Minimal UI -->
+  <!-- UI Styles -->
   <style>
-    :root { --fg:#111; --muted:#6b7280; --card:#fff; --accent:#0ea5e9; --grid:#e5e7eb; }
-    body{color:var(--fg)}
-    .container{max-width:1000px;margin:0 auto;padding:0 16px}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px}
-    header .logo{font-weight:800}
-    .hint{color:var(--muted);font-size:.92rem}
-    .q{padding:14px 12px;border-bottom:1px solid #eee}
-    .q:last-child{border-bottom:0}
-    .q h3{margin:0 0 .25rem;font-size:1rem}
-    .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:.4rem}
-    .choice{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
-    .short{width:120px}
-    .actions{display:flex;gap:8px;align-items:center;margin:16px 0 8px;flex-wrap:wrap}
-    button{cursor:pointer;border:0;background:var(--accent);color:white;padding:10px 14px;border-radius:12px;font-weight:600}
-    button.secondary{background:#e5e7eb;color:#111}
-    .ok{background:#e6ffed}
-    .bad{background:#ffecec}
-    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:.8rem;color:#334155}
-    .hintline{margin:.25rem 0 0}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--grid);border-radius:10px;padding:8px 10px;margin:6px 6px 0 0;background:#fff}
-    .pill input{transform:scale(1.1)}
-    .rec-h{margin:.6rem 0 .25rem}
-    .notice{border-left:4px solid var(--accent);background:#f0f9ff;padding:10px;border-radius:8px}
-    .wkgrid{display:grid;grid-template-columns:repeat(7,minmax(80px,1fr));gap:8px;margin-top:6px}
-    .wkgrid label{display:flex;gap:6px;align-items:center;border:1px solid var(--grid);border-radius:10px;padding:8px;background:#fff}
-    @media (max-width:900px){.wkgrid{grid-template-columns:repeat(4,minmax(100px,1fr))}}
-    @media (max-width:600px){.wkgrid{grid-template-columns:repeat(3,minmax(100px,1fr))}}
-    @media (max-width:700px){.row{grid-template-columns:1fr}}
+    :root {
+      --bg: #f9fafb;
+      --fg: #1f2937;
+      --muted: #4b5563;
+      --grid: #d1d5db;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --ring: rgba(37, 99, 235, 0.2);
+    }
+    html,body{
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .container{max-width:800px;margin:0 auto;padding:0 24px}
+    
+    /* Header */
+    .site-header{
+      position:sticky; top:0; z-index:10;
+      background: var(--card) !important;
+      color: var(--fg); padding:16px 0;
+      border-bottom: 1px solid var(--grid);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 32px;
+    }
+    .site-header .container{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+    .logo{
+      font-family: 'Lora', serif;
+      font-weight:600;
+      color: #111827;
+      margin:0;
+      font-size: 1.75rem;
+    }
+    .site-nav{display:flex; gap:16px; flex-wrap:wrap;}
+    .site-nav a{ color: var(--fg); text-decoration:none; font-weight:600; padding-bottom: 4px; border-bottom: 2px solid transparent;}
+    .site-nav a:hover{ color: var(--accent); border-bottom-color: var(--accent); }
+    .site-nav a.active{ color: var(--accent); border-bottom-color: var(--accent); }
+    #auth-slot{display:flex;align-items:center;gap:10px;min-height:32px}
+
+    h1, h2, h3, h4 {
+      font-family: 'Lora', serif;
+      color: #111827;
+      font-weight: 600;
+    }
+    h2 { font-size: 2rem; margin-bottom: 8px; }
+    main { padding: 16px 0; }
+    
+    .card{background:var(--card);border-radius:8px;box-shadow:var(--shadow);padding:24px;border:1px solid var(--grid)}
+    .hint{color:var(--muted);font-size:.875rem; margin-top: 4px;}
+    
+    /* Forms */
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:600px){.row{grid-template-columns:1fr}}
+    label { font-weight: 600; display: block; margin-bottom: 6px; }
+    input[type="number"], input[type="date"], select {
+      width: 100%;
+      border: 1px solid var(--grid); 
+      border-radius: 6px; 
+      padding:10px 12px; 
+      font-size: 1rem;
+      background:#f9fafb;
+    }
+    input:focus, select:focus {
+      outline:none; border-color:var(--accent); box-shadow: 0 0 0 3px var(--ring);
+    }
+    button{
+        cursor:pointer; border:0; background:var(--accent);color:white;padding:12px 20px;border-radius:6px;font-weight:700; font-size: 1rem;
+    }
+    button:hover { background-color: var(--accent-hover); }
+    button.secondary{background:#e5e7eb;color:var(--fg); border: 1px solid var(--grid); }
+    button.secondary:hover { background-color: #d1d5db; }
+
+    /* Diagnostic section */
+    .q{padding:16px 0;border-bottom:1px solid var(--grid)}
+    .q:first-of-type { padding-top: 0; }
+    .q:last-child{border-bottom:0; padding-bottom: 0;}
+    .q h3{margin:0 0 8px;font-size:1.1rem; display: flex; align-items: center; justify-content: space-between;}
+    .q .latex { font-size: 1.1rem; }
+    .tag{display:inline-block;border-radius:6px;padding:4px 10px;font-size:.8rem;color:var(--muted); background-color: #f3f4f6; font-family: 'Open Sans'; font-weight: 600;}
+    .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .choice{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--grid);border-radius:6px;background:var(--card); cursor: pointer;}
+    .choice:hover { background-color: #f9fafb; }
+    .choice input[type="radio"] { margin-top: 5px; }
+    input.short{width:120px; font-size: 1rem; padding: 10px 12px;}
+    .ok{border-left: 4px solid #22c55e; background-color: #f0fdf4; padding-left: 12px;}
+    .bad{border-left: 4px solid #ef4444; background-color: #fef2f2; padding-left: 12px;}
+
+    .actions{display:flex;gap:12px;align-items:center;margin:24px 0 8px;flex-wrap:wrap}
+
+    /* Builder Section */
+    .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--grid);border-radius:8px;padding:10px 12px;margin:4px;background:var(--card); cursor: pointer;}
+    .pill:hover { background-color: #f9fafb; }
+    .pill input{transform:scale(1.2); margin-right: 4px;}
+    .pill b { font-weight: 600; }
+    h4.rec-h{margin:24px 0 8px; font-size: 1.25rem; border-top: 1px solid var(--grid); padding-top: 24px;}
+    .notice{border-left:4px solid var(--accent);background:#eff6ff;padding:12px;border-radius:6px; color: #1e3a8a; margin-top: 16px;}
+    #topicTableWrap table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    #topicTableWrap th, #topicTableWrap td { padding: 10px 12px; border: 1px solid var(--grid); text-align: left;}
+    #topicTableWrap th { background-color: #f3f4f6; font-weight: 700; }
+    
+    .wkgrid{display:grid;grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));gap:10px;margin-top:8px}
+    .wkgrid label{display:flex;gap:8px;align-items:center;border:1px solid var(--grid);border-radius:6px;padding:10px;background:var(--card); font-weight: 600; cursor: pointer;}
+    .wkgrid label:hover { background-color: #f9fafb; }
+
     @media print { .site-header, nav, footer, .diagnostic-card, .actions .secondary, .hint { display:none !important; } body { background:#fff; } .card { box-shadow:none; border:1px solid #e5e7eb } .container { max-width:none } }
   </style>
 </head>
 <body>
   <header class="site-header">
-    <div class="container" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div class="container">
         <h1 class="logo">OlympiadPrep</h1>
-        <nav class="site-nav" style="display:flex;gap:12px;flex-wrap:wrap">
+        <nav class="site-nav">
           <a href="index.html">Home</a>
           <a href="timeline.html">Timeline</a>
           <a href="tutor.html">Need a Tutor</a>
           <a href="books.html">Books</a>
         </nav>
-      </div>
       <div id="auth-slot"></div>
     </div>
   </header>
 
   <main class="container">
     <h2>📅 Build Your Timeline</h2>
+    <p class="hint" style="font-size: 1.1rem; max-width: 65ch;">Answer a few questions and take a short diagnostic test. We'll generate a personalized study plan to guide you to your goal.</p>
 
-    <!-- Goal picker -->
-    <div class="card diagnostic-card">
-      <p>Before we craft your personalized study schedule, take a quick diagnostic.</p>
-      <form class="diagnostic-form" id="diagForm">
+    <!-- Step 1: Goal picker -->
+    <div class="card" style="margin-top: 24px;">
+      <h3>Step 1: Set Your Goal</h3>
+      <form id="diagForm">
         <div class="row">
           <div>
-            <label for="subject"><b>Subject</b></label>
-            <select id="subject" name="subject" style="width:100%">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject">
               <option value="math" selected>Math</option>
             </select>
           </div>
           <div>
-            <label for="goal"><b>Goal</b></label>
-            <select id="goal" name="goal" required style="width:100%">
-              <option value="" disabled selected>Select your goal</option>
+            <label for="goal">Goal Contest</label>
+            <select id="goal" name="goal" required>
+              <option value="" disabled selected>Select your goal...</option>
               <option value="amc8">AMC 8</option>
               <option value="amc10">AMC 10</option>
               <option value="amc12">AMC 12</option>
@@ -102,68 +179,72 @@
           </div>
         </div>
 
-        <!-- upfront weekday off picker (prefill for builder; can be changed later) -->
-        <div style="margin-top:10px">
-          <label><b>Weekly off days (choose specific weekdays)</b></label>
+        <div style="margin-top:16px">
+          <label>Weekly off-days (optional)</label>
           <div id="topOffDays" class="wkgrid"></div>
-          <p class="hint" style="margin:.25rem 0 0">Example: check Monday to always take Mondays off. You can change this later before generating the plan.</p>
+          <p class="hint">Select any days you consistently plan to take off from studying.</p>
         </div>
 
-        <button type="submit" style="margin-top:10px">Start Diagnostic →</button>
-        <p class="hint hintline">Mapping: AMC 8/10/12 → Test A8/A, AIME → Test B, USAMO/USAJMO → Test C.</p>
+        <button type="submit" style="margin-top:16px">Start Diagnostic →</button>
+        <p class="hint">Mapping: AMC 8/10/12 → Test A, AIME → Test B, USAMO/USAJMO → Test C.</p>
       </form>
     </div>
 
-    <!-- Diagnostic renders here -->
-    <section id="diagSection" class="card" style="display:none; margin-top:16px">
-      <div id="meta"></div>
+    <!-- Step 2: Diagnostic -->
+    <section id="diagSection" class="card" style="display:none; margin-top:24px">
+      <h3>Step 2: Diagnostic Test</h3>
+      <div id="meta" style="margin-bottom: 16px;"></div>
       <div id="quiz"></div>
     </section>
 
-    <!-- Topic breakdown -->
-    <section id="breakdown" class="card" style="display:none; margin-top:16px">
-      <h3 style="margin:.2rem 0 0.6rem">Topic Breakdown</h3>
+    <!-- Step 3: Breakdown -->
+    <section id="breakdown" class="card" style="display:none; margin-top:24px">
+      <h3>Your Results</h3>
       <div id="topicTableWrap"></div>
-      <div id="levelAdvice" class="notice" style="display:none;margin-top:10px"></div>
+      <div id="levelAdvice" class="notice" style="display:none;"></div>
     </section>
 
-    <!-- Builder: minutes/date + book recommendations/selection + weekday off picker -->
-    <section id="timelineBuilder" class="card" style="display:none; margin-top:16px">
-      <h3 style="margin:.2rem 0 .6rem">Generate Your Study Plan</h3>
+    <!-- Step 4: Builder -->
+    <section id="timelineBuilder" class="card" style="display:none; margin-top:24px">
+      <h3>Step 3: Customize Your Plan</h3>
       <div class="row">
-        <label><b>Minutes per day</b><br><input id="minutesPerDay" type="number" min="15" step="5" style="width:100%" placeholder="e.g., 45"></label>
-        <label><b>Test date</b><br><input id="testDate" type="date" style="width:100%"></label>
+        <div>
+            <label for="minutesPerDay">Minutes per day</label>
+            <input id="minutesPerDay" type="number" min="15" step="5" placeholder="e.g., 45">
+        </div>
+        <div>
+            <label for="testDate">Test date</label>
+            <input id="testDate" type="date">
+        </div>
       </div>
 
-      <!-- builder weekday off picker (this drives payload) -->
-      <div style="margin-top:8px">
-        <label><b>Weekly off days</b></label>
+      <div style="margin-top:16px">
+        <label>Weekly off days</label>
         <div id="buildOffDays" class="wkgrid"></div>
       </div>
 
       <div id="recBlock" style="margin-top:12px">
-        <h4 class="rec-h">📚 Recommended for you (pre-selected)</h4>
+        <h4 class="rec-h">Recommended Books (pre-selected)</h4>
         <div id="recBooks"></div>
-        <h4 class="rec-h">➕ You can also include these</h4>
+        <h4 class="rec-h">Additional Books</h4>
         <div id="otherBooks"></div>
-        <p class="hint" style="margin-top:6px">We’ll prioritize the selected books in your day-by-day plan. You can always rebuild later.</p>
+        <p class="hint" style="margin-top:12px">We’ll prioritize the selected books in your day-by-day plan. You can always come back and rebuild your plan with different books.</p>
       </div>
 
       <div class="actions">
-        <button id="makePlanBtn">Generate timeline →</button>
-        <button type="button" class="secondary" onclick="window.print()">Print this page</button>
+        <button id="makePlanBtn">Generate Timeline →</button>
+        <button type="button" class="secondary" onclick="window.print()">Print This Page</button>
       </div>
     </section>
   </main>
 
-  <footer>
+  <footer style="text-align:center;margin-top:32px; padding: 24px 0; border-top: 1px solid var(--grid); color: var(--muted);">
     © 2025 OlympiadPrep. Empowering tomorrow’s problem solvers.
   </footer>
 
   <script>
   // ---------- Test bank ----------
   const tests = {
-    /* NEW: AMC 8 — 12 easy MCQs */
     A8: { title: "Diagnostic Test A8 (AMC 8 Readiness — Easy)", format: "12 multiple-choice (A–E)", time: 20,
       questions: [
         { type:"mcq", topic:"Polynomials and Algebra", latex:"Solve \\(2x+3=13\\). What is \\(x\\)?", choices:["3","4","5","6","8"], answerIndex:2 },
@@ -181,7 +262,6 @@
       ]
     },
 
-    /* Existing tests */
     A: { title: "Diagnostic Test A (AMC 12 Readiness — Hard)", format: "10 multiple-choice (A–E)", time: 30,
       questions: [
         { type:"mcq", topic:"Polynomials and Algebra", latex:"Let \\(r,s\\) be the roots of \\(x^2-(k+3)x+(2k+5)=0\\). If \\(r^2+s^2=29\\), find the sum of all possible values of \\(k\\).", choices:["\\(-11\\)","\\(-1\\)","1","11","30"], answerIndex:1 },
@@ -225,7 +305,6 @@
       ] }
   };
 
-  // --- Extra, easier AMC10/12 add-ons (kept) ---
   const AMC_EASY_QUESTIONS = [
     { type:"mcq", topic:"Polynomials and Algebra",
       latex:"For \\(x^2-5x+6=0\\), what is the sum of the roots?",
@@ -259,35 +338,28 @@
       choices:["800","810","900","901","999"], answerIndex:2 }
   ];
 
-  /* Goal → test mapping (now with AMC 8) */
   const goalToTest = { 'amc8':'A8', 'amc10':'A', 'amc12':'A', 'aime':'B', 'usamo':'C', 'usajmo':'C' };
 
-  // ---------- BIGGER Book catalog ----------
   const BOOKS = [
     {id:'aops-v1', title:'AoPS Volume 1 (The Basics)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol1'},
     {id:'aops-v2', title:'AoPS Volume 2 (And Beyond)', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Number Theory','Geometry','Combinatorics','Probability','Functions','Sequences and Series'], priority:3, link:'https://artofproblemsolving.com/store/book/aops-vol2'},
-
     {id:'prealgebra', title:'AoPS Prealgebra', level:['AMC'], topics:['Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/prealgebra'},
     {id:'intro-alg', title:'AoPS Introduction to Algebra', level:['AMC'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-algebra'},
     {id:'intro-cp', title:'AoPS Introduction to Counting & Probability', level:['AMC'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/introduction-to-counting-and-probability'},
     {id:'intro-geo', title:'AoPS Introduction to Geometry', level:['AMC'], topics:['Geometry'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-geometry'},
     {id:'intro-nt', title:'AoPS Introduction to Number Theory', level:['AMC'], topics:['Number Theory'], priority:2, link:'https://artofproblemsolving.com/store/book/intro-number-theory'},
-
     {id:'int-alg', title:'AoPS Intermediate Algebra', level:['AIME','USAMO'], topics:['Polynomials and Algebra','Functions','Sequences and Series'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-algebra'},
     {id:'int-cp', title:'AoPS Intermediate Counting & Probability', level:['AIME','USAMO'], topics:['Combinatorics','Probability'], priority:2, link:'https://artofproblemsolving.com/store/book/intermediate-counting'},
     {id:'precalc', title:'AoPS Precalculus', level:['AIME','USAMO'], topics:['Functions','Sequences and Series','Polynomials and Algebra'], priority:1, link:'https://artofproblemsolving.com/store/book/precalculus'},
-
     {id:'egmo', title:'EGMO — Euclidean Geometry in Mathematical Olympiads (Chen)', level:['AIME','USAMO'], topics:['Geometry'], priority:2, link:'https://bookstore.ams.org/prb-27/'},
     {id:'zeitz', title:'The Art & Craft of Problem Solving (Zeitz)', level:['AIME','USAMO'], topics:['Combinatorics','Number Theory','Geometry','Polynomials and Algebra'], priority:1, link:'https://www.wiley.com/en-us/The+Art+and+Craft+of+Problem+Solving%2C+3rd+Edition-p-9781119239901'},
     {id:'velleman', title:'How to Prove It (Velleman)', level:['USAMO'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Geometry'], priority:1, link:'https://www.cambridge.org/highereducation/books/how-to-prove-it/6D2965D625C6836CD4A785A2C843B3DA'},
     {id:'engel', title:'Problem-Solving Strategies (Engel)', level:['USAMO'], topics:['Combinatorics','Number Theory','Geometry'], priority:1, link:'https://link.springer.com/book/10.1007/b97682'},
     {id:'104nt', title:'104 Number Theory Problems (Andreescu & Andrica)', level:['AIME','USAMO'], topics:['Number Theory'], priority:1, link:'https://www.amazon.com/104-Number-Theory-Problems-Training/dp/0817645276'},
     {id:'path-comb', title:'A Path to Combinatorics for Undergraduates', level:['AIME','USAMO'], topics:['Combinatorics'], priority:1, link:'https://www.amazon.com/Path-Combinatorics-Undergraduates-Counting-Strategies/dp/0817642889'},
-
     {id:'cmms', title:'Competition Math for Middle School (Batterson)', level:['AMC'], topics:['Polynomials and Algebra','Number Theory','Combinatorics','Probability','Geometry'], priority:1, link:'https://artofproblemsolving.com/store/book/competition-math-for-middle-school'}
   ];
 
-  // ---------- Elements ----------
   const form = document.getElementById('diagForm');
   const goalSel = document.getElementById('goal');
   const diagSection = document.getElementById('diagSection');
@@ -327,11 +399,9 @@
     }
   }
 
-  // Render both weekday pickers
   topOffDaysWrap.innerHTML = weekdayPickerHTML('top');
   buildOffDaysWrap.innerHTML = weekdayPickerHTML('build');
 
-  // ---------- Submit (render test) ----------
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const goal = goalSel.value;
@@ -340,7 +410,6 @@
     renderTest(testId);
   });
 
-  // Auto-load if URL has ?goal=...
   (function autoFromURL(){
     const params = new URLSearchParams(location.search);
     const g = (params.get('goal')||'').toLowerCase();
@@ -397,14 +466,12 @@
     return s;
   }
 
-  // ---- Render Test (AMC10/12 gets +10 easier; AMC8 uses its own 12 Q set) ----
   function renderTest(testId){
     const t = tests[testId];
 
-    // Build question set
     const qset = (testId === 'A')
-      ? [...t.questions, ...AMC_EASY_QUESTIONS]   // 20 total for AMC10/12
-      : t.questions;                              // 12 for A8, 10 for B/C
+      ? [...t.questions, ...AMC_EASY_QUESTIONS]
+      : t.questions;
 
     diagSection.style.display = 'block';
     brk.style.display = 'none';
@@ -414,12 +481,11 @@
     recBooksEl.innerHTML='';
     otherBooksEl.innerHTML='';
 
-    // Display meta (special case AMC10/12 only)
     const displayFormat = (testId==='A') ? '20 multiple-choice (A–E)' : t.format;
     const displayTime   = (testId==='A') ? 40 : t.time;
 
     meta.innerHTML = `
-      <h3 style="margin:.2rem 0">${t.title}</h3>
+      <h4>${t.title}</h4>
       <div class="hint">${displayFormat} • Time: ${displayTime} minutes • Calculator: No</div>
     `;
 
@@ -431,12 +497,13 @@
     const actions = document.createElement('div');
     actions.className = 'actions';
     actions.innerHTML = `
-      <button type="button" id="gradeBtn">Grade</button>
+      <button type="button" id="gradeBtn">Grade Test</button>
       <button type="button" class="secondary" onclick="window.print()">Print / PDF</button>
-      <span class="hint">MC: select A–E. AIME-style: enter an integer (0–999).</span>
     `;
     const result = document.createElement('div');
     result.className = 'result';
+    result.style.marginTop = '16px';
+    result.style.fontWeight = '600';
 
     quiz.appendChild(formEl);
     quiz.appendChild(actions);
@@ -445,7 +512,7 @@
     document.getElementById('gradeBtn').addEventListener('click', () => grade(t, result, testId, qset));
 
     MathJax.typesetPromise?.();
-    window.scrollTo({ top: diagSection.offsetTop - 8, behavior: 'smooth' });
+    window.scrollTo({ top: diagSection.offsetTop - 20, behavior: 'smooth' });
   }
 
   function grade(t, resultBox, testId, qset){
@@ -471,9 +538,8 @@
       if(ok) correct++;
     });
 
-    resultBox.innerHTML = `<strong>Score:</strong> ${correct} / ${total} &nbsp; (${Math.round(100*correct/total)}%)`;
+    resultBox.innerHTML = `Score: ${correct} / ${total} (${Math.round(100*correct/total)}%)`;
 
-    // Aggregate to canonical topics
     const agg = {};
     [...byTopic.entries()].forEach(([topic, rec])=>{
       const cat = canonicalTopic(topic);
@@ -484,7 +550,6 @@
     renderTopicTable(new Map(Object.entries(agg)));
     document.getElementById('breakdown').style.display = 'block';
 
-    // Up/down suggestion
     const pct = Math.round(100*correct/total);
     let advice = '';
     if(testId==='A8' && pct>=90) advice = `Great job (${pct}%)! Consider the AMC 10 diagnostic next.`;
@@ -495,7 +560,6 @@
     levelAdvice.style.display = advice ? 'block' : 'none';
     levelAdvice.textContent = advice;
 
-    // Reveal builder
     builder.style.display = 'block';
     const today = new Date(); today.setHours(0,0,0,0);
     const minStr = today.toISOString().slice(0,10);
@@ -506,14 +570,11 @@
     }
     minutesPerDayEl.value = Math.max(30, Number(localStorage.getItem('lastMinutes')||45));
 
-    // Prefill builder weekday off picks from the top selection
     const topOff = getCheckedWeekdays('top');
     setCheckedWeekdays('build', topOff);
 
-    // Book recs (A8 uses same set as AMC10)
     buildBookRecommendations(testId, agg);
 
-    // Generate
     document.getElementById('makePlanBtn').onclick = ()=>{
       const minutes = Number(minutesPerDayEl.value || 0);
       const dateStr = testDateEl.value;
@@ -522,8 +583,7 @@
 
       const selected = [...document.querySelectorAll('.book-choice input[type="checkbox"]:checked')].map(ch => ch.value);
 
-      // specific weekday off choices from builder
-      const offDays = getCheckedWeekdays('build'); // array of 0..6
+      const offDays = getCheckedWeekdays('build');
 
       const payload = {
         goal: goalSel.value,
@@ -541,7 +601,7 @@
     };
 
     MathJax.typesetPromise?.();
-    window.scrollTo({ top: document.getElementById('timelineBuilder').offsetTop - 8, behavior: 'smooth' });
+    window.scrollTo({ top: document.getElementById('breakdown').offsetTop - 20, behavior: 'smooth' });
   }
 
   function renderTopicTable(map){
@@ -552,22 +612,19 @@
       rows += `<tr><td>${topic}</td><td>${rec.right} / ${rec.total}</td><td>${pct}%</td></tr>`;
     });
     brkWrap.innerHTML = `
-      <table style="border-collapse:collapse;width:100%;margin-top:8px">
+      <table>
         <thead><tr><th>Topic</th><th>Correct</th><th>Percent</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     `;
   }
 
-  // ---- Book recs capped to 1–3 preselected; others shown unchecked ----
   function buildBookRecommendations(testId, agg){
-    // Rank weakest topics
     const ranked = Object.entries(agg)
       .map(([k,v])=>({k,score:(v.right||0)/(v.total||1)}))
       .sort((a,b)=>a.score-b.score)
       .map(x=>x.k);
 
-    // Topic → book helpers (AMC/A8 share)
     const byTopicAMC = (t) => {
       if(/Number Theory/.test(t)) return 'intro-nt';
       if(/Geometry/.test(t)) return 'intro-geo';
@@ -586,16 +643,15 @@
     let chosen = new Set();
     let alsoSuggest = [];
 
-    if(testId==='A' || testId==='A8'){ // AMC 10/12 & AMC 8 share the same book set
-      chosen.add('aops-v1');           // base
-      chosen.add('intro-cp');          // base (2 total)
+    if(testId==='A' || testId==='A8'){
+      chosen.add('aops-v1');
+      chosen.add('intro-cp');
       for(const t of ranked){
         if(chosen.size>=3) break;
-        chosen.add(byTopicAMC(t));     // optionally add a 3rd based on weakness
+        chosen.add(byTopicAMC(t));
       }
-      // Show the rest unchecked:
       alsoSuggest.push('intro-nt','intro-geo','intro-alg','cmms');
-    } else if(testId==='B'){ // AIME
+    } else if(testId==='B'){
       chosen.add('aops-v2');
       if(ranked.length) chosen.add(byTopicAIME(ranked[0]));
       if(chosen.size<3){
@@ -603,7 +659,7 @@
         chosen.add(next);
       }
       alsoSuggest.push('int-alg','int-cp','precalc','egmo','104nt','zeitz');
-    } else { // C — US(A)JMO
+    } else {
       chosen.add('aops-v2');
       chosen.add('velleman');
       if(ranked.some(t=>/Geometry/.test(t))) chosen.add('egmo');
@@ -612,10 +668,8 @@
       alsoSuggest.push('int-cp','precalc','zeitz','engel','104nt','path-comb');
     }
 
-    // Enforce ≤3 preselected
     while(chosen.size>3){ chosen.delete([...chosen][chosen.size-1]); }
 
-    // Build UI
     const chosenIds = new Set(chosen);
     const allSuggest = Array.from(new Set(alsoSuggest.filter(id=>!chosenIds.has(id))));
     const recs   = BOOKS.filter(b => chosenIds.has(b.id));
